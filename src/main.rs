@@ -1,3 +1,3 @@
 fn main() {
-    println!("Hello, world!");
+    println!("{:?}", std::env::args()); // This will not work either
 }
