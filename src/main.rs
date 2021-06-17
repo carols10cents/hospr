@@ -21,8 +21,5 @@ fn main() {
 
     let text = matches.values_of_lossy("text").unwrap();
     let omit_newline = matches.is_present("omit_newline");
-
-    let text = vec!["Hello", "world"];
-    assert_eq!(text.join(" "), "Hello world");
-    println!("{}", text.join(" "));
+    print!("{}{}", text.join(" "), if omit_newline { "" } else { "\n" });
 }
