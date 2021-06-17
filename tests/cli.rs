@@ -1,7 +1,10 @@
+use assert_cmd::prelude::*;
+use predicates::prelude::*;
 use std::process::Command;
 #[test]
-fn runs() {
-    let mut cmd = Command::new("ls");
-    let res = cmd.output();
-    assert!(res.is_ok());
+fn dies_no_args() {
+    let mut cmd = Command::cargo_bin("echor").unwrap();
+    cmd.assert()
+        .failure()
+        .stderr(predicate::str::contains("USAGE"));
 }
