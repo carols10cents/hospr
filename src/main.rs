@@ -18,7 +18,7 @@ fn main() {
 
     for file in files {
         match fs::read_to_string(&file) {
-            Ok(contents) => println!("{}", contents),
+            Ok(contents) => print!("{}", contents),
             Err(_) => {
                 eprintln!("\"{}\" is not a valid file.", file);
                 std::process::exit(1);
