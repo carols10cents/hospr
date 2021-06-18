@@ -78,8 +78,11 @@ fn reject_unparsable_or_zero(arg_name: &str, val: &str) -> MyResult<usize> {
 
 fn parse_int(val: Option<&str>) -> MyResult<Option<usize>> {
     match val {
-        Some(v) => match v.trim().parse::<core::num::NonZeroUsize>() {
-            Ok(n) => Ok(Some(usize::from(n))),
+        Some(v) => match v.trim().parse::<usize>() {
+            Ok(n) => match n > 0 {
+                true => Ok(Some(n)),
+                _ => Err(From::from(v)),
+            },
             Err(_) => Err(From::from(v)),
         },
         None => Ok(None),
