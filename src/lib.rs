@@ -53,7 +53,7 @@ pub fn get_args() -> MyResult<Config> {
                 .short("n"),
         )
         .arg(
-            Arg::with_name("number_noblank")
+            Arg::with_name("number_nonblank")
                 .help("number nonempty output lines, overrides -n")
                 .takes_value(false)
                 .long("number-nonblank")
