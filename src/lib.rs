@@ -13,14 +13,41 @@ pub struct Config {
 pub fn get_args() -> MyResult<Config> {
     let matches = App::new("headr")
         .version("0.1.0")
-        .author("Ken Youens-Clark <kyclark@gmail.com>")
+        .author("me")
         .about("Rust head")
+        .arg(
+            Arg::with_name("file")
+                .value_name("FILE")
+                .help("Input file(s)")
+                .required(true)
+                .min_values(1),
+        )
+        .arg(
+            Arg::with_name("bytes")
+                .value_name("BYTES")
+                .help("Number of bytes")
+                .long("bytes")
+                .short("c"),
+        )
+        .arg(
+            Arg::with_name("lines")
+                .value_name("LINES")
+                .help("Number of lines")
+                .long("lines")
+                .short("n")
+                .default_value("10"),
+        )
         .get_matches();
-    Ok(Config {
-        lines,
-        bytes,
-        files,
-    })
+
+    let files = matches.values_of_lossy("file").unwrap();
+    let bytes = matches.value_of("bytes").unwrap();
+    let lines = matches.value_of("lines").unwrap();
+    unimplemented!();
+    // Ok(Config {
+    //     lines,
+    //     bytes,
+    //     files,
+    // })
 }
 
 pub fn run(config: Config) -> MyResult<()> {
