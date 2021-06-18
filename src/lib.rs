@@ -10,9 +10,9 @@ type MyResult<T> = Result<T, Box<dyn Error>>;
 
 pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
-        let file = match filename.as_str() {
-            "-" => BufReader::new(io::stdin()),
-            _ => BufReader::new(File::open(filename)?),
+        let file: Box<dyn BufRead> = match filename.as_str() {
+            "-" => Box::new(BufReader::new(io::stdin())),
+            _ => Box::new(BufReader::new(File::open(filename)?)),
         };
 
         let lines = io::BufReader::new(file).lines();
