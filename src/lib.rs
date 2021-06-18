@@ -1,5 +1,5 @@
 use clap::{App, Arg};
-use std::error::Error;
+use std::{error::Error, fs::File};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -28,7 +28,8 @@ pub fn get_args() -> MyResult<Config> {
                 .help("Number of bytes")
                 .long("bytes")
                 .short("c")
-                .takes_value(true),
+                .takes_value(true)
+                .conflicts_with("lines"),
         )
         .arg(
             Arg::with_name("lines")
@@ -42,6 +43,10 @@ pub fn get_args() -> MyResult<Config> {
         .get_matches();
 
     let files = matches.values_of_lossy("file").unwrap();
+    for file in files.iter().filter(|&name| name != "-") {
+        File::open(file).map_err::<String, _>(|e| From::from(format!("{}: {}", file, e)))?;
+    }
+
     let bytes = matches.value_of("bytes");
     let bytes = match bytes {
         Some(b) => Some(reject_unparsable_or_zero("byte", b)?),
