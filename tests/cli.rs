@@ -45,11 +45,7 @@ fn run(args: Vec<&str>, expected_file: &str) -> TestResult {
 }
 
 // --------------------------------------------------
-fn run_stdin(
-    stdin_file: &str,
-    args: Vec<&str>,
-    expected_file: &str,
-) -> TestResult {
+fn run_stdin(stdin_file: &str, args: Vec<&str>, expected_file: &str) -> TestResult {
     let input = fs::read_to_string(stdin_file)?;
     let expected = fs::read_to_string(expected_file)?;
     let mut cmd = Command::cargo_bin(PROGRAM)?;
