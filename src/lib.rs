@@ -1,8 +1,5 @@
 use clap::{App, Arg};
-use std::{
-    error::Error,
-    fs::File,
-};
+use std::{error::Error, path::Path};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -26,8 +23,9 @@ pub fn get_args() -> MyResult<Config> {
         .arg(
             Arg::with_name("file")
                 .value_name("FILE")
-                .help("Input file")
-                .multiple(true),
+                .help("Input file(s)")
+                .required(true)
+                .min_values(1),
         )
         .arg(
             Arg::with_name("number")
@@ -50,9 +48,10 @@ pub fn get_args() -> MyResult<Config> {
     let number_nonblank_lines = matches.is_present("number_noblank");
 
     for file in &files {
-        if let Err(_) = File::open(file) {
-            eprintln!("\"{}\" is not a valid file.", file);
-            std::process::exit(1);
+        if file != "-" {
+            if !Path::new(&file).exists() {
+                return Err(From::from(format!("\"{}\" is not a valid file.", file)));
+            }
         }
     }
 
