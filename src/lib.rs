@@ -12,12 +12,20 @@ pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
         let file = File::open(filename)?;
         let lines = io::BufReader::new(file).lines();
+        let mut last_num = 0;
 
-        for (line_num, line_result) in lines.enumerate() {
-            let line = line_result?;
+        for (line_num, line) in lines.enumerate() {
+            let line = line?;
 
             if config.number_lines {
                 println!("{:6}\t{}", line_num + 1, line);
+            } else if config.number_nonblank_lines {
+                if line.len() > 0 {
+                    last_num += 1;
+                    println!("{:6}\t{}", last_num, line);
+                } else {
+                    println!("");
+                }
             } else {
                 println!("{}", line);
             }
