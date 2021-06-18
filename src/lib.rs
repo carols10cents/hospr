@@ -1,11 +1,20 @@
 use clap::{App, Arg};
-use std::{error::Error, path::Path};
+use std::{
+    error::Error,
+    fs::File,
+    io::{self, BufRead},
+    path::Path,
+};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
 pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
-        println!("{}", filename);
+        let file = File::open(filename)?;
+        for line_result in io::BufReader::new(file).lines() {
+            let line = line_result?;
+            println!("{}", line);
+        }
     }
     Ok(())
 }
