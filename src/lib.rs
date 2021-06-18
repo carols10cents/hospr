@@ -11,15 +11,13 @@ type MyResult<T> = Result<T, Box<dyn Error>>;
 pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
         let file = File::open(filename)?;
+        let lines = io::BufReader::new(file).lines();
 
-        let mut line_num = 0;
-
-        for line_result in io::BufReader::new(file).lines() {
+        for (line_num, line_result) in lines.enumerate() {
             let line = line_result?;
-            line_num += 1;
 
             if config.number_lines {
-                println!("{:6}\t{}", line_num, line);
+                println!("{:6}\t{}", line_num + 1, line);
             } else {
                 println!("{}", line);
             }
