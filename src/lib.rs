@@ -4,7 +4,7 @@ use std::error::Error;
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
 pub fn run(config: Config) -> MyResult<()> {
-    println!("Hello, world!");
+    dbg!(config);
     Ok(())
 }
 
