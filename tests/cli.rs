@@ -25,7 +25,7 @@ fn hello2() -> TestResult {
 
 #[test]
 fn hello1_no_newline() -> TestResult {
-    run(vec!["Hello there", "-n"], "tests/expected/hello1.n.txt")
+    run(vec!["Hello  there", "-n"], "tests/expected/hello1.n.txt")
 }
 
 #[test]
