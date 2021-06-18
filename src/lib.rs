@@ -44,9 +44,6 @@ pub fn get_args() -> MyResult<Config> {
         .get_matches();
 
     let files = matches.values_of_lossy("file").unwrap();
-    let number_lines = matches.is_present("number");
-    let number_nonblank_lines = matches.is_present("number_noblank");
-
     for file in files
         .iter()
         .filter(|&name| name != "-" && !Path::new(name).exists())
@@ -55,8 +52,8 @@ pub fn get_args() -> MyResult<Config> {
     }
 
     Ok(Config {
-        files,
-        number_lines,
-        number_nonblank_lines,
+        files: files,
+        number_lines: matches.is_present("number"),
+        number_nonblank_lines: matches.is_present("number_nonblank"),
     })
 }
