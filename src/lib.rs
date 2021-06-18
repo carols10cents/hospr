@@ -27,7 +27,8 @@ pub fn get_args() -> MyResult<Config> {
                 .value_name("BYTES")
                 .help("Number of bytes")
                 .long("bytes")
-                .short("c"),
+                .short("c")
+                .takes_value(true),
         )
         .arg(
             Arg::with_name("lines")
@@ -35,19 +36,20 @@ pub fn get_args() -> MyResult<Config> {
                 .help("Number of lines")
                 .long("lines")
                 .short("n")
+                .takes_value(true)
                 .default_value("10"),
         )
         .get_matches();
 
     let files = matches.values_of_lossy("file").unwrap();
-    let bytes = matches.value_of("bytes").unwrap();
-    let lines = matches.value_of("lines").unwrap();
-    unimplemented!();
-    // Ok(Config {
-    //     lines,
-    //     bytes,
-    //     files,
-    // })
+    let bytes = matches.value_of("bytes").map(|b| b.parse().unwrap());
+    let lines = matches.value_of("lines").unwrap().parse().unwrap();
+
+    Ok(Config {
+        lines,
+        bytes,
+        files,
+    })
 }
 
 pub fn run(config: Config) -> MyResult<()> {
