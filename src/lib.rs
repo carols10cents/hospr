@@ -49,7 +49,7 @@ pub fn get_args() -> MyResult<Config> {
 
     for file in files
         .iter()
-        .filter(|name| name != &"-" && !Path::new(&name).exists())
+        .filter(|&name| name != "-" && !Path::new(name).exists())
     {
         return Err(From::from(format!("\"{}\" is not a valid file.", file)));
     }
