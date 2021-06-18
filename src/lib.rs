@@ -2,7 +2,7 @@ use clap::{App, Arg};
 use std::{
     error::Error,
     fs::File,
-    io::{self, BufRead},
+    io::{self, BufRead, BufReader},
     path::Path,
 };
 
@@ -10,7 +10,11 @@ type MyResult<T> = Result<T, Box<dyn Error>>;
 
 pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
-        let file = File::open(filename)?;
+        let file = match filename.as_str() {
+            "-" => BufReader::new(io::stdin()),
+            _ => BufReader::new(File::open(filename)?),
+        };
+
         let lines = io::BufReader::new(file).lines();
         let mut last_num = 0;
 
