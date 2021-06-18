@@ -47,10 +47,11 @@ pub fn get_args() -> MyResult<Config> {
     let number_lines = matches.is_present("number");
     let number_nonblank_lines = matches.is_present("number_noblank");
 
-    for file in files.iter().filter(|name| name != &"-") {
-        if !Path::new(&file).exists() {
-            return Err(From::from(format!("\"{}\" is not a valid file.", file)));
-        }
+    for file in files
+        .iter()
+        .filter(|name| name != &"-" && !Path::new(&name).exists())
+    {
+        return Err(From::from(format!("\"{}\" is not a valid file.", file)));
     }
 
     Ok(Config {
