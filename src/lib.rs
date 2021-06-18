@@ -1,5 +1,8 @@
 use clap::{App, Arg};
-use std::error::Error;
+use std::{
+    error::Error,
+    fs::File,
+};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -45,6 +48,13 @@ pub fn get_args() -> MyResult<Config> {
     let files = matches.values_of_lossy("file").unwrap();
     let number_lines = matches.is_present("number");
     let number_nonblank_lines = matches.is_present("number_noblank");
+
+    for file in &files {
+        if let Err(_) = File::open(file) {
+            eprintln!("\"{}\" is not a valid file.", file);
+            std::process::exit(1);
+        }
+    }
 
     Ok(Config {
         files,
