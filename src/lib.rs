@@ -1,42 +1,13 @@
 use clap::{App, Arg};
-use std::{error::Error, path::Path, fs};
+use std::{error::Error, path::Path};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
 pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
-        let contents = fs::read_to_string(filename)?;
-
-        if !contents.is_empty() {
-            let lines: Vec<_> = contents.lines().collect();
-            println!("{}", file_lines(&lines));
-        }
+        println!("{}", filename);
     }
     Ok(())
-}
-
-fn file_lines(lines: &[&str]) -> String {
-    lines.join("\n")
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn no_lines_retuns_empty_string() {
-        assert_eq!(file_lines(&[]), "");
-    }
-
-    #[test]
-    fn one_line_retuns_itself() {
-        assert_eq!(file_lines(&["hello how are you"]), "hello how are you");
-    }
-
-    #[test]
-    fn one_line_and_one_blank_line_returns_itself() {
-        assert_eq!(file_lines(&["hello how are you", ""]), "hello how are you\n");
-    }
 }
 
 #[derive(Debug)]
