@@ -42,8 +42,14 @@ pub fn get_args() -> MyResult<Config> {
         .get_matches();
 
     let files = matches.values_of_lossy("file").unwrap();
-    let bytes = matches.value_of("bytes").map(|b| b.parse().unwrap());
-    let lines = matches.value_of("lines").unwrap().parse().unwrap();
+    let bytes = matches.value_of("bytes");
+    let bytes = match bytes {
+        Some(b) => Some(reject_unparsable_or_zero("byte", b)?),
+        None => None,
+    };
+
+    let lines = matches.value_of("lines").unwrap();
+    let lines = reject_unparsable_or_zero("line", lines)?;
 
     Ok(Config {
         lines,
@@ -55,4 +61,44 @@ pub fn get_args() -> MyResult<Config> {
 pub fn run(config: Config) -> MyResult<()> {
     println!("{:#?}", config);
     Ok(())
+}
+
+fn reject_unparsable_or_zero(arg_name: &str, val: &str) -> MyResult<usize> {
+    let parse_result = val.parse();
+    match parse_result {
+        Ok(0) | Err(_) => Err(From::from(format!("illegal {} count -- {}", arg_name, val))),
+        Ok(num) => Ok(num),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn zero_is_invalid() {
+        let arg_name = "foo";
+        let val = "0";
+        let result = reject_unparsable_or_zero(arg_name, val);
+        assert_eq!(result.unwrap_err().to_string(), "illegal foo count -- 0");
+    }
+
+    #[test]
+    fn nonnumber_is_invalid() {
+        let arg_name = "foo";
+        let val = "notanumber";
+        let result = reject_unparsable_or_zero(arg_name, val);
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "illegal foo count -- notanumber"
+        );
+    }
+
+    #[test]
+    fn number_is_valid() {
+        let arg_name = "foo";
+        let val = "1000";
+        let result = reject_unparsable_or_zero(arg_name, val);
+        assert_eq!(result.unwrap(), 1000);
+    }
 }
