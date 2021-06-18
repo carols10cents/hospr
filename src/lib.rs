@@ -76,9 +76,53 @@ fn reject_unparsable_or_zero(arg_name: &str, val: &str) -> MyResult<usize> {
     }
 }
 
+fn parse_int(val: Option<&str>) -> MyResult<Option<usize>> {
+    match val {
+        Some(v) => {
+            let i = v.parse().map_err::<String, _>(|_| From::from(v))?;
+            if i == 0 {
+                Err(From::from(v))
+            } else {
+                Ok(Some(i))
+            }
+        }
+        None => Ok(None),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parse_int_none_is_fine() {
+        let result = parse_int(None);
+        assert_eq!(result.unwrap(), None);
+    }
+
+    #[test]
+    fn test_parse_int() {
+        // No value is OK
+        let res1 = parse_int(None);
+        assert!(res1.is_ok());
+        assert!(res1.unwrap().is_none());
+        // 3 is an OK integer
+        let res2 = parse_int(Some("3"));
+        assert!(res2.is_ok());
+        assert_eq!(res2.unwrap(), Some(3));
+        // Any string is an error
+        let res3 = parse_int(Some("foo"));
+        assert!(res3.is_err());
+        if let Err(e) = res3 {
+            assert_eq!(e.to_string(), "foo".to_string());
+        }
+        // A zero is an error
+        let res4 = parse_int(Some("0"));
+        assert!(res4.is_err());
+        if let Err(e) = res4 {
+            assert_eq!(e.to_string(), "0".to_string());
+        }
+    }
 
     #[test]
     fn zero_is_invalid() {
