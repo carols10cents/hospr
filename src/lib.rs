@@ -67,15 +67,22 @@ pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
         match File::open(&filename) {
             Ok(file) => {
-                let mut file = BufReader::new(file);
-                let mut line = String::new();
-                for _ in 0..config.lines {
-                    let bytes = file.read_line(&mut line)?;
-                    if bytes == 0 {
-                        break;
+                if let Some(num_bytes) = config.bytes {
+                    let mut handle = file.take(num_bytes as u64);
+                    let mut buffer = vec![0; num_bytes];
+                    let n = handle.read(&mut buffer)?;
+                    print!("{}", String::from_utf8_lossy(&buffer[..n]));
+                } else {
+                    let mut file = BufReader::new(file);
+                    let mut line = String::new();
+                    for _ in 0..config.lines {
+                        let bytes = file.read_line(&mut line)?;
+                        if bytes == 0 {
+                            break;
+                        }
+                        print!("{}", line);
+                        line.clear();
                     }
-                    print!("{}", line);
-                    line.clear();
                 }
             }
             Err(err) => eprintln!("{}: {}", filename, err),
