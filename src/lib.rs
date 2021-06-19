@@ -15,7 +15,7 @@ pub fn run(config: Config) -> MyResult<()> {
             _ => Box::new(BufReader::new(File::open(filename)?)),
         };
 
-        let lines = io::BufReader::new(file).lines();
+        let lines = file.lines();
         let mut last_num = 0;
 
         for (line_num, line) in lines.enumerate() {
