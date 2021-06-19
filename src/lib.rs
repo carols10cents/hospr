@@ -2,7 +2,7 @@ use clap::{App, Arg};
 use std::{
     error::Error,
     fs::File,
-    io::{self, BufRead, BufReader},
+    io::{self, BufRead, BufReader, Read},
 };
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
@@ -78,11 +78,17 @@ pub fn run(config: Config) -> MyResult<()> {
             println!("==> {} <==", filename);
         }
 
-        let lines = file.split('\n' as u8);
+        if let Some(bytes) = config.bytes {
+            let bytes = file.bytes().take(bytes).collect::<Result<Vec<u8>, _>>()?;
 
-        for line in lines.take(config.lines) {
-            let line = line?;
-            println!("{}", String::from_utf8(line)?);
+            println!("{}", String::from_utf8_lossy(&bytes));
+        } else {
+            let lines = file.split('\n' as u8);
+
+            for line in lines.take(config.lines) {
+                let line = line?;
+                println!("{}", String::from_utf8(line)?);
+            }
         }
 
         println!();
