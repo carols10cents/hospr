@@ -69,17 +69,12 @@ pub fn run(config: Config) -> MyResult<()> {
             Ok(file) => {
                 let mut file = BufReader::new(file);
                 let mut line = String::new();
-                let mut line_num = 0;
-                loop {
-                    if line_num == config.lines {
-                        break;
-                    }
+                for _ in 0..config.lines {
                     let bytes = file.read_line(&mut line)?;
                     if bytes == 0 {
                         break;
                     }
                     print!("{}", line);
-                    line_num += 1;
                     line.clear();
                 }
             }
