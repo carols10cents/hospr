@@ -1,5 +1,9 @@
 use clap::{App, Arg};
-use std::{error::Error, fs::File};
+use std::{
+    error::Error,
+    fs::File,
+    io::{prelude::*, BufReader},
+};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -61,7 +65,26 @@ pub fn get_args() -> MyResult<Config> {
 
 pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
-        println!("{}", filename);
+        match File::open(&filename) {
+            Ok(file) => {
+                let mut file = BufReader::new(file);
+                let mut line = String::new();
+                let mut line_num = 0;
+                loop {
+                    if line_num == config.lines {
+                        break;
+                    }
+                    let bytes = file.read_line(&mut line)?;
+                    if bytes == 0 {
+                        break;
+                    }
+                    print!("{}", line);
+                    line_num += 1;
+                    line.clear();
+                }
+            }
+            Err(err) => eprintln!("{}: {}", filename, err),
+        };
     }
     Ok(())
 }
