@@ -89,8 +89,9 @@ pub fn run(config: Config) -> MyResult<()> {
                 let line = line?;
                 println!("{}", String::from_utf8(line)?);
             }
-            println!();
         }
+
+        println!();
     }
     Ok(())
 }
