@@ -1,9 +1,5 @@
 use clap::{App, Arg};
-use std::{
-    error::Error,
-    fs::File,
-    io::{self, BufRead, BufReader},
-};
+use std::{error::Error, fs::File};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -64,28 +60,8 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    let multiple_files = config.files.len() > 1;
-
     for filename in config.files {
-        let file: Box<dyn BufRead> = match filename.as_str() {
-            "-" => Box::new(BufReader::new(io::stdin())),
-            _ => Box::new(BufReader::new(
-                File::open(&filename).map_err(|e| format!("{}: {}", filename, e))?,
-            )),
-        };
-
-        if multiple_files {
-            println!("==> {} <==", filename);
-        }
-
-        let lines = file.split('\n' as u8);
-
-        for line in lines.take(config.lines) {
-            let line = line?;
-            println!("{}", String::from_utf8(line)?);
-        }
-
-        println!();
+        println!("{}", filename);
     }
     Ok(())
 }
