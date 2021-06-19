@@ -47,18 +47,17 @@ pub fn get_args() -> MyResult<Config> {
         File::open(file).map_err::<String, _>(|e| From::from(format!("{}: {}", file, e)))?;
     }
 
-    let bytes = matches.value_of("bytes");
-    let bytes = match bytes {
-        Some(b) => Some(reject_unparsable_or_zero("byte", b)?),
-        None => None,
-    };
+    let bytes = parse_int(matches.value_of("bytes"));
+    if let Err(bad_bytes) = bytes {
+        return Err(From::from(format!("illegal byte count -- {}", bad_bytes)));
+    }
 
-    let lines = matches.value_of("lines").unwrap();
-    let lines = reject_unparsable_or_zero("line", lines)?;
+    let lines =
+        parse_int(matches.value_of("lines")).map_err(|e| format!("illegal line count -- {}", e))?;
 
     Ok(Config {
-        lines,
-        bytes,
+        lines: lines.unwrap(),
+        bytes: bytes?,
         files,
     })
 }
