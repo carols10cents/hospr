@@ -64,20 +64,29 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    for filename in config.files {
+    let num_files = config.files.len();
+    for (file_num, filename) in config.files.iter().enumerate() {
         match File::open(&filename) {
-            Ok(mut file) => {
+            Ok(file) => {
+                if num_files > 1 {
+                    println!(
+                        "{}==> {} <==",
+                        if file_num > 0 { "\n" } else { "" },
+                        filename
+                    );
+                }
                 if let Some(num_bytes) = config.bytes {
-                    let mut contents = String::new();
-                    file.read_to_string(&mut contents)?; // Danger here
-                    let bytes = contents.as_bytes();
-                    if let Some(v) = bytes.get(..num_bytes) {
-                        print!("{}", String::from_utf8_lossy(v));
-                    }
+                    let mut handle = file.take(num_bytes as u64);
+                    let mut buffer = String::new();
+                    handle.read_to_string(&mut buffer)?;
+                    print!("{}", buffer);
                 } else {
                     let mut file = BufReader::new(file);
                     let mut line = String::new();
-                    for _ in 0..config.lines {
+                    for line_num in 0.. {
+                        if line_num == config.lines {
+                            break;
+                        }
                         let bytes = file.read_line(&mut line)?;
                         if bytes == 0 {
                             break;
