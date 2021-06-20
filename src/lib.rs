@@ -71,9 +71,8 @@ pub fn run(config: Config) -> MyResult<()> {
                     let mut contents = String::new();
                     file.read_to_string(&mut contents)?; // Danger here
                     let bytes = contents.as_bytes();
-                    if let Ok(s) = std::str::from_utf8(&bytes[..num_bytes]) {
-                        // More danger
-                        print!("{}", s);
+                    if let Some(v) = bytes.get(..num_bytes) {
+                        print!("{}", String::from_utf8_lossy(v));
                     }
                 } else {
                     let mut file = BufReader::new(file);
