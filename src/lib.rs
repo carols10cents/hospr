@@ -70,7 +70,7 @@ pub fn run(config: Config) -> MyResult<()> {
                 if let Some(num_bytes) = config.bytes {
                     let mut contents = String::new();
                     file.read_to_string(&mut contents)?; // Danger here
-                    let bytes: Vec<u8> = contents.bytes().collect();
+                    let bytes = contents.as_bytes();
                     if let Ok(s) = std::str::from_utf8(&bytes[..num_bytes]) {
                         // More danger
                         print!("{}", s);
