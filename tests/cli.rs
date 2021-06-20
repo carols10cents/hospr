@@ -358,3 +358,24 @@ fn multiple_files_c4() -> TestResult {
         "tests/inputs/all.c4.out",
     )
 }
+
+#[test]
+fn multiple_files_one_bad() -> TestResult {
+    let expected = std::fs::read_to_string("tests/inputs/multiple.1bad.out")?;
+    let mut cmd = Command::cargo_bin("headr")?;
+    cmd.args(&[
+        "-n",
+        "1",
+        "tests/inputs/one.txt",
+        "blargh",
+        "tests/inputs/two.txt",
+    ])
+    .assert()
+    .success()
+    .stderr(predicate::str::contains(
+        "blargh: No such file or directory",
+    ))
+    .stdout(predicate::str::contains(expected));
+
+    Ok(())
+}
