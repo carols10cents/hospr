@@ -77,9 +77,9 @@ pub fn run(config: Config) -> MyResult<()> {
                 }
                 if let Some(num_bytes) = config.bytes {
                     let mut handle = file.take(num_bytes as u64);
-                    let mut buffer = String::new();
-                    handle.read_to_string(&mut buffer)?;
-                    print!("{}", buffer);
+                    let mut buffer = vec![0; num_bytes];
+                    let n = handle.read(&mut buffer)?;
+                    print!("{}", String::from_utf8_lossy(&buffer[..n]));
                 } else {
                     let mut file = BufReader::new(file);
                     let mut line = String::new();
