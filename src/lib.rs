@@ -80,7 +80,10 @@ pub fn get_args() -> MyResult<Config> {
     })
 }
 
-fn parse_int<T: FromStr + num::Zero>(val: &str) -> MyResult<T> {
+fn parse_int<T>(val: &str) -> MyResult<T>
+where
+    T: FromStr + num::Zero,
+{
     match val.trim().parse::<T>() {
         Ok(n) if !n.is_zero() => Ok(n),
         _ => Err(From::from(val)),
