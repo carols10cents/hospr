@@ -13,7 +13,7 @@ pub fn run(config: Config) -> MyResult<()> {
 pub struct Config {
     files: Vec<String>,
     lines: usize,
-    bytes: Option<usize>,
+    bytes: Option<i64>,
     quiet: bool,
 }
 pub fn get_args() -> MyResult<Config> {
