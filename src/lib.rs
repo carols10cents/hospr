@@ -89,3 +89,31 @@ where
         _ => Err(From::from(val)),
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::{parse_int, MyResult};
+    #[test]
+    fn test_parse_int() {
+        // 3 is an OK integer
+        let res2: MyResult<u32> = parse_int("3");
+        assert!(res2.is_ok());
+        assert_eq!(res2.unwrap(), 3u32);
+        // 4 is an OK integer
+        let res3 = parse_int::<i64>("4");
+        assert!(res3.is_ok());
+        assert_eq!(res3.unwrap(), 4i64);
+        // Any string is an error
+        let res4 = parse_int::<u32>("foo");
+        assert!(res4.is_err());
+        if let Err(e) = res4 {
+            assert_eq!(e.to_string(), "foo".to_string());
+        }
+        // A zero is an error
+        let res5 = parse_int::<u32>("0");
+        assert!(res5.is_err());
+        if let Err(e) = res5 {
+            assert_eq!(e.to_string(), "0".to_string());
+        }
+    }
+}
