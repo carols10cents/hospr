@@ -48,17 +48,19 @@ pub fn get_args() -> MyResult<Config> {
 
     let files = matches.values_of_lossy("file").unwrap();
 
-    let bytes = parse_int(matches.value_of("bytes"));
-    if let Err(bad_bytes) = bytes {
-        return Err(From::from(format!("illegal byte count -- {}", bad_bytes)));
-    }
+    let bytes = match matches.value_of("bytes") {
+        Some(b) => Some(parse_int(b).map_err(|e| format!("illegal byte count -- {}", e))?),
+        None => None,
+    };
 
-    let lines =
-        parse_int(matches.value_of("lines")).map_err(|e| format!("illegal line count -- {}", e))?;
+    let lines = matches
+        .value_of("lines")
+        .expect("lines has a default value");
+    let lines = parse_int(lines).map_err(|e| format!("illegal line count -- {}", e))?;
 
     Ok(Config {
-        lines: lines.unwrap(),
-        bytes: bytes?,
+        lines,
+        bytes,
         files,
     })
 }
@@ -102,13 +104,10 @@ pub fn run(config: Config) -> MyResult<()> {
     Ok(())
 }
 
-fn parse_int(val: Option<&str>) -> MyResult<Option<usize>> {
-    match val {
-        Some(v) => match v.trim().parse::<core::num::NonZeroUsize>() {
-            Ok(n) => Ok(Some(usize::from(n))),
-            Err(_) => Err(From::from(v)),
-        },
-        None => Ok(None),
+fn parse_int(val: &str) -> MyResult<usize> {
+    match val.trim().parse::<core::num::NonZeroUsize>() {
+        Ok(n) => Ok(usize::from(n)),
+        Err(_) => Err(From::from(val)),
     }
 }
 
@@ -117,29 +116,19 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parse_int_none_is_fine() {
-        let result = parse_int(None);
-        assert_eq!(result.unwrap(), None);
-    }
-
-    #[test]
     fn test_parse_int() {
-        // No value is OK
-        let res1 = parse_int(None);
-        assert!(res1.is_ok());
-        assert!(res1.unwrap().is_none());
         // 3 is an OK integer
-        let res2 = parse_int(Some("3"));
+        let res2 = parse_int("3");
         assert!(res2.is_ok());
-        assert_eq!(res2.unwrap(), Some(3));
+        assert_eq!(res2.unwrap(), 3);
         // Any string is an error
-        let res3 = parse_int(Some("foo"));
+        let res3 = parse_int("foo");
         assert!(res3.is_err());
         if let Err(e) = res3 {
             assert_eq!(e.to_string(), "foo".to_string());
         }
         // A zero is an error
-        let res4 = parse_int(Some("0"));
+        let res4 = parse_int("0");
         assert!(res4.is_err());
         if let Err(e) = res4 {
             assert_eq!(e.to_string(), "0".to_string());
