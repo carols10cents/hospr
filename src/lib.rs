@@ -62,28 +62,27 @@ pub fn get_args() -> MyResult<Config> {
 
     let files = matches.values_of_lossy("file").unwrap();
 
-    let bytes = parse_int(matches.value_of("bytes"));
-    if let Err(bad_bytes) = bytes {
-        return Err(From::from(format!("illegal byte count -- {}", bad_bytes)));
-    }
+    let bytes = match matches.value_of("bytes") {
+        Some(b) => Some(parse_int(b).map_err(|e| format!("illegal byte count -- {}", e))?),
+        None => None,
+    };
 
-    let lines =
-        parse_int(matches.value_of("lines")).map_err(|e| format!("illegal line count -- {}", e))?;
+    let lines = matches
+        .value_of("lines")
+        .expect("lines has a default value");
+    let lines = parse_int(lines).map_err(|e| format!("illegal line count -- {}", e))?;
 
     Ok(Config {
-        lines: lines.unwrap(),
-        bytes: bytes?,
+        lines,
+        bytes,
         files,
         quiet: matches.is_present("quiet"),
     })
 }
 
-fn parse_int<T: FromStr + num::Zero>(val: Option<&str>) -> MyResult<Option<T>> {
-    match val {
-        Some(v) => match v.trim().parse::<T>() {
-            Ok(n) if !n.is_zero() => Ok(Some(n)),
-            _ => Err(From::from(v)),
-        },
-        None => Ok(None),
+fn parse_int<T: FromStr + num::Zero>(val: &str) -> MyResult<T> {
+    match val.trim().parse::<T>() {
+        Ok(n) if !n.is_zero() => Ok(n),
+        _ => Err(From::from(val)),
     }
 }
