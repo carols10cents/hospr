@@ -13,7 +13,7 @@ pub fn run(config: Config) -> MyResult<()> {
     for (file_num, filename) in config.files.iter().enumerate() {
         match File::open(&filename) {
             Ok(mut file) => {
-                if multiple_files {
+                if multiple_files && !config.quiet {
                     println!(
                         "{}==> {} <==",
                         if file_num > 0 { "\n" } else { "" },
@@ -28,7 +28,16 @@ pub fn run(config: Config) -> MyResult<()> {
                     let bytes = file.bytes().collect::<Result<Vec<_>, _>>()?;
                     print!("{}", String::from_utf8_lossy(&bytes));
                 } else {
-                    unimplemented!();
+                    let mut contents = String::new();
+                    file.read_to_string(&mut contents)?;
+                    let lines: Vec<_> = contents.split('\n').collect();
+                    let selected_lines: Vec<_> = lines
+                        .into_iter()
+                        .rev()
+                        .take(config.lines + 1)
+                        .rev()
+                        .collect();
+                    print!("{}", selected_lines.join("\n"));
                 }
             }
             Err(err) => eprintln!("{}: {}", filename, err),
