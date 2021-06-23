@@ -11,7 +11,13 @@ pub struct Config {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    println!("{:?}", config);
+    let (entries, errors) = find_files(&config)?;
+    for error in errors {
+        eprintln!("{}", error);
+    }
+    for entry in entries {
+        println!("{}", format_output(&entry, &config)?);
+    }
     Ok(())
 }
 
