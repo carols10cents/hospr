@@ -4,6 +4,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::str::FromStr;
+use std::collections::VecDeque;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -12,13 +13,13 @@ pub fn run(config: Config) -> MyResult<()> {
         let file = BufReader::new(File::open(filename)?);
         for line in take_lines(file, config.lines)? {
             // What I want
-            print!("{}", line?);
+            print!("{}", line);
         }
     }
     Ok(())
 }
 
-fn take_lines<T>(mut file: T, num: usize) -> MyResult<VecDeque<String>>
+fn take_lines<T>(mut file: T, num_lines: usize) -> MyResult<VecDeque<String>>
 where
     T: BufRead,
 {
