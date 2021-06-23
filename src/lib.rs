@@ -1,11 +1,19 @@
 use clap::{App, Arg};
 use std::error::Error;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::BufReader;
 use std::str::FromStr;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
 pub fn run(config: Config) -> MyResult<()> {
-    println!("{:?}", config);
+    for filename in &config.files {
+        let file = BufReader::new(File::open(filename)?);
+        for line in file.lines() {
+            print!("{}", line?);
+        }
+    }
     Ok(())
 }
 
