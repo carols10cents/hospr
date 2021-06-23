@@ -21,6 +21,15 @@ pub fn run(config: Config) -> MyResult<()> {
     Ok(())
 }
 
+fn find_files(config: &Config) -> MyResult<(Vec<FileInfo>, Vec<String>)> {
+    let mut results = vec![];
+    let mut errors = vec![];
+    for path in &config.entries {
+        // ... Check each entry
+    }
+    Ok((results, errors))
+}
+
 pub fn get_args() -> MyResult<Config> {
     let matches = App::new("lsr")
         .version("0.1.0")
