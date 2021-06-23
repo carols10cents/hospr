@@ -1,39 +1,11 @@
 use clap::{App, Arg};
-use std::{
-    error::Error,
-    fs::File,
-    io::{Read, Seek, SeekFrom},
-    str::FromStr,
-};
+use std::error::Error;
+use std::str::FromStr;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
 pub fn run(config: Config) -> MyResult<()> {
-    let multiple_files = config.files.len() > 1;
-    for (file_num, filename) in config.files.iter().enumerate() {
-        match File::open(&filename) {
-            Ok(mut file) => {
-                if multiple_files {
-                    println!(
-                        "{}==> {} <==",
-                        if file_num > 0 { "\n" } else { "" },
-                        filename
-                    );
-                }
-
-                let len = file.metadata()?.len() as i64;
-                if let Some(requested_bytes) = config.bytes {
-                    let num_bytes_to_print = std::cmp::min(len, requested_bytes) * -1;
-                    file.seek(SeekFrom::End(num_bytes_to_print))?;
-                    let bytes = file.bytes().collect::<Result<Vec<_>, _>>()?;
-                    print!("{}", String::from_utf8_lossy(&bytes));
-                } else {
-                    unimplemented!();
-                }
-            }
-            Err(err) => eprintln!("{}: {}", filename, err),
-        };
-    }
+    println!("{:?}", config);
     Ok(())
 }
 
