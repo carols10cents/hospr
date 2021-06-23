@@ -10,12 +10,15 @@ type MyResult<T> = Result<T, Box<dyn Error>>;
 pub fn run(config: Config) -> MyResult<()> {
     for filename in &config.files {
         let file = BufReader::new(File::open(filename)?);
-        for line in file.lines() {
+        for line in take_lines(file, config.lines)? {
+            // What I want
             print!("{}", line?);
         }
     }
     Ok(())
 }
+
+fn take_lines<T: BufRead>(mut file: T, num_lines: usize) -> MyResult<VecDeque<String>> {}
 
 #[derive(Debug)]
 pub struct Config {
@@ -91,7 +94,25 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::{parse_int, MyResult};
+    use super::{parse_int, take_lines, MyResult};
+    use std::io::Cursor;
+
+    #[test]
+    fn test_take_lines() {
+        let lines1 = Cursor::new(b"lorem\nipsum\r\ndolor");
+        let res1 = take_lines(lines1, 1);
+        assert!(res1.is_ok());
+        if let Ok(vec) = res1 {
+            assert_eq!(vec, vec!["dolor"]);
+        }
+        let lines2 = Cursor::new(b"lorem\nipsum\r\ndolor");
+        let res2 = take_lines(lines2, 2);
+        assert!(res2.is_ok());
+        if let Ok(vec) = res2 {
+            assert_eq!(vec, vec!["ipsum\r\n", "dolor"]);
+        }
+    }
+
     #[test]
     fn test_parse_int() {
         // No value is OK
