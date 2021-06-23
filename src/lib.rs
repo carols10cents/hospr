@@ -71,7 +71,7 @@ pub struct Config {
     quiet: bool,
 }
 pub fn get_args() -> MyResult<Config> {
-    let matches = App::new("tail")
+    let matches = App::new("tailr")
         .version("0.1.0")
         .author("Ken Youens-Clark <kyclark@gmail.com>")
         .about("Rust tail")
