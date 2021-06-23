@@ -9,3 +9,8 @@ pub struct Config {
     long: bool,
     all: bool,
 }
+
+pub fn run(config: Config) -> MyResult<()> {
+    println!("{:?}", config);
+    Ok(())
+}
