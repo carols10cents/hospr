@@ -2,7 +2,7 @@ use clap::{App, Arg};
 use std::{
     error::Error,
     fs::File,
-    io::{Read, Seek, SeekFrom},
+    io::{BufRead, BufReader, Read, Seek, SeekFrom},
     str::FromStr,
 };
 
@@ -28,16 +28,10 @@ pub fn run(config: Config) -> MyResult<()> {
                     let bytes = file.bytes().collect::<Result<Vec<_>, _>>()?;
                     print!("{}", String::from_utf8_lossy(&bytes));
                 } else {
-                    let mut contents = String::new();
-                    file.read_to_string(&mut contents)?;
-                    let lines: Vec<_> = contents.split('\n').collect();
-                    let selected_lines: Vec<_> = lines
-                        .into_iter()
-                        .rev()
-                        .take(config.lines + 1)
-                        .rev()
-                        .collect();
-                    print!("{}", selected_lines.join("\n"));
+                    print!(
+                        "{}",
+                        lines_from_end(config.lines + 1, BufReader::new(file)).join("\n")
+                    );
                 }
             }
             Err(err) => eprintln!("{}: {}", filename, err),
@@ -118,9 +112,66 @@ where
     }
 }
 
+fn lines_from_end<T: BufRead + Seek + Read>(num_lines: usize, mut buf: T) -> Vec<String> {
+    // hold the lines to return as bytes
+    let mut to_return = vec![];
+    // bytes of the current line we've seen so far
+    let mut current = vec![];
+
+    // start from the end
+    if let Err(_) = buf.seek(SeekFrom::End(-1)) {
+        // if the file is empty, return an empty vec
+        return vec![];
+    }
+
+    loop {
+        // read one byte
+        let mut byte_buf: Vec<u8> = vec![0];
+        buf.read_exact(&mut byte_buf).unwrap();
+
+        // if we found a newline
+        if byte_buf[0] == '\n' as u8 {
+            // put the bytes we've seen since the last newline in the group of results
+            to_return.push(current);
+
+            // check to see if we have enough lines and stop if we do
+            if to_return.len() == num_lines {
+                break;
+            }
+
+            // reset the current line
+            current = vec![];
+        } else {
+            // add the byte to the current line
+            current.push(byte_buf[0]);
+        }
+
+        // go back the byte we just read and the byte before that
+        if let Err(_) = buf.seek(SeekFrom::Current(-2)) {
+            // if we're at the beginning of the file, push the current line onto the results
+            to_return.push(current);
+            break;
+        }
+    }
+
+    to_return
+        .into_iter()
+        // the lines are now in the opposite order than they occur in the file, so reverse
+        .rev()
+        .map(|mut p| {
+            // the bytes in each line are also in the opposite order, reverse them
+            p.reverse();
+            // make the bytes into a string
+            String::from_utf8_lossy(&p).to_string()
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod test {
-    use super::{parse_int, MyResult};
+    use super::*;
+    use std::io::Cursor;
+
     #[test]
     fn test_parse_int() {
         // No value is OK
@@ -147,5 +198,16 @@ mod test {
         if let Err(e) = res5 {
             assert_eq!(e.to_string(), "0".to_string());
         }
+    }
+
+    #[test]
+    fn lines_by_chunks_from_end() {
+        let s = "what is this\r\nthis old man\r\nhé played one\nhe played knick nack";
+        let bytes = s.as_bytes();
+        let c = Cursor::new(bytes);
+
+        let expected = vec!["this old man\r", "hé played one", "he played knick nack"];
+
+        assert_eq!(lines_from_end(3, c), expected);
     }
 }
