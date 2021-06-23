@@ -19,29 +19,32 @@ pub fn get_args() -> MyResult<Config> {
     let matches = App::new("lsr")
         .version("0.1.0")
         .author("Ken Youens-Clark <kyclark@gmail.com>")
-        .about("Rust tail")
+        .about("Rust ls")
         .arg(
-            Arg::with_name("all")
-                .short("a")
-                .long("all")
-                .help("Show all files, including hidden ones"),
+            Arg::with_name("entries")
+                .value_name("ENTRY")
+                .help("Files and/or directories")
+                .required(true)
+                .default_value(".")
+                .min_values(1),
         )
         .arg(
             Arg::with_name("long")
-                .short("l")
-                .long("long")
-                .help("Display the long format"),
+                .value_name("LONG")
+                .takes_value(false)
+                .help("Long listing")
+                .short("-l")
+                .long("--long"),
         )
         .arg(
-            Arg::with_name("entries")
-                .value_name("ENTRIES")
-                .help("Input file(s)")
-                .required(true)
-                .min_values(1)
-                .default_value("."),
+            Arg::with_name("all")
+                .value_name("ALL")
+                .takes_value(false)
+                .help("Show all files")
+                .short("-a")
+                .long("--all"),
         )
         .get_matches();
-
     Ok(Config {
         entries: matches.values_of_lossy("entries").unwrap(),
         long: matches.is_present("long"),
