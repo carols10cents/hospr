@@ -18,7 +18,26 @@ pub fn run(config: Config) -> MyResult<()> {
     Ok(())
 }
 
-fn take_lines<T: BufRead>(mut file: T, num_lines: usize) -> MyResult<VecDeque<String>> {}
+fn take_lines<T>(mut file: T, num: usize) -> MyResult<VecDeque<String>>
+where
+    T: BufRead,
+{
+    let mut last: VecDeque<String> = VecDeque::with_capacity(num_lines);
+    let mut line = String::new();
+
+    loop {
+        let bytes = file.read_line(&mut line)?;
+        if bytes == 0 {
+            break;
+        }
+        last.push_back(line.to_string());
+        if last.len() > num_lines {
+            last.pop_front();
+        }
+        line.clear();
+    }
+    Ok(last)
+}
 
 #[derive(Debug)]
 pub struct Config {
