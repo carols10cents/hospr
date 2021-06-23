@@ -1,19 +1,33 @@
 use clap::{App, Arg};
+use std::collections::VecDeque;
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::BufReader;
+use std::io::{BufReader, SeekFrom};
 use std::str::FromStr;
-use std::collections::VecDeque;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
 pub fn run(config: Config) -> MyResult<()> {
     for filename in &config.files {
-        let file = BufReader::new(File::open(filename)?);
-        for line in take_lines(file, config.lines)? {
-            // What I want
-            print!("{}", line);
+        match File::open(filename) {
+            Ok(file) => {
+                let mut file = BufReader::new(file);
+                if let Some(num_bytes) = config.bytes {
+                    if file.seek(SeekFrom::End(num_bytes * -1)).is_ok() {
+                        let mut buffer = Vec::new();
+                        file.read_to_end(&mut buffer)?;
+                        if buffer.len() > 0 {
+                            print!("{}", String::from_utf8_lossy(&buffer));
+                        }
+                    }
+                } else {
+                    for line in take_lines(file, config.lines)? {
+                        print!("{}", line);
+                    }
+                }
+            }
+            Err(err) => eprintln!("{}: {}", filename, err),
         }
     }
     Ok(())
