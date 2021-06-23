@@ -31,6 +31,10 @@ fn find_files(config: &Config) -> MyResult<(Vec<FileInfo>, Vec<String>)> {
     Ok((results, errors))
 }
 
+fn format_output(entry: &FileInfo, config: &Config) -> MyResult<String> {
+    unimplemented!();
+}
+
 #[derive(Debug)]
 pub struct FileInfo {
     path: String,
