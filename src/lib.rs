@@ -9,11 +9,20 @@ use std::str::FromStr;
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
 pub fn run(config: Config) -> MyResult<()> {
-    for filename in &config.files {
+    let num_files = config.files.len();
+    for (file_num, filename) in config.files.iter().enumerate() {
+        if !config.quiet && num_files > 1 {
+            println!(
+                "{}==> {} <==",
+                if file_num > 0 { "\n" } else { "" },
+                &filename
+            );
+        }
         match File::open(filename) {
             Ok(file) => {
                 let mut file = BufReader::new(file);
                 if let Some(num_bytes) = config.bytes {
+                    // Handle empty files
                     if file.seek(SeekFrom::End(num_bytes * -1)).is_ok() {
                         let mut buffer = Vec::new();
                         file.read_to_end(&mut buffer)?;
