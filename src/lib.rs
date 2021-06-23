@@ -30,6 +30,12 @@ fn find_files(config: &Config) -> MyResult<(Vec<FileInfo>, Vec<String>)> {
     Ok((results, errors))
 }
 
+#[derive(Debug)]
+pub struct FileInfo {
+    path: String,
+    metadata: Metadata,
+}
+
 pub fn get_args() -> MyResult<Config> {
     let matches = App::new("lsr")
         .version("0.1.0")
