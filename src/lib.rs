@@ -99,8 +99,8 @@ fn format_output(entry: &FileInfo, config: &Config) -> MyResult<String> {
 
 #[derive(Debug)]
 pub struct FileInfo {
-    path: String,
-    metadata: Metadata,
+    pub path: String,
+    pub metadata: Metadata,
 }
 
 pub fn get_args() -> MyResult<Config> {
