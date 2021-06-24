@@ -1,6 +1,8 @@
 use clap::{App, Arg};
 use std::error::Error;
 use std::fs::{self, Metadata};
+use std::os::unix::fs::MetadataExt;
+use std::os::unix::fs::PermissionsExt;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -55,7 +57,13 @@ fn find_files(config: &Config) -> MyResult<(Vec<FileInfo>, Vec<String>)> {
 }
 
 fn format_output(entry: &FileInfo, config: &Config) -> MyResult<String> {
-    Ok(format!("{}", entry.path))
+    if config.long {
+        let mode = entry.metadata.permissions().mode() as u16;
+        let nlink = entry.metadata.nlink();
+        Ok(format!("{} {} {}", format_mode(mode), nlink, entry.path))
+    } else {
+        Ok(format!("{}", entry.path))
+    }
 }
 
 #[derive(Debug)]
