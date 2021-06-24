@@ -33,6 +33,19 @@ fn find_files(config: &Config) -> MyResult<(Vec<FileInfo>, Vec<String>)> {
                         path: path.into(),
                         metadata,
                     });
+                } else {
+                    for dir_entry in fs::read_dir(path)? {
+                        let inner_path = dir_entry?.path().display().to_string();
+                        match fs::metadata(&inner_path) {
+                            Ok(metadata) => {
+                                results.push(FileInfo {
+                                    path: inner_path.into(),
+                                    metadata,
+                                });
+                            }
+                            Err(e) => errors.push(format!("{}: {}", inner_path, e)),
+                        }
+                    }
                 }
             }
             Err(e) => errors.push(format!("{}: {}", path, e)),
