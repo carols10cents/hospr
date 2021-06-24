@@ -1,9 +1,10 @@
+use chrono::{DateTime, Local};
 use clap::{App, Arg};
 use std::error::Error;
 use std::fs::{self, Metadata};
 use std::os::unix::fs::MetadataExt;
 use std::os::unix::fs::PermissionsExt;
-use users::get_user_by_uid;
+use users::{get_group_by_gid, get_user_by_uid};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -60,16 +61,35 @@ fn find_files(config: &Config) -> MyResult<(Vec<FileInfo>, Vec<String>)> {
 fn format_output(entry: &FileInfo, config: &Config) -> MyResult<String> {
     if config.long {
         let metadata = &entry.metadata;
+
+        let d = if metadata.is_dir() { "d" } else { "-" };
+
         let mode = metadata.permissions().mode() as u16;
         let nlink = metadata.nlink();
+
         let user_id = metadata.uid();
         let username = get_user_by_uid(user_id).unwrap();
         let username = username.name().to_str().unwrap();
+        let short_name = &username[..8];
+
+        let group_id = metadata.gid();
+        let group = get_group_by_gid(group_id).unwrap();
+        let group = group.name().to_str().unwrap();
+
+        let len = metadata.len();
+
+        let modified: DateTime<Local> = metadata.modified()?.into();
+        let modified = modified.format("%b %e %y %H:%M");
+
         Ok(format!(
-            "{} {} {} {}",
+            "{}{} {:>2} {:<8} {:<8} {:>8} {} {}",
+            d,
             format_mode(mode),
             nlink,
-            username,
+            short_name,
+            group,
+            len,
+            modified,
             entry.path
         ))
     } else {
