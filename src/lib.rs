@@ -1,6 +1,6 @@
 use clap::{App, Arg};
 use std::error::Error;
-use std::fs::Metadata;
+use std::fs::{self, Metadata};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -26,7 +26,10 @@ fn find_files(config: &Config) -> MyResult<(Vec<FileInfo>, Vec<String>)> {
     let mut results = vec![];
     let mut errors = vec![];
     for path in &config.entries {
-        // ... Check each entry
+        match fs::metadata(&path) {
+            Ok(_) => unimplemented!(),
+            Err(e) => errors.push(format!("{}: {}", path, e)),
+        }
     }
     Ok((results, errors))
 }
