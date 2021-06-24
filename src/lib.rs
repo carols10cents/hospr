@@ -140,24 +140,14 @@ pub fn get_args() -> MyResult<Config> {
     })
 }
 
-fn mk_triple(mode: u16, read: u16, write: u16, execute: u16) -> String {
+/// Given an octal number like 0o500 and three mask values,
+/// return a string like "r-x"
+pub fn mk_triple(mode: u16, read: u16, write: u16, execute: u16) -> String {
     format!(
         "{}{}{}",
-        if (mode & read).count_ones() > 0 {
-            "r"
-        } else {
-            "-"
-        },
-        if (mode & write).count_ones() > 0 {
-            "w"
-        } else {
-            "-"
-        },
-        if (mode & execute).count_ones() > 0 {
-            "x"
-        } else {
-            "-"
-        },
+        if mode & read == 0 { "-" } else { "r" },
+        if mode & write == 0 { "-" } else { "w" },
+        if mode & execute == 0 { "-" } else { "x" },
     )
 }
 
