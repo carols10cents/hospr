@@ -27,7 +27,14 @@ fn find_files(config: &Config) -> MyResult<(Vec<FileInfo>, Vec<String>)> {
     let mut errors = vec![];
     for path in &config.entries {
         match fs::metadata(&path) {
-            Ok(_) => unimplemented!(),
+            Ok(metadata) => {
+                if metadata.is_file() {
+                    results.push(FileInfo {
+                        path: path.into(),
+                        metadata,
+                    });
+                }
+            },
             Err(e) => errors.push(format!("{}: {}", path, e)),
         }
     }
