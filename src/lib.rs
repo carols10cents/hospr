@@ -78,8 +78,35 @@ pub fn get_args() -> MyResult<Config> {
     })
 }
 
-fn mk_triple(mode: u16, read: u16, write: u16, execute: u16) -> String {}
-fn format_mode(mode: u16) -> String {}
+fn mk_triple(mode: u16, read: u16, write: u16, execute: u16) -> String {
+    format!(
+        "{}{}{}",
+        if (mode & read).count_ones() > 0 {
+            "r"
+        } else {
+            "-"
+        },
+        if (mode & write).count_ones() > 0 {
+            "w"
+        } else {
+            "-"
+        },
+        if (mode & execute).count_ones() > 0 {
+            "x"
+        } else {
+            "-"
+        },
+    )
+}
+
+fn format_mode(mode: u16) -> String {
+    format!(
+        "{}{}{}",
+        mk_triple(mode, 0o400, 0o200, 0o100),
+        mk_triple(mode, 0o040, 0o020, 0o010),
+        mk_triple(mode, 0o004, 0o002, 0o001),
+    )
+}
 
 #[cfg(test)]
 mod test {
