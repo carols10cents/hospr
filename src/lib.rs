@@ -77,3 +77,24 @@ pub fn get_args() -> MyResult<Config> {
         all: matches.is_present("all"),
     })
 }
+
+fn mk_triple(mode: u16, read: u16, write: u16, execute: u16) -> String {}
+fn format_mode(mode: u16) -> String {}
+
+#[cfg(test)]
+mod test {
+    use super::{format_mode, mk_triple};
+    #[test]
+    fn test_mk_triple() {
+        assert_eq!(mk_triple(0o751, 0o400, 0o200, 0o100), "rwx");
+        assert_eq!(mk_triple(0o751, 0o040, 0o020, 0o010), "r-x");
+        assert_eq!(mk_triple(0o751, 0o004, 0o002, 0o001), "--x");
+        assert_eq!(mk_triple(0o600, 0o004, 0o002, 0o001), "---");
+    }
+
+    #[test]
+    fn test_format_mode() {
+        assert_eq!(format_mode(0o755), "rwxr-xr-x");
+        assert_eq!(format_mode(0o421), "r---w---x");
+    }
+}
