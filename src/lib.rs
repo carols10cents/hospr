@@ -151,7 +151,9 @@ pub fn mk_triple(mode: u16, read: u16, write: u16, execute: u16) -> String {
     )
 }
 
-fn format_mode(mode: u16) -> String {
+/// Given a file mode in octal format like 0o751,
+/// return a string like "rwxr-x--x"
+pub fn format_mode(mode: u16) -> String {
     format!(
         "{}{}{}",
         mk_triple(mode, 0o400, 0o200, 0o100),
