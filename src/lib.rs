@@ -3,6 +3,7 @@ use std::error::Error;
 use std::fs::{self, Metadata};
 use std::os::unix::fs::MetadataExt;
 use std::os::unix::fs::PermissionsExt;
+use users::get_user_by_uid;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -58,9 +59,19 @@ fn find_files(config: &Config) -> MyResult<(Vec<FileInfo>, Vec<String>)> {
 
 fn format_output(entry: &FileInfo, config: &Config) -> MyResult<String> {
     if config.long {
-        let mode = entry.metadata.permissions().mode() as u16;
-        let nlink = entry.metadata.nlink();
-        Ok(format!("{} {} {}", format_mode(mode), nlink, entry.path))
+        let metadata = &entry.metadata;
+        let mode = metadata.permissions().mode() as u16;
+        let nlink = metadata.nlink();
+        let user_id = metadata.uid();
+        let username = get_user_by_uid(user_id).unwrap();
+        let username = username.name().to_str().unwrap();
+        Ok(format!(
+            "{} {} {} {}",
+            format_mode(mode),
+            nlink,
+            username,
+            entry.path
+        ))
     } else {
         Ok(format!("{}", entry.path))
     }
