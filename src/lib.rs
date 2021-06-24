@@ -34,7 +34,7 @@ fn find_files(config: &Config) -> MyResult<(Vec<FileInfo>, Vec<String>)> {
                         metadata,
                     });
                 }
-            },
+            }
             Err(e) => errors.push(format!("{}: {}", path, e)),
         }
     }
@@ -42,7 +42,7 @@ fn find_files(config: &Config) -> MyResult<(Vec<FileInfo>, Vec<String>)> {
 }
 
 fn format_output(entry: &FileInfo, config: &Config) -> MyResult<String> {
-    unimplemented!();
+    Ok(format!("{}", entry.path))
 }
 
 #[derive(Debug)]
