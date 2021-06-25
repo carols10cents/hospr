@@ -30,29 +30,29 @@ fn find_files(config: &Config) -> MyResult<(Vec<FileInfo>, Vec<String>)> {
     let mut results = vec![];
     let mut errors = vec![];
     for path in &config.entries {
-        match fs::metadata(&path) {
-            Ok(metadata) => {
-                if metadata.is_file() {
-                    results.push(FileInfo {
-                        path: path.into(),
-                        metadata,
-                    });
-                } else {
-                    for dir_entry in fs::read_dir(path)? {
-                        let inner_path = dir_entry?.path().display().to_string();
-                        match fs::metadata(&inner_path) {
-                            Ok(metadata) => {
-                                results.push(FileInfo {
-                                    path: inner_path.into(),
-                                    metadata,
-                                });
-                            }
-                            Err(e) => errors.push(format!("{}: {}", inner_path, e)),
+        if let Ok(meta) = fs::metadata(path) {
+            if meta.is_file() {
+                results.push(FileInfo {
+                    path: path.to_string(),
+                    metadata: meta,
+                });
+            } else if let Ok(entries) = fs::read_dir(path) {
+                for entry in entries {
+                    let entry = entry?;
+                    if let Ok(meta) = entry.metadata() {
+                        let basename = entry.file_name().to_string_lossy().to_string();
+                        let hidden = basename.starts_with('.');
+                        if !hidden || (hidden && config.all) {
+                            results.push(FileInfo {
+                                path: entry.path().display().to_string(),
+                                metadata: meta,
+                            });
                         }
                     }
                 }
             }
-            Err(e) => errors.push(format!("{}: {}", path, e)),
+        } else {
+            errors.push(format!("{}: No such file or directory", path));
         }
     }
     Ok((results, errors))
