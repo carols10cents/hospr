@@ -1,3 +1,8 @@
+use clap::App;
 fn main() {
-    println!("{:?}", std::env::args()); // This will not work either
+    let _matches = App::new("echor")
+        .version("0.1.0")
+        .author("Ken Youens-Clark <kyclark@gmail.com>")
+        .about("Rust echo")
+        .get_matches();
 }
