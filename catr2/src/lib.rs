@@ -18,19 +18,22 @@ pub fn get_args() -> MyResult<Config> {
         .arg(
             Arg::with_name("files")
                 .value_name("FILES")
-                .help("Input files")
+                .help("Input file(s)")
                 .required(true)
+                .default_value("-")
                 .min_values(1),
         )
         .arg(
             Arg::with_name("number_lines")
-                .help("Number all lines in the file")
+                .long("number")
+                .help("Number lines")
                 .takes_value(false)
                 .short("n"),
         )
         .arg(
             Arg::with_name("number_nonblank_lines")
-                .help("Number only non-blank lines in the file")
+                .help("Number non-blank lines")
+                .long("number-nonblank")
                 .takes_value(false)
                 .short("b"),
         )
