@@ -34,6 +34,7 @@ pub fn get_args() -> MyResult<Config> {
             Arg::with_name("number_nonblank_lines")
                 .help("Number non-blank lines")
                 .long("number-nonblank")
+                .conflicts_with("number_lines")
                 .takes_value(false)
                 .short("b"),
         )
