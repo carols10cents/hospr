@@ -1,5 +1,5 @@
-use std::error::Error;
 use clap::{App, Arg};
+use std::error::Error;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -12,29 +12,29 @@ pub struct Config {
 
 pub fn get_args() -> MyResult<Config> {
     let matches = App::new("catr")
-    .version("1.0.0")
-    .author("Carol (Nichols || Goulding)")
-    .about("Rust cat")
-    .arg(
-        Arg::with_name("files")
-            .value_name("FILES")
-            .help("Input files")
-            .required(true)
-            .min_values(1),
-    )
-    .arg(
-        Arg::with_name("number_lines")
-            .help("Number all lines in the file")
-            .takes_value(false)
-            .short("n"),
-    )
-    .arg(
-        Arg::with_name("number_nonblank_lines")
-            .help("Number only non-blank lines in the file")
-            .takes_value(false)
-            .short("b"),
-    )
-    .get_matches();
+        .version("1.0.0")
+        .author("Carol (Nichols || Goulding)")
+        .about("Rust cat")
+        .arg(
+            Arg::with_name("files")
+                .value_name("FILES")
+                .help("Input files")
+                .required(true)
+                .min_values(1),
+        )
+        .arg(
+            Arg::with_name("number_lines")
+                .help("Number all lines in the file")
+                .takes_value(false)
+                .short("n"),
+        )
+        .arg(
+            Arg::with_name("number_nonblank_lines")
+                .help("Number only non-blank lines in the file")
+                .takes_value(false)
+                .short("b"),
+        )
+        .get_matches();
 
     Ok(Config {
         files: matches.values_of_lossy("files").unwrap(),
@@ -43,7 +43,7 @@ pub fn get_args() -> MyResult<Config> {
     })
 }
 
-pub fn run() -> MyResult<()> {
-    println!("Hello, world!");
+pub fn run(config: Config) -> MyResult<()> {
+    dbg!(config);
     Ok(())
 }
