@@ -4,7 +4,7 @@ use std::fs;
 
 #[test]
 fn dies_no_args() {
-    let mut cmd = Command::cargo_bin("echor2").unwrap();
+    let mut cmd = Command::cargo_bin("echor").unwrap();
     cmd.assert()
         .failure()
         .stderr(predicate::str::contains("USAGE"));
@@ -14,6 +14,6 @@ fn dies_no_args() {
 fn hello1() {
     let outfile = "tests/expected/hello1.txt";
     let expected = fs::read_to_string(outfile).unwrap();
-    let mut cmd = Command::cargo_bin("echor2").unwrap();
+    let mut cmd = Command::cargo_bin("echor").unwrap();
     cmd.arg("Hello there").assert().success().stdout(expected);
 }
