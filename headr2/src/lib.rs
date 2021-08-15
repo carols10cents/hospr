@@ -59,9 +59,9 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn parse_positive_int(val: &str) -> MyResult<usize> {
-    match val.parse().map_err(|_| val.into()) {
-        Ok(0) => Err("0".into()),
-        other => other,
+    match val.parse() {
+        Ok(n) if n > 0 => Ok(n),
+        _ => Err(From::from(val)),
     }
 }
 
