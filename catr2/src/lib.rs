@@ -52,26 +52,17 @@ pub fn get_args() -> MyResult<Config> {
 pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
         match open(&filename) {
-            Err(err) => eprintln!("Failed to open {}: {}", filename, err),
-            Ok(buf) => {
-                let mut num = 1;
-                for line in buf.lines() {
-                    let line = line?;
+            Err(err) => eprintln!("{}: {}", filename, err),
+            Ok(file) => {
+                for (line_num, line_result) in file.lines().enumerate() {
+                    let line = line_result?;
                     if config.number_lines {
-                        println!("{:>6}\t{}", num, line);
-                        num += 1;
-                    } else if config.number_nonblank_lines {
-                        if line.is_empty() {
-                            println!();
-                        } else {
-                            println!("{:>6}\t{}", num, line);
-                            num += 1;
-                        }
+                        println!("{:>6}\t{}", line_num + 1, line);
                     } else {
                         println!("{}", line);
                     }
                 }
-            },
+            }
         }
     }
     Ok(())
