@@ -26,10 +26,9 @@ pub fn get_args() -> MyResult<Config> {
         .arg(
             Arg::with_name("LINES")
                 .long("lines")
-                .help("Number of lines")
+                .help("Number of lines [default: 10]")
                 .takes_value(true)
-                .short("n")
-                .default_value("10"),
+                .short("n"),
         )
         .arg(
             Arg::with_name("BYTES")
@@ -41,15 +40,19 @@ pub fn get_args() -> MyResult<Config> {
         )
         .get_matches();
 
-    let bytes = match matches.value_of("bytes") {
+    let bytes = match matches.value_of("BYTES") {
         Some(s) => Some(parse_positive_int(s).map_err(|e| format!("illegal byte count -- {}", e))?),
         None => None,
     };
 
+    let lines = match matches.value_of("LINES") {
+        Some(s) => parse_positive_int(s).map_err(|e| format!("illegal line count -- {}", e))?,
+        None => 10,
+    };
+
     Ok(Config {
         files: matches.values_of_lossy("files").unwrap(),
-        lines: parse_positive_int(matches.value_of("lines").unwrap())
-            .map_err(|e| format!("illegal line count -- {}", e))?,
+        lines,
         bytes,
     })
 }
