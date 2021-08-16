@@ -17,38 +17,39 @@ pub fn get_args() -> MyResult<Config> {
         .about("Rust head")
         .arg(
             Arg::with_name("files")
-                .value_name("FILES")
+                .value_name("FILE")
                 .help("Input file(s)")
                 .required(true)
                 .default_value("-")
                 .min_values(1),
         )
         .arg(
-            Arg::with_name("lines")
+            Arg::with_name("LINES")
                 .long("lines")
-                .help("Number lines")
+                .help("Number of lines")
                 .takes_value(true)
                 .short("n")
                 .default_value("10"),
         )
         .arg(
-            Arg::with_name("bytes")
+            Arg::with_name("BYTES")
                 .long("bytes")
-                .help("Number bytes")
+                .help("Number of bytes")
                 .takes_value(true)
                 .short("c")
-                .conflicts_with("lines"),
+                .conflicts_with("LINES"),
         )
         .get_matches();
 
     let bytes = match matches.value_of("bytes") {
-        Some(s) => Some(parse_positive_int(s)?),
+        Some(s) => Some(parse_positive_int(s).map_err(|e| format!("illegal byte count -- {}", e))?),
         None => None,
     };
 
     Ok(Config {
         files: matches.values_of_lossy("files").unwrap(),
-        lines: parse_positive_int(matches.value_of("lines").unwrap())?,
+        lines: parse_positive_int(matches.value_of("lines").unwrap())
+            .map_err(|e| format!("illegal line count -- {}", e))?,
         bytes,
     })
 }
