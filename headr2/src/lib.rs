@@ -16,27 +16,29 @@ pub fn get_args() -> MyResult<Config> {
         .author("Carol (Nichols || Goulding)")
         .about("Rust head")
         .arg(
+            Arg::with_name("lines")
+                .short("n")
+                .long("lines")
+                .value_name("LINES")
+                .help("Number of lines")
+                .default_value("10"),
+        )
+        .arg(
+            Arg::with_name("bytes")
+                .short("c")
+                .long("bytes")
+                .value_name("BYTES")
+                .takes_value(true)
+                .conflicts_with("lines")
+                .help("Number of bytes"),
+        )
+        .arg(
             Arg::with_name("files")
                 .value_name("FILE")
                 .help("Input file(s)")
                 .required(true)
                 .default_value("-")
                 .min_values(1),
-        )
-        .arg(
-            Arg::with_name("LINES")
-                .long("lines")
-                .help("Number of lines [default: 10]")
-                .takes_value(true)
-                .short("n"),
-        )
-        .arg(
-            Arg::with_name("BYTES")
-                .long("bytes")
-                .help("Number of bytes")
-                .takes_value(true)
-                .short("c")
-                .conflicts_with("LINES"),
         )
         .get_matches();
 
