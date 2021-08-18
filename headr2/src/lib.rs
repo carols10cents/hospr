@@ -12,8 +12,8 @@ pub struct Config {
 
 pub fn get_args() -> MyResult<Config> {
     let matches = App::new("headr")
-        .version("1.0")
-        .author("Carol (Nichols || Goulding)")
+        .version("0.1.0")
+        .author("Ken Youens-Clark <kyclark@gmail.com>")
         .about("Rust head")
         .arg(
             Arg::with_name("lines")
@@ -42,19 +42,19 @@ pub fn get_args() -> MyResult<Config> {
         )
         .get_matches();
 
-    let bytes = match matches.value_of("BYTES") {
-        Some(s) => Some(parse_positive_int(s).map_err(|e| format!("illegal byte count -- {}", e))?),
-        None => None,
-    };
-
-    let lines = match matches.value_of("LINES") {
-        Some(s) => parse_positive_int(s).map_err(|e| format!("illegal line count -- {}", e))?,
-        None => 10,
-    };
-
+    let lines = matches
+        .value_of("lines")
+        .map(parse_positive_int)
+        .transpose()
+        .map_err(|e| format!("illegal line count -- {}", e))?;
+    let bytes = matches
+        .value_of("bytes")
+        .map(parse_positive_int)
+        .transpose()
+        .map_err(|e| format!("illegal byte count -- {}", e))?;
     Ok(Config {
         files: matches.values_of_lossy("files").unwrap(),
-        lines,
+        lines: lines.unwrap(),
         bytes,
     })
 }
