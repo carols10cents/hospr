@@ -62,12 +62,29 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
+    let multiple_files = config.files.len() > 1;
+
+    let mut output = vec![];
     for filename in config.files {
         match open(&filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
-            Ok(_file) => println!("Opened {}", filename),
+            Ok(file) => {
+                if multiple_files {
+                    output.push(format!("==> {} <==", filename));
+                }
+                if let Some(bytes) = config.bytes {
+                    let bytevec: Vec<_> = file.bytes().take(bytes).flatten().collect();
+                    output.push(format!("{}", String::from_utf8_lossy(&bytevec)));
+                } else {
+                    for line in file.split(b'\n').take(config.lines).flatten() {
+                        output.push(format!("{}", String::from_utf8_lossy(&line)));
+                    }
+                    output.push("".into());
+                }
+            }
         }
     }
+    print!("{}", output.join("\n"));
     Ok(())
 }
 
