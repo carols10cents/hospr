@@ -63,7 +63,7 @@ pub fn get_args() -> MyResult<Config> {
 
 pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
-        match File::open(&filename) {
+        match open(&filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(mut file) => {
                 let mut line = String::new();
