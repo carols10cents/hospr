@@ -67,10 +67,8 @@ pub fn run(config: Config) -> MyResult<()> {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(mut file) => {
                 if let Some(num_bytes) = config.bytes {
-                    let mut contents = String::new();
-                    file.read_to_string(&mut contents)?; // Danger here
-                    let bytes = contents.as_bytes();
-                    print!("{}", String::from_utf8_lossy(&bytes[..num_bytes])); // More danger
+                    let bytes: Result<Vec<_>, _> = file.bytes().take(num_bytes).collect();
+                    print!("{}", String::from_utf8_lossy(&bytes?));
                 } else {
                     let mut line = String::new();
                     for _ in 0..config.lines {
