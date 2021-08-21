@@ -18,14 +18,14 @@ pub fn get_args() -> MyResult<Config> {
         .author("Ken Youens-Clark <kyclark@gmail.com>")
         .about("Rust wc")
         // What goes here?
-        .get_matches()
+        .get_matches();
 
     Ok(Config {
-        files: ...
-        lines: ...
-        words: ...
-        bytes: ...
-        chars: ...
+        files: unimplemented!(),
+        lines: unimplemented!(),
+        words: unimplemented!(),
+        bytes: unimplemented!(),
+        chars: unimplemented!(),
     })
 }
 
