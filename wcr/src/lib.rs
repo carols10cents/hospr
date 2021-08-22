@@ -100,6 +100,7 @@ pub fn run(config: Config) -> MyResult<()> {
                     let line = line?;
                     lines += 1;
                     bytes += 1;
+                    chars += 1;
 
                     words += line.split_whitespace().count();
                     bytes += line.as_bytes().len();
