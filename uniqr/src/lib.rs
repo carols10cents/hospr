@@ -4,9 +4,9 @@ use std::error::Error;
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
 #[derive(Debug)]
-pub struct Config {
-    in_file: &str,
-    out_file: Option<&str>,
+pub struct Config<'a> {
+    in_file: &'a str,
+    out_file: Option<&'a str>,
     count: bool,
 }
 
