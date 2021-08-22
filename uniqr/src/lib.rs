@@ -49,19 +49,17 @@ pub fn get_args() -> MyResult<Config> {
 
 pub fn run(config: Config) -> MyResult<()> {
     let mut file = open(&config.in_file).map_err(|e| format!("{}: {}", config.in_file, e))?;
+    let mut writer = output(&config.out_file)?;
+
     let mut line = String::new();
     let mut current_line: Option<String> = None;
     let mut current_line_count = 0;
-    let mut results = vec![];
+
     loop {
         let bytes = file.read_line(&mut line)?;
         if bytes == 0 {
             if let Some(current) = current_line {
-                if config.count {
-                    results.push(format!("{:>4} {}", current_line_count, current));
-                } else {
-                    results.push(current.clone());
-                }
+                print_result(&mut writer, config.count, current_line_count, &current)?;
             }
 
             break;
@@ -71,11 +69,7 @@ pub fn run(config: Config) -> MyResult<()> {
 
         if let Some(current) = current_line {
             if trimmed != current {
-                if config.count {
-                    results.push(format!("{:>4} {}", current_line_count, current));
-                } else {
-                    results.push(current.clone());
-                }
+                print_result(&mut writer, config.count, current_line_count, &current)?;
                 current_line_count = 0;
             }
         }
@@ -85,9 +79,16 @@ pub fn run(config: Config) -> MyResult<()> {
 
         line.clear();
     }
-    let mut writer = output(&config.out_file)?;
-    writeln!(writer, "{}", results.join("\n"))?;
+
     Ok(())
+}
+
+fn print_result(writer: &mut impl Write, count: bool, num: usize, line: &str) -> MyResult<()> {
+    if count {
+        Ok(writeln!(writer, "{:>4} {}", num, line)?)
+    } else {
+        Ok(writeln!(writer, "{}", line)?)
+    }
 }
 
 fn output(filename: &Option<String>) -> MyResult<Box<dyn Write>> {
