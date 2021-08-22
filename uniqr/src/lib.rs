@@ -67,15 +67,19 @@ pub fn run(config: Config) -> MyResult<()> {
 
         let trimmed = line.trim();
 
-        if let Some(current) = current_line {
-            if trimmed != current {
+        if let Some(current) = &current_line {
+            let trimmed_current = current.trim();
+            if trimmed == trimmed_current {
+                current_line_count += 1;
+            } else {
                 print_result(&mut writer, config.count, current_line_count, &current)?;
-                current_line_count = 0;
+                current_line = Some(line.clone());
+                current_line_count = 1;
             }
+        } else {
+            current_line = Some(line.clone());
+            current_line_count += 1;
         }
-
-        current_line = Some(trimmed.to_owned());
-        current_line_count += 1;
 
         line.clear();
     }
@@ -85,9 +89,9 @@ pub fn run(config: Config) -> MyResult<()> {
 
 fn print_result(writer: &mut impl Write, count: bool, num: usize, line: &str) -> MyResult<()> {
     if count {
-        Ok(writeln!(writer, "{:>4} {}", num, line)?)
+        Ok(write!(writer, "{:>4} {}", num, line)?)
     } else {
-        Ok(writeln!(writer, "{}", line)?)
+        Ok(write!(writer, "{}", line)?)
     }
 }
 
