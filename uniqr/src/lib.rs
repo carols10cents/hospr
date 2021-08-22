@@ -58,10 +58,7 @@ pub fn run(config: Config) -> MyResult<()> {
     loop {
         let bytes = file.read_line(&mut line)?;
         if bytes == 0 {
-            if let Some(current) = &current_line {
-                print_result(&mut writer, config.count, current_line_count, &current)?;
-            }
-
+            print_result(&mut writer, config.count, current_line_count, &current_line)?;
             break;
         }
 
@@ -71,9 +68,7 @@ pub fn run(config: Config) -> MyResult<()> {
         if trimmed_line == trimmed_current {
             current_line_count += 1;
         } else {
-            if let Some(current) = &current_line {
-                print_result(&mut writer, config.count, current_line_count, &current)?;
-            }
+            print_result(&mut writer, config.count, current_line_count, &current_line)?;
             current_line = Some(line.clone());
             current_line_count = 1;
         }
@@ -84,12 +79,20 @@ pub fn run(config: Config) -> MyResult<()> {
     Ok(())
 }
 
-fn print_result(writer: &mut impl Write, count: bool, num: usize, line: &str) -> MyResult<()> {
-    if count {
-        Ok(write!(writer, "{:>4} {}", num, line)?)
-    } else {
-        Ok(write!(writer, "{}", line)?)
+fn print_result(
+    writer: &mut impl Write,
+    count: bool,
+    num: usize,
+    maybe_line: &Option<String>,
+) -> MyResult<()> {
+    if let Some(line) = maybe_line {
+        if count {
+            write!(writer, "{:>4} {}", num, line)?;
+        } else {
+            write!(writer, "{}", line)?;
+        }
     }
+    Ok(())
 }
 
 fn output(filename: &Option<String>) -> MyResult<Box<dyn Write>> {
