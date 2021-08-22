@@ -2,7 +2,7 @@ use clap::{App, Arg};
 use std::{
     error::Error,
     fs::File,
-    io::{self, BufRead, BufReader},
+    io::{self, BufRead, BufReader, Write},
 };
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
@@ -83,8 +83,17 @@ pub fn run(config: Config) -> MyResult<()> {
 
         line.clear();
     }
-    print!("{}", results.join("\n"));
+    let mut writer = output(&config.out_file)?;
+    write!(writer, "{}", results.join("\n"))?;
     Ok(())
+}
+
+fn output(filename: &Option<String>) -> MyResult<Box<dyn Write>> {
+    if let Some(file) = filename {
+        Ok(Box::new(File::create(file)?))
+    } else {
+        Ok(Box::new(io::stdout()))
+    }
 }
 
 fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
