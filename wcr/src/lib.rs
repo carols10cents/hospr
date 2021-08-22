@@ -171,6 +171,21 @@ pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
     let mut num_bytes = 0;
     let mut num_chars = 0;
 
+    let mut line = String::new();
+    loop {
+        let num_bytes_read = file.read_line(&mut line)?;
+        if num_bytes_read == 0 {
+            break;
+        }
+        num_lines += 1;
+
+        num_words += line.split_whitespace().count();
+        num_bytes += line.as_bytes().len();
+        num_chars += line.chars().count();
+
+        line.clear();
+    }
+
     Ok(FileInfo {
         num_lines,
         num_words,
