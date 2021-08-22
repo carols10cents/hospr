@@ -90,21 +90,25 @@ pub fn run(config: Config) -> MyResult<()> {
     for filename in &config.files {
         match open(filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
-            Ok(file) => {
+            Ok(mut file) => {
                 let mut lines = 0;
                 let mut words = 0;
                 let mut bytes = 0;
                 let mut chars = 0;
 
-                for line in file.lines() {
-                    let line = line?;
+                let mut line = String::new();
+                loop {
+                    let num_bytes_read = file.read_line(&mut line)?;
+                    if num_bytes_read == 0 {
+                        break;
+                    }
                     lines += 1;
-                    bytes += 1;
-                    chars += 1;
 
                     words += line.split_whitespace().count();
                     bytes += line.as_bytes().len();
                     chars += line.chars().count();
+
+                    line.clear();
                 }
 
                 if config.lines {
