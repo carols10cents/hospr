@@ -67,8 +67,10 @@ pub fn run(config: Config) -> MyResult<()> {
             break;
         }
 
+        let trimmed = line.trim();
+
         if let Some(current) = current_line {
-            if line != current {
+            if trimmed != current {
                 if config.count {
                     results.push(format!("{:>4} {}", current_line_count, current));
                 } else {
@@ -78,13 +80,13 @@ pub fn run(config: Config) -> MyResult<()> {
             }
         }
 
-        current_line = Some(line.clone());
+        current_line = Some(trimmed.to_owned());
         current_line_count += 1;
 
         line.clear();
     }
     let mut writer = output(&config.out_file)?;
-    write!(writer, "{}", results.join(""))?;
+    writeln!(writer, "{}", results.join("\n"))?;
     Ok(())
 }
 
