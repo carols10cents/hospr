@@ -53,10 +53,10 @@ pub fn run(config: Config) -> MyResult<()> {
     let mut last = String::new();
     let mut count: u64 = 0;
 
-    let print = |count: &u64, line: &String| {
-        if count > &0 {
+    let print = |count: u64, line: &String| {
+        if count > 0 {
             if config.count {
-                print!("{:>4} {}", &count, &line);
+                print!("{:>4} {}", count, &line);
             } else {
                 print!("{}", &line);
             }
@@ -69,7 +69,7 @@ pub fn run(config: Config) -> MyResult<()> {
             break;
         }
         if line.trim_end() != last.trim_end() {
-            print(&count, &last);
+            print(count, &last);
             last = line.clone();
             count = 0;
         }
@@ -77,7 +77,7 @@ pub fn run(config: Config) -> MyResult<()> {
         line.clear();
     }
 
-    print(&count, &last);
+    print(count, &last);
 
     Ok(())
 }
