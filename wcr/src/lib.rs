@@ -14,6 +14,14 @@ pub struct Config {
     chars: bool,
 }
 
+#[derive(Debug, PartialEq)]
+pub struct FileInfo {
+    num_lines: usize,
+    num_words: usize,
+    num_bytes: usize,
+    num_chars: usize,
+}
+
 pub fn get_args() -> MyResult<Config> {
     let matches = App::new("wcr")
         .version("0.1.0")
@@ -134,7 +142,7 @@ pub fn run(config: Config) -> MyResult<()> {
                 total_words += words;
                 total_bytes += bytes;
                 total_chars += chars;
-            },
+            }
         }
     }
 
