@@ -5,8 +5,8 @@ type MyResult<T> = Result<T, Box<dyn Error>>;
 
 #[derive(Debug)]
 pub struct Config {
-    in_file: &str,
-    out_file: Option<&str>,
+    in_file: String,
+    out_file: Option<String>,
     count: bool,
 }
 
@@ -37,8 +37,8 @@ pub fn get_args() -> MyResult<Config> {
         .get_matches();
 
     Ok(Config {
-        in_file: matches.value_of("in_file").unwrap(),
-        out_file: matches.value_of("out_file"),
+        in_file: matches.value_of("in_file").map(str::to_string).unwrap(),
+        out_file: matches.value_of("out_file").map(String::from),
         count: matches.is_present("count"),
     })
 }
