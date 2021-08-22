@@ -18,51 +18,56 @@ pub fn get_args() -> MyResult<Config> {
         .author("Ken Youens-Clark <kyclark@gmail.com>")
         .about("Rust wc")
         .arg(
-            Arg::with_name("bytes")
-                .short("c")
-                .long("bytes")
-                .conflicts_with("chars")
-                .help("Show byte count"),
-        )
-        .arg(
-            Arg::with_name("chars")
-                .short("m")
-                .long("chars")
-                .help("Show character count"),
-        )
-        .arg(
-            Arg::with_name("lines")
-                .short("l")
-                .long("lines")
-                .help("Show line count"),
-        )
-        .arg(
-            Arg::with_name("words")
-                .short("w")
-                .long("words")
-                .help("Show word count"),
-        )
-        .arg(
             Arg::with_name("files")
                 .value_name("FILE")
                 .help("Input file(s)")
-                .required(true)
                 .default_value("-")
                 .min_values(1),
         )
+        .arg(
+            Arg::with_name("lines")
+                .value_name("LINES")
+                .help("Show line count")
+                .takes_value(false)
+                .short("l")
+                .long("lines"),
+        )
+        .arg(
+            Arg::with_name("words")
+                .value_name("WORDS")
+                .help("Show word count")
+                .takes_value(false)
+                .short("w")
+                .long("words"),
+        )
+        .arg(
+            Arg::with_name("bytes")
+                .value_name("BYTES")
+                .help("Show byte count")
+                .takes_value(false)
+                .short("c")
+                .long("bytes"),
+        )
+        .arg(
+            Arg::with_name("chars")
+                .value_name("CHARS")
+                .help("Show character count")
+                .takes_value(false)
+                .short("m")
+                .long("chars")
+                .conflicts_with("bytes"),
+        )
         .get_matches();
-
-    let lines = matches.is_present("lines");
-    let words = matches.is_present("words");
-    let bytes = matches.is_present("bytes");
-    let chars = matches.is_present("chars");
-
-    let (lines, words, bytes, chars) = if !(lines || words || bytes || chars) {
-        (true, true, true, false)
-    } else {
-        (lines, words, bytes, chars)
-    };
-
+    let mut lines = matches.is_present("lines");
+    let mut words = matches.is_present("words");
+    let mut bytes = matches.is_present("bytes");
+    let mut chars = matches.is_present("chars");
+    if [lines, words, bytes, chars].iter().all(|v| v == &false) {
+        lines = true;
+        words = true;
+        bytes = true;
+        chars = false;
+    }
     Ok(Config {
         files: matches.values_of_lossy("files").unwrap(),
         lines,
