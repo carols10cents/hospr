@@ -101,8 +101,16 @@ pub fn run(config: Config) -> MyResult<()> {
             Ok(file) => {
                 if let Ok(info) = count(file) {
                     println!(
-                        "{:>8}{:>8}{:>8} {}",
-                        info.num_lines, info.num_words, info.num_bytes, filename
+                        "{}{}{}{}{}",
+                        format_field(info.num_lines, config.lines),
+                        format_field(info.num_words, config.words),
+                        format_field(info.num_bytes, config.bytes),
+                        format_field(info.num_chars, config.chars),
+                        if filename.as_str() == "-" {
+                            "".to_string()
+                        } else {
+                            format!(" {}", filename)
+                        }
                     );
                 }
             }
@@ -219,8 +227,9 @@ fn format_field(value: usize, show: bool) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{count, FileInfo};
+    use super::{count, format_field, FileInfo};
     use std::io::Cursor;
+
     #[test]
     fn test_count() {
         let text = "I don't want the world. I just want your half.\r\n";
@@ -233,5 +242,12 @@ mod tests {
             num_bytes: 48,
         };
         assert_eq!(info.unwrap(), expected);
+    }
+
+    #[test]
+    fn test_format_field() {
+        assert_eq!(format_field(1, false), "");
+        assert_eq!(format_field(3, true), "       3");
+        assert_eq!(format_field(10, true), "      10");
     }
 }
