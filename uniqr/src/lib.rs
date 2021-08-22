@@ -49,33 +49,27 @@ pub fn get_args() -> MyResult<Config> {
 
 pub fn run(config: Config) -> MyResult<()> {
     let mut file = open(&config.in_file).map_err(|e| format!("{}: {}", config.in_file, e))?;
-    let mut writer = output(&config.out_file)?;
-
     let mut line = String::new();
-    let mut current_line: Option<String> = None;
-    let mut current_line_count = 0;
-
+    let mut last = String::new();
+    let mut count: u64 = 0;
     loop {
         let bytes = file.read_line(&mut line)?;
         if bytes == 0 {
-            print_result(&mut writer, config.count, current_line_count, &current_line)?;
             break;
         }
-
-        let trimmed_line = line.trim();
-        let trimmed_current = current_line.as_ref().map(|s| s.trim()).unwrap_or("");
-
-        if trimmed_line == trimmed_current {
-            current_line_count += 1;
-        } else {
-            print_result(&mut writer, config.count, current_line_count, &current_line)?;
-            current_line = Some(line.clone());
-            current_line_count = 1;
+        if line.trim_end() != last.trim_end() {
+            if count > 0 {
+                print!("{:>4} {}", count, last);
+            }
+            last = line.clone();
+            count = 0;
         }
-
+        count += 1;
         line.clear();
     }
-
+    if count > 0 {
+        print!("{:>4} {}", count, last);
+    }
     Ok(())
 }
 
