@@ -87,6 +87,8 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
+    let (mut total_lines, mut total_words, mut total_bytes, mut total_chars) = (0, 0, 0, 0);
+
     for filename in &config.files {
         match open(filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
@@ -128,8 +130,29 @@ pub fn run(config: Config) -> MyResult<()> {
                 } else {
                     println!(" {}", filename);
                 }
+                total_lines += lines;
+                total_words += words;
+                total_bytes += bytes;
+                total_chars += chars;
             },
         }
     }
+
+    if config.files.len() > 1 {
+        if config.lines {
+            print!("{:>8}", total_lines);
+        }
+        if config.words {
+            print!("{:>8}", total_words);
+        }
+        if config.bytes {
+            print!("{:>8}", total_bytes);
+        }
+        if config.chars {
+            print!("{:>8}", total_chars);
+        }
+        println!(" total");
+    }
+
     Ok(())
 }
