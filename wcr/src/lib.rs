@@ -52,12 +52,23 @@ pub fn get_args() -> MyResult<Config> {
         )
         .get_matches();
 
+    let lines = matches.is_present("lines");
+    let words = matches.is_present("words");
+    let bytes = matches.is_present("bytes");
+    let chars = matches.is_present("chars");
+
+    let (lines, words, bytes, chars) = if !(lines || words || bytes || chars) {
+        (true, true, true, false)
+    } else {
+        (lines, words, bytes, chars)
+    };
+
     Ok(Config {
-        files: unimplemented!(),
-        lines: unimplemented!(),
-        words: unimplemented!(),
-        bytes: unimplemented!(),
-        chars: unimplemented!(),
+        files: matches.values_of_lossy("files").unwrap(),
+        lines,
+        words,
+        bytes,
+        chars,
     })
 }
 
