@@ -16,29 +16,29 @@ pub fn get_args() -> MyResult<Config> {
         .author("Ken Youens-Clark <kyclark@gmail.com>")
         .about("Rust uniq")
         .arg(
-            Arg::with_name("count")
-                .help("Show counts")
-                .takes_value(false)
-                .short("c")
-                .long("count"),
-        )
-        .arg(
             Arg::with_name("in_file")
-                .value_name("INPUT_FILE")
+                .value_name("INPUT")
                 .help("Input file")
                 .default_value("-"),
         )
         .arg(
             Arg::with_name("out_file")
-                .value_name("OUPUT_FILE")
-                .help("Output file")
-                .requires("in_file"),
+                .value_name("OUTPUT")
+                .help("Output file"),
+        )
+        .arg(
+            Arg::with_name("count")
+                .value_name("COUNT")
+                .help("Show counts")
+                .short("c")
+                .long("count")
+                .takes_value(false),
         )
         .get_matches();
 
     Ok(Config {
-        in_file: matches.value_of_lossy("in_file").unwrap().to_string(),
-        out_file: matches.value_of_lossy("out_file").map(|v| v.to_string()),
+        in_file: matches.value_of("in_file").map(str::to_string).unwrap(),
+        out_file: matches.value_of("out_file").map(String::from),
         count: matches.is_present("count"),
     })
 }
