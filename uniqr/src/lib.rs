@@ -50,14 +50,40 @@ pub fn get_args() -> MyResult<Config> {
 pub fn run(config: Config) -> MyResult<()> {
     let mut file = open(&config.in_file).map_err(|e| format!("{}: {}", config.in_file, e))?;
     let mut line = String::new();
+    let mut current_line: Option<String> = None;
+    let mut current_line_count = 0;
+    let mut results = vec![];
     loop {
         let bytes = file.read_line(&mut line)?;
         if bytes == 0 {
+            if let Some(current) = current_line {
+                if config.count {
+                    results.push(format!("{:>4} {}", current_line_count, current));
+                } else {
+                    results.push(current.clone());
+                }
+            }
+
             break;
         }
-        print!("{}", line);
+
+        if let Some(current) = current_line {
+            if line != current {
+                if config.count {
+                    results.push(format!("{} {}", current_line_count, current));
+                } else {
+                    results.push(current.clone());
+                }
+                current_line_count = 0;
+            }
+        }
+
+        current_line = Some(line.clone());
+        current_line_count += 1;
+
         line.clear();
     }
+    print!("{}", results.join("\n"));
     Ok(())
 }
 
