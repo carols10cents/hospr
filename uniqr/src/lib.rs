@@ -58,27 +58,24 @@ pub fn run(config: Config) -> MyResult<()> {
     loop {
         let bytes = file.read_line(&mut line)?;
         if bytes == 0 {
-            if let Some(current) = current_line {
+            if let Some(current) = &current_line {
                 print_result(&mut writer, config.count, current_line_count, &current)?;
             }
 
             break;
         }
 
-        let trimmed = line.trim();
+        let trimmed_line = line.trim();
+        let trimmed_current = current_line.as_ref().map(|s| s.trim()).unwrap_or("");
 
-        if let Some(current) = &current_line {
-            let trimmed_current = current.trim();
-            if trimmed == trimmed_current {
-                current_line_count += 1;
-            } else {
-                print_result(&mut writer, config.count, current_line_count, &current)?;
-                current_line = Some(line.clone());
-                current_line_count = 1;
-            }
-        } else {
-            current_line = Some(line.clone());
+        if trimmed_line == trimmed_current {
             current_line_count += 1;
+        } else {
+            if let Some(current) = &current_line {
+                print_result(&mut writer, config.count, current_line_count, &current)?;
+            }
+            current_line = Some(line.clone());
+            current_line_count = 1;
         }
 
         line.clear();
