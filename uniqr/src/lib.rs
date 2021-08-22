@@ -70,7 +70,7 @@ pub fn run(config: Config) -> MyResult<()> {
         if let Some(current) = current_line {
             if line != current {
                 if config.count {
-                    results.push(format!("{} {}", current_line_count, current));
+                    results.push(format!("{:>4} {}", current_line_count, current));
                 } else {
                     results.push(current.clone());
                 }
@@ -84,7 +84,7 @@ pub fn run(config: Config) -> MyResult<()> {
         line.clear();
     }
     let mut writer = output(&config.out_file)?;
-    write!(writer, "{}", results.join("\n"))?;
+    write!(writer, "{}", results.join(""))?;
     Ok(())
 }
 
