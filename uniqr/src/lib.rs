@@ -52,6 +52,17 @@ pub fn run(config: Config) -> MyResult<()> {
     let mut line = String::new();
     let mut last = String::new();
     let mut count: u64 = 0;
+
+    let print = |count: &u64, line: &String| {
+        if count > &0 {
+            if config.count {
+                print!("{:>4} {}", &count, &line);
+            } else {
+                print!("{}", &line);
+            }
+        };
+    };
+
     loop {
         let bytes = file.read_line(&mut line)?;
         if bytes == 0 {
