@@ -90,7 +90,40 @@ pub fn run(config: Config) -> MyResult<()> {
     for filename in &config.files {
         match open(filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
-            Ok(_file) => println!("Opened {}", filename),
+            Ok(file) => {
+                let mut lines = 0;
+                let mut words = 0;
+                let mut bytes = 0;
+                let mut chars = 0;
+
+                for line in file.lines() {
+                    let line = line?;
+                    lines += 1;
+                    bytes += 1;
+
+                    words += line.split_whitespace().count();
+                    bytes += line.as_bytes().len();
+                    chars += line.chars().count();
+                }
+
+                if config.lines {
+                    print!("{:>8}", lines);
+                }
+                if config.words {
+                    print!("{:>8}", words);
+                }
+                if config.bytes {
+                    print!("{:>8}", bytes);
+                }
+                if config.chars {
+                    print!("{:>8}", chars);
+                }
+                if filename == "-" {
+                    println!();
+                } else {
+                    println!(" {}", filename);
+                }
+            },
         }
     }
     Ok(())
