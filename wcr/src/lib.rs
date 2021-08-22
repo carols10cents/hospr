@@ -95,75 +95,89 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    let (mut total_lines, mut total_words, mut total_bytes, mut total_chars) = (0, 0, 0, 0);
-
     for filename in &config.files {
         match open(filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
-            Ok(mut file) => {
-                let mut lines = 0;
-                let mut words = 0;
-                let mut bytes = 0;
-                let mut chars = 0;
-
-                let mut line = String::new();
-                loop {
-                    let num_bytes_read = file.read_line(&mut line)?;
-                    if num_bytes_read == 0 {
-                        break;
-                    }
-                    lines += 1;
-
-                    words += line.split_whitespace().count();
-                    bytes += line.as_bytes().len();
-                    chars += line.chars().count();
-
-                    line.clear();
+            Ok(file) => {
+                if let Ok(info) = count(file) {
+                    println!("{:?}", info);
                 }
-
-                if config.lines {
-                    print!("{:>8}", lines);
-                }
-                if config.words {
-                    print!("{:>8}", words);
-                }
-                if config.bytes {
-                    print!("{:>8}", bytes);
-                }
-                if config.chars {
-                    print!("{:>8}", chars);
-                }
-                if filename == "-" {
-                    println!();
-                } else {
-                    println!(" {}", filename);
-                }
-                total_lines += lines;
-                total_words += words;
-                total_bytes += bytes;
-                total_chars += chars;
             }
         }
     }
-
-    if config.files.len() > 1 {
-        if config.lines {
-            print!("{:>8}", total_lines);
-        }
-        if config.words {
-            print!("{:>8}", total_words);
-        }
-        if config.bytes {
-            print!("{:>8}", total_bytes);
-        }
-        if config.chars {
-            print!("{:>8}", total_chars);
-        }
-        println!(" total");
-    }
-
     Ok(())
 }
+
+// pub fn run(config: Config) -> MyResult<()> {
+//     let (mut total_lines, mut total_words, mut total_bytes, mut total_chars) = (0, 0, 0, 0);
+//
+//     for filename in &config.files {
+//         match open(filename) {
+//             Err(err) => eprintln!("{}: {}", filename, err),
+//             Ok(mut file) => {
+//                 let mut lines = 0;
+//                 let mut words = 0;
+//                 let mut bytes = 0;
+//                 let mut chars = 0;
+//
+//                 let mut line = String::new();
+//                 loop {
+//                     let num_bytes_read = file.read_line(&mut line)?;
+//                     if num_bytes_read == 0 {
+//                         break;
+//                     }
+//                     lines += 1;
+//
+//                     words += line.split_whitespace().count();
+//                     bytes += line.as_bytes().len();
+//                     chars += line.chars().count();
+//
+//                     line.clear();
+//                 }
+//
+//                 if config.lines {
+//                     print!("{:>8}", lines);
+//                 }
+//                 if config.words {
+//                     print!("{:>8}", words);
+//                 }
+//                 if config.bytes {
+//                     print!("{:>8}", bytes);
+//                 }
+//                 if config.chars {
+//                     print!("{:>8}", chars);
+//                 }
+//                 if filename == "-" {
+//                     println!();
+//                 } else {
+//                     println!(" {}", filename);
+//                 }
+//                 total_lines += lines;
+//                 total_words += words;
+//                 total_bytes += bytes;
+//                 total_chars += chars;
+//             }
+//         }
+//     }
+//
+//     if config.files.len() > 1 {
+//         if config.lines {
+//             print!("{:>8}", total_lines);
+//         }
+//         if config.words {
+//             print!("{:>8}", total_words);
+//         }
+//         if config.bytes {
+//             print!("{:>8}", total_bytes);
+//         }
+//         if config.chars {
+//             print!("{:>8}", total_chars);
+//         }
+//         println!(" total");
+//     }
+//
+//     Ok(())
+// }
 
 pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
     let mut num_lines = 0;
