@@ -69,18 +69,16 @@ pub fn run(config: Config) -> MyResult<()> {
             break;
         }
         if line.trim_end() != last.trim_end() {
-            if count > 0 {
-                print!("{:>4} {}", count, last);
-            }
+            print(&count, &last);
             last = line.clone();
             count = 0;
         }
         count += 1;
         line.clear();
     }
-    if count > 0 {
-        print!("{:>4} {}", count, last);
-    }
+
+    print(&count, &last);
+
     Ok(())
 }
 
