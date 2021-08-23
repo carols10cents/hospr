@@ -63,6 +63,14 @@ pub fn get_args() -> MyResult<Config> {
         )
         .get_matches();
 
+    let re = Regex::new(".*[.]csv").unwrap();
+    assert!(re.is_match("foo.csv"));
+    assert!(re.is_match(".csv.foo"));
+
+    let re = Regex::new(".*[.]csv$").unwrap();
+    assert!(re.is_match("foo.csv"));
+    assert!(!re.is_match(".csv.foo"));
+
     Ok(Config {
         dirs: matches.values_of_lossy("dir").unwrap(),
         names: matches
