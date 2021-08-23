@@ -33,3 +33,8 @@ pub fn get_args() -> MyResult<Config> {
         entry_types,
     })
 }
+
+pub fn run(config: Config) -> MyResult<()> {
+    println!("{:?}", config);
+    Ok(())
+}
