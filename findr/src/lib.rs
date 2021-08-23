@@ -1,7 +1,7 @@
 use crate::EntryType::*;
 use clap::{App, Arg};
 use regex::Regex;
-use std::error::Error;
+use std::{error::Error, str::FromStr};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -10,6 +10,19 @@ enum EntryType {
     Dir,
     File,
     Link,
+}
+
+impl FromStr for EntryType {
+    type Err = Box<dyn Error>;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "d" => Ok(Dir),
+            "f" => Ok(File),
+            "l" => Ok(Link),
+            _ => unreachable!(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -51,9 +64,13 @@ pub fn get_args() -> MyResult<Config> {
         .get_matches();
 
     Ok(Config {
-        dirs: vec![],
-        names: None,
-        entry_types: None,
+        dirs: matches.values_of_lossy("dir").unwrap(),
+        names: matches
+            .values_of_lossy("name")
+            .map(|names_list| names_list.iter().flat_map(|s| Regex::new(s)).collect()),
+        entry_types: matches
+            .values_of_lossy("type")
+            .map(|types_list| types_list.iter().flat_map(|s| s.parse()).collect()),
     })
 }
 
