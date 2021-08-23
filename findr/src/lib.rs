@@ -18,3 +18,18 @@ pub struct Config {
     names: Option<Vec<Regex>>,
     entry_types: Option<Vec<EntryType>>,
 }
+
+pub fn get_args() -> MyResult<Config> {
+    let matches = App::new("findr")
+        .version("0.1.0")
+        .author("Ken Youens-Clark <kyclark@gmail.com>")
+        .about("Rust find")
+        // What goes here?
+        .matches();
+
+    Ok(Config {
+        dirs,
+        names,
+        entry_types,
+    })
+}
