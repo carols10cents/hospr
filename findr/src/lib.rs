@@ -84,7 +84,10 @@ pub fn get_args() -> MyResult<Config> {
 pub fn run(config: Config) -> MyResult<()> {
     for dirname in config.dirs {
         for entry in WalkDir::new(dirname) {
-            println!("{}", entry?.path().display());
+            match entry {
+                Ok(entry) => println!("{}", entry.path().display()),
+                Err(e) => eprintln!("Error: {}", e),
+            }
         }
     }
     Ok(())
