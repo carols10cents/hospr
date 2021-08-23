@@ -53,27 +53,26 @@ pub fn run(config: Config) -> MyResult<()> {
         Some(out_name) => Box::new(File::create(&out_name)?),
         _ => Box::new(io::stdout()),
     };
+    let mut print = |count: &u64, line: &String| -> MyResult<()> {
+        if count > &0 {
+            if config.count {
+                write!(out_file, "{:>4} {}", &count, &line)?;
+            } else {
+                write!(out_file, "{}", &line)?;
+            }
+        };
+        Ok(())
+    };
     let mut line = String::new();
     let mut last = String::new();
     let mut count: u64 = 0;
-
-    let print = |count: u64, line: &str| {
-        if count > 0 {
-            if config.count {
-                print!("{:>4} {}", count, line);
-            } else {
-                print!("{}", line);
-            }
-        };
-    };
-
     loop {
         let bytes = file.read_line(&mut line)?;
         if bytes == 0 {
             break;
         }
         if line.trim_end() != last.trim_end() {
-            print(count, &last);
+            print(&count, &last)?;
             last = line.clone();
             count = 0;
         }
@@ -81,33 +80,8 @@ pub fn run(config: Config) -> MyResult<()> {
         line.clear();
     }
 
-    print(count, &last);
-
+    print(&count, &last)?;
     Ok(())
-}
-
-fn print_result(
-    writer: &mut impl Write,
-    count: bool,
-    num: usize,
-    maybe_line: &Option<String>,
-) -> MyResult<()> {
-    if let Some(line) = maybe_line {
-        if count {
-            write!(writer, "{:>4} {}", num, line)?;
-        } else {
-            write!(writer, "{}", line)?;
-        }
-    }
-    Ok(())
-}
-
-fn output(filename: &Option<String>) -> MyResult<Box<dyn Write>> {
-    if let Some(file) = filename {
-        Ok(Box::new(File::create(file)?))
-    } else {
-        Ok(Box::new(io::stdout()))
-    }
 }
 
 fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
