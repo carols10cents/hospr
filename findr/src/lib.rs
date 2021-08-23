@@ -24,13 +24,36 @@ pub fn get_args() -> MyResult<Config> {
         .version("0.1.0")
         .author("Ken Youens-Clark <kyclark@gmail.com>")
         .about("Rust find")
-        // What goes here?
-        .matches();
+        .arg(
+            Arg::with_name("name")
+                .value_name("NAME")
+                .help("Name")
+                .short("n")
+                .long("name")
+                .multiple(true),
+        )
+        .arg(
+            Arg::with_name("type")
+                .value_name("TYPE")
+                .help("Entry type")
+                .short("t")
+                .long("type")
+                .possible_values(&["f", "d", "l"])
+                .multiple(true),
+        )
+        .arg(
+            Arg::with_name("dir")
+                .value_name("DIR")
+                .help("Search directory")
+                .multiple(true)
+                .default_value("."),
+        )
+        .get_matches();
 
     Ok(Config {
-        dirs,
-        names,
-        entry_types,
+        dirs: vec![],
+        names: None,
+        entry_types: None,
     })
 }
 
