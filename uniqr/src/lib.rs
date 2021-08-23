@@ -49,6 +49,10 @@ pub fn get_args() -> MyResult<Config> {
 
 pub fn run(config: Config) -> MyResult<()> {
     let mut file = open(&config.in_file).map_err(|e| format!("{}: {}", config.in_file, e))?;
+    let mut out_file: Box<dyn Write> = match &config.out_file {
+        Some(out_name) => Box::new(File::create(&out_name)?),
+        _ => Box::new(io::stdout()),
+    };
     let mut line = String::new();
     let mut last = String::new();
     let mut count: u64 = 0;
