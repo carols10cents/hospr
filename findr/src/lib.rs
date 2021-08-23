@@ -63,19 +63,20 @@ pub fn get_args() -> MyResult<Config> {
         )
         .get_matches();
 
-    let re = Regex::new(".*[.]csv").unwrap();
-    assert!(re.is_match("foo.csv"));
-    assert!(re.is_match(".csv.foo"));
-
-    let re = Regex::new(".*[.]csv$").unwrap();
-    assert!(re.is_match("foo.csv"));
-    assert!(!re.is_match(".csv.foo"));
+    let names = match matches.values_of_lossy("name") {
+        Some(names) => {
+            let mut regexes = vec![];
+            for name in &names {
+                regexes.push(Regex::new(name).map_err(|_| format!("Invalid --name \"{}\"", name))?);
+            }
+            Some(regexes)
+        }
+        None => None,
+    };
 
     Ok(Config {
         dirs: matches.values_of_lossy("dir").unwrap(),
-        names: matches
-            .values_of_lossy("name")
-            .map(|names_list| names_list.iter().flat_map(|s| Regex::new(s)).collect()),
+        names,
         entry_types: matches
             .values_of_lossy("type")
             .map(|types_list| types_list.iter().flat_map(|s| s.parse()).collect()),
