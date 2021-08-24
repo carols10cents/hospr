@@ -1,7 +1,7 @@
 use crate::EntryType::*;
 use clap::{App, Arg};
 use regex::Regex;
-use std::error::Error;
+use std::{fs, error::Error};
 use walkdir::{DirEntry, WalkDir};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
@@ -104,17 +104,13 @@ fn matches_name(config_names: &Option<Vec<Regex>>, entry: &DirEntry) -> bool {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    for dirname in &config.dirs {
-        for entry in WalkDir::new(dirname) {
-            match entry {
-                Ok(entry) => {
-                    if matches_type(&config.entry_types, &entry)
-                        && matches_name(&config.names, &entry)
-                    {
-                        println!("{}", entry.path().display());
-                    }
+    for dirname in config.dirs {
+        match fs::read_dir(&dirname) {
+            Err(e) => eprintln!("{}: {}", dirname, e),
+            _ => {
+                for entry in WalkDir::new(dirname) {
+                    println!("{}", entry?.path().display());
                 }
-                Err(e) => eprintln!("Error: {}", e),
             }
         }
     }
