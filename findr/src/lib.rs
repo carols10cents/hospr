@@ -82,10 +82,22 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    for dirname in config.dirs {
+    for dirname in &config.dirs {
         for entry in WalkDir::new(dirname) {
             match entry {
-                Ok(entry) => println!("{}", entry.path().display()),
+                Ok(entry) => {
+                    if let Some(entry_types) = &config.entry_types {
+                        let ft = entry.file_type();
+                        if (entry_types.contains(&Dir) && ft.is_dir())
+                            || (entry_types.contains(&File) && ft.is_file())
+                            || (entry_types.contains(&Link) && ft.is_symlink())
+                        {
+                            println!("{}", entry.path().display());
+                        }
+                    } else {
+                        println!("{}", entry.path().display());
+                    }
+                }
                 Err(e) => eprintln!("Error: {}", e),
             }
         }
