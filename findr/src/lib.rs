@@ -1,7 +1,7 @@
 use crate::EntryType::*;
 use clap::{App, Arg};
 use regex::Regex;
-use std::{fs, error::Error};
+use std::{error::Error, fs};
 use walkdir::{DirEntry, WalkDir};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
@@ -109,7 +109,17 @@ pub fn run(config: Config) -> MyResult<()> {
             Err(e) => eprintln!("{}: {}", dirname, e),
             _ => {
                 for entry in WalkDir::new(dirname) {
-                    println!("{}", entry?.path().display());
+                    let entry = entry?;
+                    if let Some(types) = &config.entry_types {
+                        if !types.iter().any(|type_| match type_ {
+                            Link => entry.path_is_symlink(),
+                            Dir => entry.file_type().is_dir(),
+                            File => entry.file_type().is_file(),
+                        }) {
+                            continue;
+                        }
+                    }
+                    println!("{}", entry.path().display());
                 }
             }
         }
