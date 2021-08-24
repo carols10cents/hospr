@@ -82,14 +82,15 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 fn matches_type(config_entry_types: &Option<Vec<EntryType>>, entry: &DirEntry) -> bool {
-    if let Some(entry_types) = config_entry_types {
-        let ft = entry.file_type();
-        (entry_types.contains(&Dir) && ft.is_dir())
-            || (entry_types.contains(&File) && ft.is_file())
-            || (entry_types.contains(&Link) && ft.is_symlink())
-    } else {
-        true
-    }
+    config_entry_types
+        .as_ref()
+        .map(|entry_types| {
+            let ft = entry.file_type();
+            (entry_types.contains(&Dir) && ft.is_dir())
+                || (entry_types.contains(&File) && ft.is_file())
+                || (entry_types.contains(&Link) && ft.is_symlink())
+        })
+        .unwrap_or(true)
 }
 
 pub fn run(config: Config) -> MyResult<()> {
