@@ -2,7 +2,7 @@ use crate::EntryType::*;
 use clap::{App, Arg};
 use regex::Regex;
 use std::{error::Error, fs};
-use walkdir::WalkDir;
+use walkdir::{DirEntry, WalkDir};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -82,34 +82,32 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    for dirname in config.dirs {
+    let type_filter = |entry: &DirEntry| match &config.entry_types {
+        Some(types) => types.iter().any(|t| match t {
+            Link => entry.path_is_symlink(),
+            Dir => entry.file_type().is_dir(),
+            File => entry.file_type().is_file(),
+        }),
+        _ => true,
+    };
+    let name_filter = |entry: &DirEntry| match &config.names {
+        Some(names) => names
+            .iter()
+            .any(|re| re.is_match(&entry.file_name().to_string_lossy())),
+        _ => true,
+    };
+    for dirname in &config.dirs {
         match fs::read_dir(&dirname) {
             Err(e) => eprintln!("{}: {}", dirname, e),
             _ => {
-                for entry in WalkDir::new(dirname) {
-                    let entry = entry?;
-
-                    if let Some(types) = &config.entry_types {
-                        if !types.iter().any(|type_| match type_ {
-                            Link => entry.path_is_symlink(),
-                            Dir => entry.file_type().is_dir(),
-                            File => entry.file_type().is_file(),
-                        }) {
-                            continue;
-                        }
-                    }
-
-                    if let Some(names) = &config.names {
-                        if !names
-                            .iter()
-                            .any(|re| re.is_match(&entry.file_name().to_string_lossy()))
-                        {
-                            continue;
-                        }
-                    }
-
-                    println!("{}", entry.path().display());
-                }
+                let entries = WalkDir::new(dirname)
+                    .into_iter()
+                    .filter_map(|e| e.ok())
+                    .filter(type_filter)
+                    .filter(name_filter)
+                    .map(|entry| entry.path().display().to_string())
+                    .collect::<Vec<String>>();
+                println!("{}", entries.join("\n"));
             }
         }
     }
