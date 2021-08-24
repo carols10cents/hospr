@@ -93,12 +93,24 @@ fn matches_type(config_entry_types: &Option<Vec<EntryType>>, entry: &DirEntry) -
         .unwrap_or(true)
 }
 
+fn matches_name(config_names: &Option<Vec<Regex>>, entry: &DirEntry) -> bool {
+    config_names
+        .as_ref()
+        .map(|regexes| {
+            let path = entry.file_name().to_str().unwrap(); // cheating
+            regexes.iter().any(|regex| regex.is_match(&path))
+        })
+        .unwrap_or(true)
+}
+
 pub fn run(config: Config) -> MyResult<()> {
     for dirname in &config.dirs {
         for entry in WalkDir::new(dirname) {
             match entry {
                 Ok(entry) => {
-                    if matches_type(&config.entry_types, &entry) {
+                    if matches_type(&config.entry_types, &entry)
+                        && matches_name(&config.names, &entry)
+                    {
                         println!("{}", entry.path().display());
                     }
                 }
