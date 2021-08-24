@@ -2,7 +2,7 @@ use crate::EntryType::*;
 use clap::{App, Arg};
 use regex::Regex;
 use std::{error::Error, fs};
-use walkdir::{DirEntry, WalkDir};
+use walkdir::WalkDir;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -81,28 +81,6 @@ pub fn get_args() -> MyResult<Config> {
     })
 }
 
-fn matches_type(config_entry_types: &Option<Vec<EntryType>>, entry: &DirEntry) -> bool {
-    config_entry_types
-        .as_ref()
-        .map(|entry_types| {
-            let ft = entry.file_type();
-            (entry_types.contains(&Dir) && ft.is_dir())
-                || (entry_types.contains(&File) && ft.is_file())
-                || (entry_types.contains(&Link) && ft.is_symlink())
-        })
-        .unwrap_or(true)
-}
-
-fn matches_name(config_names: &Option<Vec<Regex>>, entry: &DirEntry) -> bool {
-    config_names
-        .as_ref()
-        .map(|regexes| {
-            let path = entry.file_name().to_str().unwrap(); // cheating
-            regexes.iter().any(|regex| regex.is_match(&path))
-        })
-        .unwrap_or(true)
-}
-
 pub fn run(config: Config) -> MyResult<()> {
     for dirname in config.dirs {
         match fs::read_dir(&dirname) {
@@ -110,6 +88,7 @@ pub fn run(config: Config) -> MyResult<()> {
             _ => {
                 for entry in WalkDir::new(dirname) {
                     let entry = entry?;
+
                     if let Some(types) = &config.entry_types {
                         if !types.iter().any(|type_| match type_ {
                             Link => entry.path_is_symlink(),
@@ -119,6 +98,16 @@ pub fn run(config: Config) -> MyResult<()> {
                             continue;
                         }
                     }
+
+                    if let Some(names) = &config.names {
+                        if !names
+                            .iter()
+                            .any(|re| re.is_match(&entry.file_name().to_string_lossy()))
+                        {
+                            continue;
+                        }
+                    }
+
                     println!("{}", entry.path().display());
                 }
             }
