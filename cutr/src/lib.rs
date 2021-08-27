@@ -24,15 +24,54 @@ pub fn get_args() -> MyResult<Config> {
         .version("0.1.0")
         .author("Ken Youens-Clark <kyclark@gmail.com>")
         .about("Rust cut")
-        // What goes here?
+        .arg(
+            Arg::with_name("files")
+                .value_name("FILE")
+                .help("Input file(s)")
+                .default_value("-")
+                .min_values(1),
+        )
+        .arg(
+            Arg::with_name("bytes")
+                .value_name("BYTES")
+                .help("Selected bytes")
+                .short("b")
+                .long("bytes")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("chars")
+                .value_name("CHARS")
+                .help("Selected characters")
+                .short("c")
+                .long("chars")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("delimiter")
+                .value_name("DELIMITER")
+                .help("Field delimiter")
+                .short("d")
+                .long("delim")
+                .default_value("\t")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("fields")
+                .value_name("FIELDS")
+                .help("Selected fields")
+                .short("f")
+                .long("fields")
+                .takes_value(true),
+        )
         .get_matches();
-    Ok(Config {
-        files,
-        delimiter,
-        fields,
-        bytes,
-        chars,
-    })
+
+    panic!();
+    // Ok(Config {
+    //     files: matches.values_of_lossy("files").unwrap(),
+    //     delimiter,
+    //     extract,
+    // })
 }
 
 pub fn run(config: Config) -> MyResult<()> {
