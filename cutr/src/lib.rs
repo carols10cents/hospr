@@ -78,3 +78,52 @@ pub fn run(config: Config) -> MyResult<()> {
     println!("{:#?}", &config);
     Ok(())
 }
+
+fn parse_pos(range: &str) -> MyResult<PositionList> {
+    unimplemented!();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_pos;
+
+    #[test]
+    fn test_parse_pos() {
+        assert!(parse_pos("").is_err());
+
+        let res = parse_pos("0");
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().to_string(), "illegal list value: \"0\"",);
+
+        let res = parse_pos("a");
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().to_string(), "illegal list value: \"a\"",);
+
+        let res = parse_pos("1,a");
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().to_string(), "illegal list value: \"a\"",);
+
+        let res = parse_pos("2-1");
+        assert!(res.is_err());
+        assert_eq!(
+            res.unwrap_err().to_string(),
+            "First number in range (2) must be lower than second number (1)"
+        );
+
+        let res = parse_pos("1");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), vec![0]);
+
+        let res = parse_pos("1,3");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), vec![0, 2]);
+
+        let res = parse_pos("1-3");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), vec![0, 1, 2]);
+
+        let res = parse_pos("1,7,3-5");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), vec![0, 6, 2, 3, 4]);
+    }
+}
