@@ -84,41 +84,40 @@ fn parse_pos(range: &str) -> MyResult<PositionList> {
 
     for value in range.split(',') {
         let mut parts = value.split('-').fuse();
-        match (parts.next(), parts.next()) {
-            (Some(first), Some(second)) => {
-                let first_num: usize = first.parse().map_err::<Box<dyn Error>, _>(|_| {
-                    format!("illegal list value: \"{}\"", first).into()
-                })?;
-                let second_num: usize = second.parse().map_err::<Box<dyn Error>, _>(|_| {
-                    format!("illegal list value: \"{}\"", second).into()
-                })?;
 
-                if first_num >= second_num {
-                    return Err(format!(
-                        "First number in range ({}) must be lower than second number ({})",
-                        first_num, second_num
-                    )
-                    .into());
-                }
+        let first = parts.next().map(parse_list_num).unwrap()?;
+        let second = parts
+            .next()
+            .map(parse_list_num)
+            .transpose()?
+            .unwrap_or(first);
 
-                for i in first_num..=second_num {
-                    result.push(i - 1);
-                }
-            }
-            (Some(first), None) => {
-                let num: usize = first.parse().map_err::<Box<dyn Error>, _>(|_| {
-                    format!("illegal list value: \"{}\"", first).into()
-                })?;
-                if num == 0 {
-                    return Err("illegal list value: \"0\"".into());
-                }
-                result.push(num - 1)
-            }
-            _ => unreachable!(),
+        if first > second {
+            return Err(format!(
+                "First number in range ({}) must be lower than second number ({})",
+                first, second
+            )
+            .into());
+        }
+
+        for i in first..=second {
+            result.push(i - 1);
         }
     }
 
     Ok(result)
+}
+
+fn parse_list_num(value: &str) -> MyResult<usize> {
+    let num = value
+        .parse()
+        .map_err(|_| format!("illegal list value: \"{}\"", value))?;
+
+    if num == 0 {
+        return Err("illegal list value: \"0\"".into());
+    }
+
+    Ok(num)
 }
 
 #[cfg(test)]
