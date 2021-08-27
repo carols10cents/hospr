@@ -62,16 +62,35 @@ pub fn get_args() -> MyResult<Config> {
                 .help("Selected fields")
                 .short("f")
                 .long("fields")
+                .conflicts_with("bytes")
+                .conflicts_with("chars")
                 .takes_value(true),
         )
         .get_matches();
 
-    panic!();
-    // Ok(Config {
-    //     files: matches.values_of_lossy("files").unwrap(),
-    //     delimiter,
-    //     extract,
-    // })
+    let files = matches.values_of_lossy("files").unwrap();
+    let delimiter = matches
+        .value_of("delimiter")
+        .unwrap()
+        .chars()
+        .next()
+        .unwrap() as u8;
+    let extract = match (
+        matches.value_of("bytes"),
+        matches.value_of("chars"),
+        matches.value_of("fields"),
+    ) {
+        (Some(bytes), None, None) => Bytes(parse_pos(bytes)?),
+        (None, Some(chars), None) => Chars(parse_pos(chars)?),
+        (None, None, Some(fields)) => Fields(parse_pos(fields)?),
+        _ => unreachable!(),
+    };
+
+    Ok(Config {
+        files,
+        delimiter,
+        extract,
+    })
 }
 
 pub fn run(config: Config) -> MyResult<()> {
