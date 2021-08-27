@@ -80,7 +80,45 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn parse_pos(range: &str) -> MyResult<PositionList> {
-    unimplemented!();
+    let mut result = vec![];
+
+    for value in range.split(',') {
+        let mut parts = value.split('-').fuse();
+        match (parts.next(), parts.next()) {
+            (Some(first), Some(second)) => {
+                let first_num: usize = first.parse().map_err::<Box<dyn Error>, _>(|_| {
+                    format!("illegal list value: \"{}\"", first).into()
+                })?;
+                let second_num: usize = second.parse().map_err::<Box<dyn Error>, _>(|_| {
+                    format!("illegal list value: \"{}\"", second).into()
+                })?;
+
+                if first_num >= second_num {
+                    return Err(format!(
+                        "First number in range ({}) must be lower than second number ({})",
+                        first_num, second_num
+                    )
+                    .into());
+                }
+
+                for i in first_num..=second_num {
+                    result.push(i - 1);
+                }
+            }
+            (Some(first), None) => {
+                let num: usize = first.parse().map_err::<Box<dyn Error>, _>(|_| {
+                    format!("illegal list value: \"{}\"", first).into()
+                })?;
+                if num == 0 {
+                    return Err("illegal list value: \"0\"".into());
+                }
+                result.push(num - 1)
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    Ok(result)
 }
 
 #[cfg(test)]
