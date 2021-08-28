@@ -29,25 +29,9 @@ pub fn get_args() -> MyResult<Config> {
             Arg::with_name("files")
                 .value_name("FILE")
                 .help("Input file(s)")
-                .default_value("-")
                 .required(true)
+                .default_value("-")
                 .min_values(1),
-        )
-        .arg(
-            Arg::with_name("bytes")
-                .value_name("BYTES")
-                .help("Selected bytes")
-                .short("b")
-                .long("bytes")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("chars")
-                .value_name("CHARS")
-                .help("Selected characters")
-                .short("c")
-                .long("chars")
-                .takes_value(true),
         )
         .arg(
             Arg::with_name("delimiter")
@@ -55,8 +39,7 @@ pub fn get_args() -> MyResult<Config> {
                 .help("Field delimiter")
                 .short("d")
                 .long("delim")
-                .default_value("\t")
-                .takes_value(true),
+                .default_value("\t"),
         )
         .arg(
             Arg::with_name("fields")
@@ -64,41 +47,52 @@ pub fn get_args() -> MyResult<Config> {
                 .help("Selected fields")
                 .short("f")
                 .long("fields")
-                .conflicts_with("bytes")
-                .conflicts_with("chars")
-                .takes_value(true),
+                .conflicts_with_all(&["chars", "bytes"]),
+        )
+        .arg(
+            Arg::with_name("bytes")
+                .value_name("BYTES")
+                .help("Selected bytes")
+                .short("b")
+                .long("bytes")
+                .conflicts_with_all(&["fields", "chars"]),
+        )
+        .arg(
+            Arg::with_name("chars")
+                .value_name("CHARS")
+                .help("Selected characters")
+                .short("c")
+                .long("chars")
+                .conflicts_with_all(&["fields", "bytes"]),
         )
         .get_matches();
 
-    let files = matches.values_of_lossy("files").unwrap();
-
-    let delimiter_orig = matches.value_of("delimiter").unwrap(); // safe because of the default
-    let mut delimiter_iter = delimiter_orig.bytes();
-
-    let delimiter = match delimiter_iter.next() {
-        Some(d) => d,
-        None => return Err("--delim must be at least one byte".into()),
-    };
-
-    if delimiter_iter.next().is_some() {
-        return Err(format!("--delim \"{}\" must be a single byte", delimiter_orig).into());
+    let delimiter = matches.value_of("delimiter").unwrap_or("\t");
+    let delim_bytes = delimiter.as_bytes();
+    if delim_bytes.len() > 1 {
+        return Err(From::from(format!(
+            "--delim \"{}\" must be a single byte",
+            delimiter
+        )));
     }
 
-    let extract = match (
-        matches.value_of("bytes"),
-        matches.value_of("chars"),
-        matches.value_of("fields"),
-    ) {
-        (Some(bytes), None, None) => Bytes(parse_pos(bytes)?),
-        (None, Some(chars), None) => Chars(parse_pos(chars)?),
-        (None, None, Some(fields)) => Fields(parse_pos(fields)?),
-        (None, None, None) => return Err("Must have --fields, --bytes, or --chars".into()),
-        _ => unreachable!(),
+    let fields = matches.value_of("fields").map(parse_pos).transpose()?;
+    let bytes = matches.value_of("bytes").map(parse_pos).transpose()?;
+    let chars = matches.value_of("chars").map(parse_pos).transpose()?;
+
+    let extract = if let Some(field_pos) = fields {
+        Fields(field_pos)
+    } else if let Some(byte_pos) = bytes {
+        Bytes(byte_pos)
+    } else if let Some(char_pos) = chars {
+        Chars(char_pos)
+    } else {
+        return Err(From::from("Must have --fields, --bytes, or --chars"));
     };
 
     Ok(Config {
-        files,
-        delimiter,
+        files: matches.values_of_lossy("files").unwrap(),
+        delimiter: delim_bytes[0],
         extract,
     })
 }
