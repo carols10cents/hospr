@@ -29,6 +29,7 @@ pub fn get_args() -> MyResult<Config> {
                 .value_name("FILE")
                 .help("Input file(s)")
                 .default_value("-")
+                .required(true)
                 .min_values(1),
         )
         .arg(
@@ -69,12 +70,19 @@ pub fn get_args() -> MyResult<Config> {
         .get_matches();
 
     let files = matches.values_of_lossy("files").unwrap();
-    let delimiter = matches
-        .value_of("delimiter")
-        .unwrap()
-        .chars()
-        .next()
-        .unwrap() as u8;
+
+    let delimiter_orig = matches.value_of("delimiter").unwrap(); // safe because of the default
+    let mut delimiter_iter = delimiter_orig.bytes();
+
+    let delimiter = match delimiter_iter.next() {
+        Some(d) => d,
+        None => return Err("--delim must be at least one byte".into()),
+    };
+
+    if delimiter_iter.next().is_some() {
+        return Err(format!("--delim \"{}\" must be a single byte", delimiter_orig).into());
+    }
+
     let extract = match (
         matches.value_of("bytes"),
         matches.value_of("chars"),
