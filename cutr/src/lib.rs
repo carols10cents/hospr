@@ -153,29 +153,30 @@ fn extract_chars(line: &str, char_pos: &[usize]) -> String {
 
 fn extract_bytes(line: &str, byte_pos: &[usize]) -> String {
     unimplemented!();
-)
+}
 
 #[cfg(test)]
 mod tests {
-    use super::parse_pos;
+    use super::{extract_bytes, extract_chars, parse_pos};
 
     #[test]
     fn test_extract_chars() {
-        assert_eq!(extract_chars("", &[0]), "".to_string());
-        assert_eq!(extract_chars("ábc", &[0]), "á".to_string());
-        assert_eq!(extract_chars("ábc", &[0, 2]), "ác".to_string());
-        assert_eq!(extract_chars("ábc", &[0, 1, 2]), "ábc".to_string());
-        assert_eq!(extract_chars("ábc", &[2, 1]), "cb".to_string());
-        assert_eq!(extract_chars("ábc", &[0, 1, 4]), "áb".to_string());
+        assert_eq!(extract_chars("", &[0]), "");
+        assert_eq!(extract_chars("ábc", &[0]), "á");
+        assert_eq!(extract_chars("ábc", &[0, 2]), "ác");
+        assert_eq!(extract_chars("ábc", &[0, 1, 2]), "ábc");
+        assert_eq!(extract_chars("ábc", &[2, 1]), "cb");
+        assert_eq!(extract_chars("ábc", &[0, 1, 4]), "áb");
     }
 
+    #[test]
     fn test_extract_bytes() {
-    assert_eq!(extract_bytes("ábc", &[0]), "".to_string());
-    assert_eq!(extract_bytes("ábc", &[0, 1]), "á".to_string());
-    assert_eq!(extract_bytes("ábc", &[0, 1, 2]), "áb".to_string());
-    assert_eq!(extract_bytes("ábc", &[0, 1, 2, 3]), "ábc".to_string());
-    assert_eq!(extract_bytes("ábc", &[3, 2]), "cb".to_string());
-    assert_eq!(extract_bytes("ábc", &[0, 1, 5]), "á".to_string());
+        assert_eq!(extract_bytes("ábc", &[0]), "");
+        assert_eq!(extract_bytes("ábc", &[0, 1]), "á");
+        assert_eq!(extract_bytes("ábc", &[0, 1, 2]), "áb");
+        assert_eq!(extract_bytes("ábc", &[0, 1, 2, 3]), "ábc");
+        assert_eq!(extract_bytes("ábc", &[3, 2]), "cb");
+        assert_eq!(extract_bytes("ábc", &[0, 1, 5]), "á");
     }
 
     #[test]
