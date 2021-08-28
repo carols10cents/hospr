@@ -109,14 +109,14 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn parse_pos(range: &str) -> MyResult<PositionList> {
-    let mut fields: Vec<usize> = vec![];
-    let range_re = Regex::new(r"(\d+)?-(\d+)?").unwrap();
+    let mut fields = vec![];
+    let range_re = Regex::new(r"(\d+)-(\d+)").unwrap();
     for val in range.split(',') {
         if let Some(cap) = range_re.captures(val) {
-            let n1: &usize = &cap[1].parse()?;
-            let n2: &usize = &cap[2].parse()?;
+            let n1: usize = cap[1].parse()?;
+            let n2: usize = cap[2].parse()?;
             if n1 < n2 {
-                for n in *n1..=*n2 {
+                for n in n1..=n2 {
                     fields.push(n);
                 }
             } else {
