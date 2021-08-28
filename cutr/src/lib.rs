@@ -91,6 +91,7 @@ pub fn get_args() -> MyResult<Config> {
         (Some(bytes), None, None) => Bytes(parse_pos(bytes)?),
         (None, Some(chars), None) => Chars(parse_pos(chars)?),
         (None, None, Some(fields)) => Fields(parse_pos(fields)?),
+        (None, None, None) => return Err("Must have --fields, --bytes, or --chars".into()),
         _ => unreachable!(),
     };
 
