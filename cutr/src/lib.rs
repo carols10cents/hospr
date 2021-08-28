@@ -1,5 +1,6 @@
 use crate::Extract::*;
 use clap::{App, Arg};
+use regex::Regex;
 use std::error::Error;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
@@ -108,44 +109,32 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn parse_pos(range: &str) -> MyResult<PositionList> {
-    let mut result = vec![];
-
-    for value in range.split(',') {
-        let mut parts = value.split('-').fuse();
-
-        let first = parts.next().map(parse_list_num).unwrap()?;
-        let second = parts
-            .next()
-            .map(parse_list_num)
-            .transpose()?
-            .unwrap_or(first);
-
-        if first > second {
-            return Err(format!(
-                "First number in range ({}) must be lower than second number ({})",
-                first, second
-            )
-            .into());
-        }
-
-        for i in first..=second {
-            result.push(i - 1);
+    let mut fields: Vec<usize> = vec![];
+    let range_re = Regex::new(r"(\d+)?-(\d+)?").unwrap();
+    for val in range.split(',') {
+        if let Some(cap) = range_re.captures(val) {
+            let n1: &usize = &cap[1].parse()?;
+            let n2: &usize = &cap[2].parse()?;
+            if n1 < n2 {
+                for n in *n1..=*n2 {
+                    fields.push(n);
+                }
+            } else {
+                return Err(From::from(format!(
+                    "First number in range ({}) \
+must be lower than second number ({})",
+                    n1, n2
+                )));
+            }
+        } else {
+            match val.parse() {
+                Ok(n) if n > 0 => fields.push(n),
+                _ => return Err(From::from(format!("illegal list value: \"{}\"", val))),
+            }
         }
     }
-
-    Ok(result)
-}
-
-fn parse_list_num(value: &str) -> MyResult<usize> {
-    let num = value
-        .parse()
-        .map_err(|_| format!("illegal list value: \"{}\"", value))?;
-
-    if num == 0 {
-        return Err("illegal list value: \"0\"".into());
-    }
-
-    Ok(num)
+    // Subtract one for field indexes
+    Ok(fields.into_iter().map(|i| i - 1).collect())
 }
 
 #[cfg(test)]
