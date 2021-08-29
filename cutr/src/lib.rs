@@ -1,4 +1,5 @@
 use crate::Extract::*;
+use csv::StringRecord;
 use clap::{App, Arg};
 use regex::Regex;
 use std::{
@@ -179,7 +180,8 @@ fn extract_fields(record: &StringRecord, field_pos: &[usize]) -> Vec<String> {
 
 #[cfg(test)]
 mod tests {
-    use super::{extract_bytes, extract_chars, parse_pos};
+    use super::{extract_bytes, extract_chars, parse_pos, extract_fields};
+    use csv::StringRecord;
 
     #[test]
     fn test_extract_fields() {
