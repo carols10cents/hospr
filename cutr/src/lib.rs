@@ -267,4 +267,16 @@ mod tests {
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), vec![0, 6, 2, 3, 4]);
     }
+
+    #[test]
+    fn lifetime_test() {
+        let rec = StringRecord::from(vec!["Captain", "Sham", "12345"]);
+
+        let extracted = {
+            let field_pos = vec![1];
+            extract_fields(&rec, &field_pos)
+        };
+
+        assert_eq!(extracted.len(), 1);
+    }
 }
