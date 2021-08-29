@@ -1,6 +1,6 @@
 use crate::Extract::*;
 use clap::{App, Arg};
-use csv::StringRecord;
+use csv::{ReaderBuilder, StringRecord, WriterBuilder};
 use regex::Regex;
 use std::{
     error::Error,
@@ -126,12 +126,12 @@ pub fn run(config: Config) -> MyResult<()> {
                 }
                 Bytes(byte_pos) => {
                     for line in file.lines() {
-                        println!("{}", extract_bytes(line?, &byte_pos));
+                        println!("{}", extract_bytes(&line?, &byte_pos));
                     }
                 }
                 Chars(char_pos) => {
                     for line in file.lines() {
-                        println!("{}", extract_chars(line?, &char_pos));
+                        println!("{}", extract_chars(&line?, &char_pos));
                     }
                 }
             },
