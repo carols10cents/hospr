@@ -154,7 +154,14 @@ fn extract_chars(line: &str, char_pos: &[usize]) -> String {
 }
 
 fn extract_bytes(line: &str, byte_pos: &[usize]) -> String {
-    unimplemented!();
+    let bytes = line.as_bytes();
+
+    let selected_bytes: Vec<_> = byte_pos
+        .iter()
+        .filter_map(|&pos| bytes.get(pos))
+        .copied()
+        .collect();
+    String::from_utf8_lossy(&selected_bytes).into()
 }
 
 #[cfg(test)]
