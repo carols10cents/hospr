@@ -105,7 +105,16 @@ pub fn run(config: Config) -> MyResult<()> {
     for filename in &config.files {
         match open(filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
-            Ok(_file) => println!("Opened {}", filename),
+            Ok(file) => {
+                for line in file.lines() {
+                    let line = line?;
+                    match &config.extract {
+                        Bytes(positions) => println!("{}", extract_bytes(&line, positions)),
+                        Chars(positions) => println!("{}", extract_chars(&line, positions)),
+                        _ => (),
+                    }
+                }
+            }
         }
     }
     Ok(())
