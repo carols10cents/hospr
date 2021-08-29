@@ -15,7 +15,6 @@ fn fmt(rec: &StringRecord) {
         "{}",
         rec.into_iter()
             .map(|v| format!("{:20}", v))
-            .collect::<Vec<String>>()
-            .join("")
+            .collect::<String>()
     )
 }
