@@ -1,6 +1,6 @@
 use crate::Extract::*;
-use csv::StringRecord;
 use clap::{App, Arg};
+use csv::StringRecord;
 use regex::Regex;
 use std::{
     error::Error,
@@ -102,17 +102,34 @@ pub fn get_args() -> MyResult<Config> {
     })
 }
 
+fn print_fields(record: &StringRecord, positions: &[usize], delimiter: &str) {
+    println!("{}", extract_fields(record, positions).join(delimiter));
+}
+
 pub fn run(config: Config) -> MyResult<()> {
     for filename in &config.files {
-        match open(filename) {
-            Err(err) => eprintln!("{}: {}", filename, err),
-            Ok(file) => {
+        match (open(filename), &config.extract) {
+            (Err(err), _) => eprintln!("{}: {}", filename, err),
+            (Ok(file), Fields(positions)) => {
+                let mut reader = csv::ReaderBuilder::new()
+                    .delimiter(config.delimiter)
+                    .from_reader(file);
+                let delimiter_string = (config.delimiter as char).to_string();
+
+                print_fields(reader.headers()?, positions, &delimiter_string);
+
+                for record in reader.records() {
+                    let record = record?;
+                    print_fields(&record, positions, &delimiter_string);
+                }
+            }
+            (Ok(file), _) => {
                 for line in file.lines() {
                     let line = line?;
                     match &config.extract {
                         Bytes(positions) => println!("{}", extract_bytes(&line, positions)),
                         Chars(positions) => println!("{}", extract_chars(&line, positions)),
-                        _ => (),
+                        _ => unreachable!(),
                     }
                 }
             }
@@ -175,12 +192,16 @@ fn extract_bytes(line: &str, byte_pos: &[usize]) -> String {
 }
 
 fn extract_fields(record: &StringRecord, field_pos: &[usize]) -> Vec<String> {
-    unimplemented!();
+    field_pos
+        .iter()
+        .filter_map(|&pos| record.get(pos))
+        .map(Into::into)
+        .collect()
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{extract_bytes, extract_chars, parse_pos, extract_fields};
+    use super::{extract_bytes, extract_chars, extract_fields, parse_pos};
     use csv::StringRecord;
 
     #[test]
