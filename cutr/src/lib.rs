@@ -192,8 +192,8 @@ fn extract_bytes(line: &str, byte_pos: &[usize]) -> String {
 fn extract_fields(record: &StringRecord, field_pos: &[usize]) -> Vec<String> {
     field_pos
         .iter()
-        .filter_map(|&pos| record.get(pos))
-        .map(Into::into)
+        .filter_map(|i| record.get(*i))
+        .map(|v| v.to_string())
         .collect()
 }
 
