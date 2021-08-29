@@ -181,13 +181,12 @@ fn extract_chars(line: &str, char_pos: &[usize]) -> String {
 
 fn extract_bytes(line: &str, byte_pos: &[usize]) -> String {
     let bytes = line.as_bytes();
-
-    let selected_bytes: Vec<_> = byte_pos
+    let selected: Vec<u8> = byte_pos
         .iter()
-        .filter_map(|&pos| bytes.get(pos))
-        .copied()
+        .filter_map(|i| bytes.get(*i))
+        .cloned()
         .collect();
-    String::from_utf8_lossy(&selected_bytes).into()
+    String::from_utf8_lossy(&selected).into_owned()
 }
 
 fn extract_fields(record: &StringRecord, field_pos: &[usize]) -> Vec<String> {
