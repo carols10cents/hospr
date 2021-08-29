@@ -173,7 +173,7 @@ mod tests {
 
     #[test]
     fn test_extract_bytes() {
-        assert_eq!(extract_bytes("ábc", &[0]), "");
+        assert_eq!(extract_bytes("ábc", &[0]), "�");
         assert_eq!(extract_bytes("ábc", &[0, 1]), "á");
         assert_eq!(extract_bytes("ábc", &[0, 1, 2]), "áb");
         assert_eq!(extract_bytes("ábc", &[0, 1, 2, 3]), "ábc");
