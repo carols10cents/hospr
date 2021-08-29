@@ -175,8 +175,13 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
 }
 
 fn extract_chars(line: &str, char_pos: &[usize]) -> String {
-    let chars: Vec<_> = line.chars().collect();
-    char_pos.iter().filter_map(|i| chars.get(*i)).collect()
+    let chars: Vec<char> = line.chars().collect();
+    char_pos
+        .iter()
+        .map(|i| chars.get(*i))
+        .filter(|v| v.is_some())
+        .map(|v| v.unwrap())
+        .collect::<String>()
 }
 
 fn extract_bytes(line: &str, byte_pos: &[usize]) -> String {
