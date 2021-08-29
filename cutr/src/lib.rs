@@ -108,31 +108,33 @@ fn print_fields(record: &StringRecord, positions: &[usize], delimiter: &str) {
 
 pub fn run(config: Config) -> MyResult<()> {
     for filename in &config.files {
-        match (open(filename), &config.extract) {
-            (Err(err), _) => eprintln!("{}: {}", filename, err),
-            (Ok(file), Fields(positions)) => {
-                let mut reader = csv::ReaderBuilder::new()
-                    .delimiter(config.delimiter)
-                    .from_reader(file);
-                let delimiter_string = (config.delimiter as char).to_string();
-
-                print_fields(reader.headers()?, positions, &delimiter_string);
-
-                for record in reader.records() {
-                    let record = record?;
-                    print_fields(&record, positions, &delimiter_string);
-                }
-            }
-            (Ok(file), _) => {
-                for line in file.lines() {
-                    let line = line?;
-                    match &config.extract {
-                        Bytes(positions) => println!("{}", extract_bytes(&line, positions)),
-                        Chars(positions) => println!("{}", extract_chars(&line, positions)),
-                        _ => unreachable!(),
+        match open(filename) {
+            Err(err) => eprintln!("{}: {}", filename, err),
+            Ok(file) => match &config.extract {
+                Fields(field_pos) => {
+                    let mut reader = ReaderBuilder::new()
+                        .delimiter(config.delimiter)
+                        .has_headers(false)
+                        .from_reader(file);
+                    let mut wtr = WriterBuilder::new()
+                        .delimiter(config.delimiter)
+                        .from_writer(io::stdout());
+                    for record in reader.records() {
+                        let record = record?;
+                        wtr.write_record(extract_fields(&record, field_pos))?;
                     }
                 }
-            }
+                Bytes(byte_pos) => {
+                    for line in file.lines() {
+                        println!("{}", extract_bytes(line?, &byte_pos));
+                    }
+                }
+                Chars(char_pos) => {
+                    for line in file.lines() {
+                        println!("{}", extract_chars(line?, &char_pos));
+                    }
+                }
+            },
         }
     }
     Ok(())
