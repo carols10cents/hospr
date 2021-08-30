@@ -119,36 +119,29 @@ pub fn run(config: Config) -> MyResult<()> {
 
 fn find_files(files: &[String], recursive: bool) -> Vec<MyResult<String>> {
     let mut results = vec![];
-
-    for file in files {
-        if file == "-" {
-            results.push(Ok(file.clone()));
-            continue;
-        }
-
-        let metadata = match fs::metadata(file) {
-            Ok(m) => m,
-            Err(e) => {
-                results.push(Err(format!("{}: {}", file, e).into()));
-                continue;
-            }
-        };
-
-        match (recursive, metadata.is_dir()) {
-            (true, true) => {
-                for item in WalkDir::new(file) {
-                    match item {
-                        Err(e) => results.push(Err(e.to_string().into())),
-                        Ok(i) => {
-                            if i.file_type().is_file() {
-                                results.push(Ok(i.path().display().to_string()));
+    for path in files {
+        match path.as_str() {
+            "-" => results.push(Ok(path.to_string())),
+            _ => match fs::metadata(&path) {
+                Ok(metadata) => {
+                    if metadata.is_dir() {
+                        if recursive {
+                            for entry in WalkDir::new(path)
+                                .into_iter()
+                                .filter_map(|e| e.ok())
+                                .filter(|e| e.file_type().is_file())
+                            {
+                                results.push(Ok(entry.path().display().to_string()));
                             }
+                        } else {
+                            results.push(Err(From::from(format!("{} is a directory", path))));
                         }
+                    } else if metadata.is_file() {
+                        results.push(Ok(path.to_string()));
                     }
                 }
-            }
-            (false, true) => results.push(Err(format!("{} is a directory", file).into())),
-            _ => results.push(Ok(file.clone())),
+                Err(e) => results.push(Err(From::from(format!("{}: {}", path, e)))),
+            },
         }
     }
 
