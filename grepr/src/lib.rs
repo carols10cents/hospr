@@ -100,8 +100,14 @@ pub fn run(config: Config) -> MyResult<()> {
                         String::new()
                     };
 
-                    for line in find_lines(file, &config.pattern, config.invert_match)? {
-                        print!("{}{}", pre, line);
+                    let matches = find_lines(file, &config.pattern, config.invert_match)?;
+
+                    if config.count {
+                        println!("{}{}", pre, matches.len());
+                    } else {
+                        for line in matches {
+                            print!("{}{}", pre, line);
+                        }
                     }
                 }
             },
