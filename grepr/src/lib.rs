@@ -87,9 +87,9 @@ pub fn get_args() -> MyResult<Config> {
 
 pub fn run(config: Config) -> MyResult<()> {
     let entries = find_files(&config.files, config.recursive);
-    let num_files = &entries.len();
+    let num_files = entries.len();
     let print = |fname: &str, val: &str| {
-        if num_files > &1 {
+        if num_files > 1 {
             print!("{}:{}", fname, val);
         } else {
             print!("{}", val);
@@ -105,7 +105,7 @@ pub fn run(config: Config) -> MyResult<()> {
                     Err(e) => eprintln!("{}", e),
                     Ok(matches) => {
                         if config.count {
-                            print(&filename, &format!("{}\n", &matches.len()));
+                            print(&filename, &format!("{}\n", matches.len()));
                         } else {
                             for line in &matches {
                                 print(&filename, line);
