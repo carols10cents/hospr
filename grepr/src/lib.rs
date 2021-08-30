@@ -148,7 +148,25 @@ fn find_lines<T: BufRead>(
     pattern: &Regex,
     invert_match: bool,
 ) -> MyResult<Vec<String>> {
-    unimplemented!();
+    let mut results = vec![];
+    let mut line = String::new();
+
+    loop {
+        let bytes = file.read_line(&mut line)?;
+        if bytes == 0 {
+            break;
+        }
+
+        let found_match = pattern.is_match(&line);
+
+        if found_match ^ invert_match {
+            results.push(line.clone());
+        }
+
+        line.clear();
+    }
+
+    Ok(results)
 }
 
 #[cfg(test)]
