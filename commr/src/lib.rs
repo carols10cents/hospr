@@ -23,64 +23,62 @@ pub fn get_args() -> MyResult<Config> {
             Arg::with_name("file1")
                 .value_name("FILE1")
                 .help("Input file 1")
+                .takes_value(true)
                 .required(true),
         )
         .arg(
             Arg::with_name("file2")
                 .value_name("FILE2")
                 .help("Input file 2")
+                .takes_value(true)
                 .required(true),
         )
         .arg(
-            Arg::with_name("suppress-col1")
-                .help("Suppress printing of column 1")
+            Arg::with_name("suppress_col1")
                 .short("1")
-                .takes_value(false),
+                .value_name("COL1")
+                .takes_value(false)
+                .help("Suppress printing of column 1"),
         )
         .arg(
-            Arg::with_name("suppress-col2")
-                .help("Suppress printing of column 2")
+            Arg::with_name("suppress_col2")
                 .short("2")
-                .takes_value(false),
+                .value_name("COL2")
+                .takes_value(false)
+                .help("Suppress printing of column 2"),
         )
         .arg(
-            Arg::with_name("suppress-col3")
-                .help("Suppress printing of column 3")
+            Arg::with_name("suppress_col3")
                 .short("3")
-                .takes_value(false),
+                .value_name("COL3")
+                .takes_value(false)
+                .help("Suppress printing of column 3"),
         )
         .arg(
             Arg::with_name("insensitive")
-                .help("Case insensitive comparison of lines")
                 .short("i")
-                .takes_value(false),
+                .value_name("INSENSITIVE")
+                .takes_value(false)
+                .help("Case insensitive comparison of lines"),
         )
         .arg(
             Arg::with_name("delimiter")
-                .value_name("DELIM")
-                .help("Output delimiter")
                 .short("d")
                 .long("output-delimiter")
-                .default_value("\t"),
+                .value_name("DELIM")
+                .help("Output delimiter")
+                .takes_value(true),
         )
         .get_matches();
 
-    let file1 = matches.value_of("file1").unwrap().to_string();
-    let file2 = matches.value_of("file2").unwrap().to_string();
-    let suppress_col1 = matches.is_present("suppress-col1");
-    let suppress_col2 = matches.is_present("suppress-col2");
-    let suppress_col3 = matches.is_present("suppress-col3");
-    let insensitive = matches.is_present("insensitive");
-    let delimiter = matches.value_of("delimiter").unwrap().to_string();
-
     Ok(Config {
-        file1,
-        file2,
-        suppress_col1,
-        suppress_col2,
-        suppress_col3,
-        insensitive,
-        delimiter,
+        file1: matches.value_of("file1").unwrap().to_string(),
+        file2: matches.value_of("file2").unwrap().to_string(),
+        suppress_col1: matches.is_present("suppress_col1"),
+        suppress_col2: matches.is_present("suppress_col2"),
+        suppress_col3: matches.is_present("suppress_col3"),
+        insensitive: matches.is_present("insensitive"),
+        delimiter: matches.value_of("delimiter").unwrap_or("\t").to_string(),
     })
 }
 
