@@ -1,6 +1,7 @@
 use clap::{App, Arg};
 use regex::{Regex, RegexBuilder};
-use std::error::Error;
+use std::{error::Error, fs};
+use walkdir::WalkDir;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 #[derive(Debug)]
@@ -94,7 +95,41 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn find_files(files: &[String], recursive: bool) -> Vec<MyResult<String>> {
-    unimplemented!();
+    let mut results = vec![];
+
+    for file in files {
+        if file == "-" {
+            results.push(Ok(file.clone()));
+            continue;
+        }
+
+        let metadata = match fs::metadata(file) {
+            Ok(m) => m,
+            Err(e) => {
+                results.push(Err(e.to_string().into()));
+                continue;
+            }
+        };
+
+        match (recursive, metadata.is_dir()) {
+            (true, true) => {
+                for item in WalkDir::new(file) {
+                    match item {
+                        Err(e) => results.push(Err(e.to_string().into())),
+                        Ok(i) => {
+                            if i.file_type().is_file() {
+                                results.push(Ok(i.path().display().to_string()));
+                            }
+                        }
+                    }
+                }
+            }
+            (false, true) => results.push(Err(format!("{} is a directory", file).into())),
+            _ => results.push(Ok(file.clone())),
+        }
+    }
+
+    results
 }
 
 #[cfg(test)]
@@ -113,7 +148,7 @@ mod tests {
         let files = find_files(&["./tests/inputs".to_string()], false);
         assert_eq!(files.len(), 1);
         if let Err(e) = &files[0] {
-            assert_eq!(e.to_string(), "./tests/inputs is a directory".to_string());
+            assert_eq!(e.to_string(), "./tests/inputs is a directory");
         }
 
         // Verify the function recurses to find four files in the directory
