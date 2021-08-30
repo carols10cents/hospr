@@ -86,12 +86,14 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    println!("pattern \"{}\"", config.pattern);
-
-    for entry in find_files(&config.files, config.recursive) {
+    let entries = find_files(&config.files, config.recursive);
+    for entry in entries {
         match entry {
             Err(e) => eprintln!("{}", e),
-            Ok(filename) => println!("file \"{}\"", filename),
+            Ok(filename) => match open(&filename) {
+                Err(e) => eprintln!("{}: {}", filename, e),
+                Ok(_file) => println!("Opened {}", filename),
+            },
         }
     }
 
