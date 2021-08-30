@@ -87,12 +87,23 @@ pub fn get_args() -> MyResult<Config> {
 
 pub fn run(config: Config) -> MyResult<()> {
     let entries = find_files(&config.files, config.recursive);
+    let multiple_files = entries.len() > 1;
     for entry in entries {
         match entry {
             Err(e) => eprintln!("{}", e),
             Ok(filename) => match open(&filename) {
                 Err(e) => eprintln!("{}: {}", filename, e),
-                Ok(_file) => println!("Opened {}", filename),
+                Ok(file) => {
+                    let pre = if multiple_files {
+                        format!("{}:", filename)
+                    } else {
+                        String::new()
+                    };
+
+                    for line in find_lines(file, &config.pattern, config.invert_match)? {
+                        print!("{}{}", pre, line);
+                    }
+                }
             },
         }
     }
@@ -112,7 +123,7 @@ fn find_files(files: &[String], recursive: bool) -> Vec<MyResult<String>> {
         let metadata = match fs::metadata(file) {
             Ok(m) => m,
             Err(e) => {
-                results.push(Err(e.to_string().into()));
+                results.push(Err(format!("{}: {}", file, e).into()));
                 continue;
             }
         };
