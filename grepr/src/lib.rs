@@ -81,7 +81,15 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    println!("{:#?}", config);
+    println!("pattern \"{}\"", config.pattern);
+
+    for entry in find_files(&config.files, config.recursive) {
+        match entry {
+            Err(e) => eprintln!("{}", e),
+            Ok(filename) => println!("file \"{}\"", filename),
+        }
+    }
+
     Ok(())
 }
 
