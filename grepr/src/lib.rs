@@ -1,6 +1,10 @@
 use clap::{App, Arg};
 use regex::{Regex, RegexBuilder};
-use std::{error::Error, fs};
+use std::{
+    error::Error,
+    fs::{self, File},
+    io::{self, BufRead, BufReader},
+};
 use walkdir::WalkDir;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
@@ -130,6 +134,21 @@ fn find_files(files: &[String], recursive: bool) -> Vec<MyResult<String>> {
     }
 
     results
+}
+
+fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
+    match filename {
+        "-" => Ok(Box::new(BufReader::new(io::stdin()))),
+        _ => Ok(Box::new(BufReader::new(File::open(filename)?))),
+    }
+}
+
+fn find_lines<T: BufRead>(
+    mut file: T,
+    pattern: &Regex,
+    invert_match: bool,
+) -> MyResult<Vec<String>> {
+    unimplemented!();
 }
 
 #[cfg(test)]
