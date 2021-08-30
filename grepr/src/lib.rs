@@ -160,7 +160,7 @@ fn find_lines<T: BufRead>(
     pattern: &Regex,
     invert_match: bool,
 ) -> MyResult<Vec<String>> {
-    let mut results = vec![];
+    let mut matches = vec![];
     let mut line = String::new();
 
     loop {
@@ -168,17 +168,14 @@ fn find_lines<T: BufRead>(
         if bytes == 0 {
             break;
         }
-
-        let found_match = pattern.is_match(&line);
-
-        if found_match ^ invert_match {
-            results.push(line.clone());
+        if (pattern.is_match(&line) && !invert_match) || (!pattern.is_match(&line) && invert_match)
+        {
+            matches.push(line.clone());
         }
-
         line.clear();
     }
 
-    Ok(results)
+    Ok(matches)
 }
 
 #[cfg(test)]
