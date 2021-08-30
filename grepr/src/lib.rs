@@ -32,53 +32,54 @@ pub fn get_args() -> MyResult<Config> {
                 .min_values(1),
         )
         .arg(
-            Arg::with_name("count")
-                .help("Count occurrences")
-                .short("c")
-                .long("count")
-                .takes_value(false),
-        )
-        .arg(
             Arg::with_name("insensitive")
+                .value_name("INSENSITIVE")
                 .help("Case-insensitive")
                 .short("i")
                 .long("insensitive")
                 .takes_value(false),
         )
         .arg(
-            Arg::with_name("invert-match")
-                .help("Invert match")
-                .short("v")
-                .long("invert-match")
-                .takes_value(false),
-        )
-        .arg(
             Arg::with_name("recursive")
+                .value_name("RECURSIVE")
                 .help("Recursive search")
                 .short("r")
                 .long("recursive")
                 .takes_value(false),
         )
+        .arg(
+            Arg::with_name("count")
+                .value_name("COUNT")
+                .help("Count occurrences")
+                .short("c")
+                .long("count")
+                .takes_value(false),
+        )
+        .arg(
+            Arg::with_name("invert")
+                .value_name("INVERT")
+                .help("Invert match")
+                .short("v")
+                .long("invert-match")
+                .takes_value(false),
+        )
         .get_matches();
 
-    let raw_pattern = matches.value_of("pattern").unwrap();
-    let pattern = match Regex::new(raw_pattern) {
-        Ok(p) => p,
-        Err(_) => return Err(format!("Invalid pattern \"{}\"", raw_pattern).into()),
-    };
-    let files = matches.values_of_lossy("files").unwrap();
-    let recursive = matches.is_present("recursive");
-    let count = matches.is_present("count");
-    let invert_match = matches.is_present("invert-match");
+    let pattern = matches.value_of("pattern").unwrap();
+    let pattern = RegexBuilder::new(pattern)
+        .case_insensitive(matches.is_present("insensitive"))
+        .build()
+        .map_err(|_| format!("Invalid pattern \"{}\"", pattern))?;
 
     Ok(Config {
         pattern,
-        files,
-        recursive,
-        count,
-        invert_match,
+        files: matches.values_of_lossy("files").unwrap(),
+        recursive: matches.is_present("recursive"),
+        count: matches.is_present("count"),
+        invert_match: matches.is_present("invert"),
     })
 }
+
 pub fn run(config: Config) -> MyResult<()> {
     println!("{:#?}", config);
     Ok(())
