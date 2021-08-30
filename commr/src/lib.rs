@@ -89,11 +89,11 @@ pub fn get_args() -> MyResult<Config> {
 pub fn run(config: Config) -> MyResult<()> {
     let filename1 = &config.file1;
     let filename2 = &config.file2;
-    if filename1.as_str() == "-" && filename2.as_str() == "-" {
+    if filename1 == "-" && filename2 == "-" {
         return Err(From::from("Both input files cannot be STDIN (\"-\")"));
     }
-    let _file1 = open(&filename1)?;
-    let _file2 = open(&filename2)?;
+    let _file1 = open(filename1)?;
+    let _file2 = open(filename2)?;
     println!("Opened {} and {}", filename1, filename2);
     Ok(())
 }
