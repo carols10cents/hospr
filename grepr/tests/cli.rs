@@ -64,9 +64,7 @@ fn warns_bad_file() -> TestResult {
 // --------------------------------------------------
 fn run(args: &[&str], expected_file: &str) -> TestResult {
     let windows_file = format!("{}.windows", expected_file);
-    let expected_file = if os_type().unwrap() == "Windows"
-        && Path::new(&windows_file).is_file()
-    {
+    let expected_file = if os_type().unwrap() == "Windows" && Path::new(&windows_file).is_file() {
         &windows_file
     } else {
         expected_file
@@ -245,8 +243,7 @@ fn warns_dir_not_recursive() -> TestResult {
 #[test]
 fn stdin() -> TestResult {
     let input = fs::read_to_string(BUSTLE)?;
-    let expected =
-        fs::read_to_string("tests/expected/bustle.txt.the.capitalized")?;
+    let expected = fs::read_to_string("tests/expected/bustle.txt.the.capitalized")?;
 
     Command::cargo_bin(PRG)?
         .arg("The")
@@ -266,8 +263,7 @@ fn stdin_insensitive_count() -> TestResult {
         input += &fs::read_to_string(file)?;
     }
 
-    let expected_file =
-        "tests/expected/the.recursive.insensitive.count.stdin";
+    let expected_file = "tests/expected/the.recursive.insensitive.count.stdin";
     let expected = fs::read_to_string(expected_file)?;
 
     Command::cargo_bin(PRG)?
