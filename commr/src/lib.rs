@@ -114,9 +114,6 @@ pub fn run(config: Config) -> MyResult<()> {
     let mut lines1 = open(filename1)?.lines().filter_map(Result::ok).map(case);
     let mut lines2 = open(filename2)?.lines().filter_map(Result::ok).map(case);
 
-    let mut line1 = lines1.next();
-    let mut line2 = lines2.next();
-
     let default_col1 = if config.suppress_col1 {
         ""
     } else {
@@ -156,29 +153,32 @@ pub fn run(config: Config) -> MyResult<()> {
         }
     };
 
+    let mut line1 = lines1.next();
+    let mut line2 = lines2.next();
+
     loop {
         match (&line1, &line2) {
             (Some(val1), Some(val2)) => match val1.cmp(val2) {
                 Equal => {
-                    println!("{}", val1);
+                    printer(Col3(val1.to_string()));
                     line1 = lines1.next();
                     line2 = lines2.next();
                 }
                 Less => {
-                    println!("{}", val1);
+                    printer(Col1(val1.to_string()));
                     line1 = lines1.next();
                 }
                 _ => {
-                    println!("{}", val2);
+                    printer(Col2(val2.to_string()));
                     line2 = lines2.next();
                 }
             },
             (Some(val1), None) => {
-                println!("{}", val1);
+                printer(Col1(val1.to_string()));
                 line1 = lines1.next();
             }
             (None, Some(val2)) => {
-                println!("{}", val2);
+                printer(Col2(val2.to_string()));
                 line2 = lines2.next();
             }
             (None, None) => break,
