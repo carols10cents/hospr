@@ -90,9 +90,11 @@ pub fn get_args() -> MyResult<Config> {
 pub fn run(config: Config) -> MyResult<()> {
     let filename1 = &config.file1;
     let filename2 = &config.file2;
+
     if filename1 == "-" && filename2 == "-" {
         return Err(From::from("Both input files cannot be STDIN (\"-\")"));
     }
+
     let case = |line: String| {
         if config.insensitive {
             line.to_lowercase()
@@ -100,12 +102,29 @@ pub fn run(config: Config) -> MyResult<()> {
             line
         }
     };
+
     let mut lines1 = open(filename1)?.lines().filter_map(Result::ok).map(case);
     let mut lines2 = open(filename2)?.lines().filter_map(Result::ok).map(case);
-    let line1 = lines1.next();
-    let line2 = lines2.next();
-    println!("line1 = {:?}", line1);
-    println!("line2 = {:?}", line2);
+
+    let mut line1 = lines1.next();
+    let mut line2 = lines2.next();
+
+    loop {
+        match (&line1, &line2) {
+            (Some(_val1), Some(_val2)) => {
+                line1 = lines1.next();
+                line2 = lines2.next();
+            }
+            (Some(_val1), None) => {
+                line1 = lines1.next();
+            }
+            (None, Some(_val2)) => {
+                line2 = lines2.next();
+            }
+            (None, None) => break,
+        };
+    }
+
     Ok(())
 }
 
