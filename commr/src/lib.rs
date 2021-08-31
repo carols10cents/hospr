@@ -1,5 +1,6 @@
 use clap::{App, Arg};
 use std::{
+    cmp::Ordering,
     error::Error,
     fs::File,
     io::{self, BufRead, BufReader},
@@ -86,15 +87,91 @@ pub fn get_args() -> MyResult<Config> {
     })
 }
 
+enum Cols {
+    Col1(String),
+    Col2(String),
+    Col3(String),
+}
+
+use Cols::*;
+
 pub fn run(config: Config) -> MyResult<()> {
     let filename1 = &config.file1;
     let filename2 = &config.file2;
     if filename1 == "-" && filename2 == "-" {
         return Err(From::from("Both input files cannot be STDIN (\"-\")"));
     }
-    let _file1 = open(filename1)?;
-    let _file2 = open(filename2)?;
-    println!("Opened {} and {}", filename1, filename2);
+    let file1 = open(filename1)?;
+    let file2 = open(filename2)?;
+
+    let mut file1_lines = file1.lines().filter_map(|i| i.ok());
+    let mut file2_lines = file2.lines().filter_map(|i| i.ok());
+
+    let mut f1_next = file1_lines.next();
+    let mut f2_next = file2_lines.next();
+
+    let print = |value| match value {
+        Col1(s) => {
+            if !config.suppress_col1 {
+                println!("{}", s);
+            }
+        }
+        Col2(s) => {
+            if !config.suppress_col2 {
+                let pre = if config.suppress_col1 { "" } else { "\t" };
+                println!("{}{}", pre, s);
+            }
+        }
+        Col3(s) => {
+            if !config.suppress_col3 {
+                let pre = if config.suppress_col1 && config.suppress_col2 {
+                    ""
+                } else if config.suppress_col1 || config.suppress_col2 {
+                    "\t"
+                } else {
+                    "\t\t"
+                };
+                println!("{}{}", pre, s);
+            }
+        }
+    };
+
+    loop {
+        match (&f1_next, &f2_next) {
+            (Some(f1), Some(f2)) => {
+                let (f1, f2) = if config.insensitive {
+                    (f1.to_lowercase(), f2.to_lowercase())
+                } else {
+                    (f1.clone(), f2.clone())
+                };
+                match f1.cmp(&f2) {
+                    Ordering::Greater => {
+                        print(Col2(f2));
+                        f2_next = file2_lines.next();
+                    }
+                    Ordering::Less => {
+                        print(Col1(f1));
+                        f1_next = file1_lines.next();
+                    }
+                    Ordering::Equal => {
+                        print(Col3(f1));
+                        f1_next = file1_lines.next();
+                        f2_next = file2_lines.next();
+                    }
+                }
+            }
+            (Some(f1), None) => {
+                print(Col1(f1.to_string()));
+                f1_next = file1_lines.next();
+            }
+            (None, Some(f2)) => {
+                print(Col2(f2.to_string()));
+                f2_next = file2_lines.next();
+            }
+            (None, None) => break,
+        }
+    }
+
     Ok(())
 }
 
