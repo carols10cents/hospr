@@ -88,9 +88,9 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 enum Cols {
-    Col1(String),
-    Col2(String),
-    Col3(String),
+    Col1,
+    Col2,
+    Col3,
 }
 
 use Cols::*;
@@ -131,20 +131,20 @@ pub fn run(config: Config) -> MyResult<()> {
         "\t\t"
     };
 
-    let print = |value| match value {
-        Col1(s) => {
+    let print = |column, value: &str| match column {
+        Col1 => {
             if !config.suppress_col1 {
-                println!("{}", s);
+                println!("{}", value);
             }
         }
-        Col2(s) => {
+        Col2 => {
             if !config.suppress_col2 {
-                println!("{}{}", col2_pre, s);
+                println!("{}{}", col2_pre, value);
             }
         }
-        Col3(s) => {
+        Col3 => {
             if !config.suppress_col3 {
-                println!("{}{}", col3_pre, s);
+                println!("{}{}", col3_pre, value);
             }
         }
     };
@@ -153,25 +153,25 @@ pub fn run(config: Config) -> MyResult<()> {
         match (&f1_next, &f2_next) {
             (Some(f1), Some(f2)) => match f1.cmp(&f2) {
                 Ordering::Greater => {
-                    print(Col2(f2.to_string()));
+                    print(Col2, f2);
                     f2_next = file2_lines.next();
                 }
                 Ordering::Less => {
-                    print(Col1(f1.to_string()));
+                    print(Col1, f1);
                     f1_next = file1_lines.next();
                 }
                 Ordering::Equal => {
-                    print(Col3(f1.to_string()));
+                    print(Col3, f1);
                     f1_next = file1_lines.next();
                     f2_next = file2_lines.next();
                 }
             },
             (Some(f1), None) => {
-                print(Col1(f1.to_string()));
+                print(Col1, f1);
                 f1_next = file1_lines.next();
             }
             (None, Some(f2)) => {
-                print(Col2(f2.to_string()));
+                print(Col2, &f2);
                 f2_next = file2_lines.next();
             }
             (None, None) => break,
