@@ -87,97 +87,25 @@ pub fn get_args() -> MyResult<Config> {
     })
 }
 
-enum Cols {
-    Col1,
-    Col2,
-    Col3,
-}
-
-use Cols::*;
-
 pub fn run(config: Config) -> MyResult<()> {
     let filename1 = &config.file1;
     let filename2 = &config.file2;
-    if filename1 == "-" && filename2 == "-" {
+    if filename1.as_str() == "-" && filename2.as_str() == "-" {
         return Err(From::from("Both input files cannot be STDIN (\"-\")"));
     }
-    let file1 = open(filename1)?;
-    let file2 = open(filename2)?;
-
-    let mut file1_lines = file1.lines().filter_map(|i| i.ok()).map(|i| {
+    let case = |line: String| {
         if config.insensitive {
-            i.to_lowercase()
+            line.to_lowercase()
         } else {
-            i
-        }
-    });
-    let mut file2_lines = file2.lines().filter_map(|i| i.ok()).map(|i| {
-        if config.insensitive {
-            i.to_lowercase()
-        } else {
-            i
-        }
-    });
-
-    let mut f1_next = file1_lines.next();
-    let mut f2_next = file2_lines.next();
-
-    let col2_pre = if config.suppress_col1 { "" } else { "\t" };
-    let col3_pre = if config.suppress_col1 && config.suppress_col2 {
-        ""
-    } else if config.suppress_col1 || config.suppress_col2 {
-        "\t"
-    } else {
-        "\t\t"
-    };
-
-    let print = |column, value: &str| match column {
-        Col1 => {
-            if !config.suppress_col1 {
-                println!("{}", value);
-            }
-        }
-        Col2 => {
-            if !config.suppress_col2 {
-                println!("{}{}", col2_pre, value);
-            }
-        }
-        Col3 => {
-            if !config.suppress_col3 {
-                println!("{}{}", col3_pre, value);
-            }
+            line
         }
     };
-
-    loop {
-        match (&f1_next, &f2_next) {
-            (Some(f1), Some(f2)) => match f1.cmp(&f2) {
-                Ordering::Greater => {
-                    print(Col2, f2);
-                    f2_next = file2_lines.next();
-                }
-                Ordering::Less => {
-                    print(Col1, f1);
-                    f1_next = file1_lines.next();
-                }
-                Ordering::Equal => {
-                    print(Col3, f1);
-                    f1_next = file1_lines.next();
-                    f2_next = file2_lines.next();
-                }
-            },
-            (Some(f1), None) => {
-                print(Col1, f1);
-                f1_next = file1_lines.next();
-            }
-            (None, Some(f2)) => {
-                print(Col2, &f2);
-                f2_next = file2_lines.next();
-            }
-            (None, None) => break,
-        }
-    }
-
+    let mut lines1 = open(filename1)?.lines().filter_map(Result::ok).map(case);
+    let mut lines2 = open(filename2)?.lines().filter_map(Result::ok).map(case);
+    let line1 = lines1.next();
+    let line2 = lines2.next();
+    println!("line1 = {:?}", line1);
+    println!("line2 = {:?}", line2);
     Ok(())
 }
 
