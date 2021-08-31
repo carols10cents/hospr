@@ -8,6 +8,14 @@ use std::{
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
+use crate::Column::*;
+
+enum Column {
+    Col1(String),
+    Col2(String),
+    Col3(String),
+}
+
 #[derive(Debug)]
 pub struct Config {
     file1: String,
@@ -108,6 +116,45 @@ pub fn run(config: Config) -> MyResult<()> {
 
     let mut line1 = lines1.next();
     let mut line2 = lines2.next();
+
+    let default_col1 = if config.suppress_col1 {
+        ""
+    } else {
+        &config.delimiter
+    };
+
+    let default_col2 = if config.suppress_col2 {
+        ""
+    } else {
+        &config.delimiter
+    };
+
+    let printer = |col: Column| {
+        let out = match col {
+            Col1(val) => {
+                if config.suppress_col1 {
+                    "".to_string()
+                } else {
+                    val
+                }
+            }
+            Col2(val) => format!(
+                "{}{}",
+                default_col1,
+                if config.suppress_col2 { "" } else { &val },
+            ),
+            Col3(val) => format!(
+                "{}{}{}",
+                default_col1,
+                default_col2,
+                if config.suppress_col3 { "" } else { &val },
+            ),
+        };
+
+        if !out.trim().is_empty() {
+            println!("{}", out);
+        }
+    };
 
     loop {
         match (&line1, &line2) {
