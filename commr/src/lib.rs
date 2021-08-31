@@ -1,6 +1,6 @@
 use clap::{App, Arg};
 use std::{
-    cmp::Ordering,
+    cmp::Ordering::*,
     error::Error,
     fs::File,
     io::{self, BufRead, BufReader},
@@ -111,14 +111,27 @@ pub fn run(config: Config) -> MyResult<()> {
 
     loop {
         match (&line1, &line2) {
-            (Some(_val1), Some(_val2)) => {
+            (Some(val1), Some(val2)) => match val1.cmp(val2) {
+                Equal => {
+                    println!("{}", val1);
+                    line1 = lines1.next();
+                    line2 = lines2.next();
+                }
+                Less => {
+                    println!("{}", val1);
+                    line1 = lines1.next();
+                }
+                _ => {
+                    println!("{}", val2);
+                    line2 = lines2.next();
+                }
+            },
+            (Some(val1), None) => {
+                println!("{}", val1);
                 line1 = lines1.next();
-                line2 = lines2.next();
             }
-            (Some(_val1), None) => {
-                line1 = lines1.next();
-            }
-            (None, Some(_val2)) => {
+            (None, Some(val2)) => {
+                println!("{}", val2);
                 line2 = lines2.next();
             }
             (None, None) => break,
