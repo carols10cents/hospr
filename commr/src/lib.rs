@@ -104,8 +104,20 @@ pub fn run(config: Config) -> MyResult<()> {
     let file1 = open(filename1)?;
     let file2 = open(filename2)?;
 
-    let mut file1_lines = file1.lines().filter_map(|i| i.ok());
-    let mut file2_lines = file2.lines().filter_map(|i| i.ok());
+    let mut file1_lines = file1.lines().filter_map(|i| i.ok()).map(|i| {
+        if config.insensitive {
+            i.to_lowercase()
+        } else {
+            i
+        }
+    });
+    let mut file2_lines = file2.lines().filter_map(|i| i.ok()).map(|i| {
+        if config.insensitive {
+            i.to_lowercase()
+        } else {
+            i
+        }
+    });
 
     let mut f1_next = file1_lines.next();
     let mut f2_next = file2_lines.next();
@@ -138,28 +150,21 @@ pub fn run(config: Config) -> MyResult<()> {
 
     loop {
         match (&f1_next, &f2_next) {
-            (Some(f1), Some(f2)) => {
-                let (f1, f2) = if config.insensitive {
-                    (f1.to_lowercase(), f2.to_lowercase())
-                } else {
-                    (f1.clone(), f2.clone())
-                };
-                match f1.cmp(&f2) {
-                    Ordering::Greater => {
-                        print(Col2(f2));
-                        f2_next = file2_lines.next();
-                    }
-                    Ordering::Less => {
-                        print(Col1(f1));
-                        f1_next = file1_lines.next();
-                    }
-                    Ordering::Equal => {
-                        print(Col3(f1));
-                        f1_next = file1_lines.next();
-                        f2_next = file2_lines.next();
-                    }
+            (Some(f1), Some(f2)) => match f1.cmp(&f2) {
+                Ordering::Greater => {
+                    print(Col2(f2.to_string()));
+                    f2_next = file2_lines.next();
                 }
-            }
+                Ordering::Less => {
+                    print(Col1(f1.to_string()));
+                    f1_next = file1_lines.next();
+                }
+                Ordering::Equal => {
+                    print(Col3(f1.to_string()));
+                    f1_next = file1_lines.next();
+                    f2_next = file2_lines.next();
+                }
+            },
             (Some(f1), None) => {
                 print(Col1(f1.to_string()));
                 f1_next = file1_lines.next();
