@@ -122,6 +122,15 @@ pub fn run(config: Config) -> MyResult<()> {
     let mut f1_next = file1_lines.next();
     let mut f2_next = file2_lines.next();
 
+    let col2_pre = if config.suppress_col1 { "" } else { "\t" };
+    let col3_pre = if config.suppress_col1 && config.suppress_col2 {
+        ""
+    } else if config.suppress_col1 || config.suppress_col2 {
+        "\t"
+    } else {
+        "\t\t"
+    };
+
     let print = |value| match value {
         Col1(s) => {
             if !config.suppress_col1 {
@@ -130,20 +139,12 @@ pub fn run(config: Config) -> MyResult<()> {
         }
         Col2(s) => {
             if !config.suppress_col2 {
-                let pre = if config.suppress_col1 { "" } else { "\t" };
-                println!("{}{}", pre, s);
+                println!("{}{}", col2_pre, s);
             }
         }
         Col3(s) => {
             if !config.suppress_col3 {
-                let pre = if config.suppress_col1 && config.suppress_col2 {
-                    ""
-                } else if config.suppress_col1 || config.suppress_col2 {
-                    "\t"
-                } else {
-                    "\t\t"
-                };
-                println!("{}{}", pre, s);
+                println!("{}{}", col3_pre, s);
             }
         }
     };
