@@ -1,7 +1,7 @@
 use clap::{App, Arg};
 use lazy_static::lazy_static;
 use regex::Regex;
-use std::error::Error;
+use std::{error::Error, fs::File};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -23,22 +23,6 @@ pub fn get_args() -> MyResult<Config> {
         .author("Ken Youens-Clark <kyclark@gmail.com>")
         .about("Rust tail")
         .arg(
-            Arg::with_name("file")
-                .value_name("FILE")
-                .help("Input file(s)")
-                .takes_value(true)
-                .min_values(1)
-                .required(true),
-        )
-        .arg(
-            Arg::with_name("bytes")
-                .short("c")
-                .long("bytes")
-                .value_name("BYTES")
-                .help("Number of bytes")
-                .conflicts_with("lines"),
-        )
-        .arg(
             Arg::with_name("lines")
                 .short("n")
                 .long("lines")
@@ -47,32 +31,56 @@ pub fn get_args() -> MyResult<Config> {
                 .default_value("10"),
         )
         .arg(
+            Arg::with_name("bytes")
+                .short("c")
+                .long("bytes")
+                .value_name("BYTES")
+                .takes_value(true)
+                .conflicts_with("lines")
+                .help("Number of bytes"),
+        )
+        .arg(
             Arg::with_name("quiet")
                 .short("q")
                 .long("quiet")
-                .takes_value(false)
                 .help("Suppress headers"),
+        )
+        .arg(
+            Arg::with_name("files")
+                .value_name("FILE")
+                .help("Input file(s)")
+                .required(true)
+                .min_values(1),
         )
         .get_matches();
 
-    let bytes = match matches.value_of("bytes") {
-        None => None,
-        Some(b) => Some(parse_num(b).map_err(|e| format!("illegal byte count -- {}", e))?),
-    };
+    let lines = matches
+        .value_of("lines")
+        .map(parse_num)
+        .transpose()
+        .map_err(|e| format!("illegal line count -- {}", e))?;
 
-    let lines = matches.value_of("lines").unwrap();
-    let lines = parse_num(lines).map_err(|e| format!("illegal line count -- {}", e))?;
+    let bytes = matches
+        .value_of("bytes")
+        .map(parse_num)
+        .transpose()
+        .map_err(|e| format!("illegal byte count -- {}", e))?;
 
     Ok(Config {
-        lines,
+        lines: lines.unwrap(),
         bytes,
-        files: matches.values_of_lossy("file").unwrap(),
+        files: matches.values_of_lossy("files").unwrap(),
         quiet: matches.is_present("quiet"),
     })
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    println!("{:#?}", config);
+    for filename in config.files {
+        match File::open(&filename) {
+            Err(err) => eprintln!("{}: {}", filename, err),
+            Ok(_file) => println!("Opened {}", filename),
+        }
+    }
     Ok(())
 }
 
