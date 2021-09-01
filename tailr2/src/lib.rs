@@ -1,8 +1,13 @@
 use clap::{App, Arg};
+use lazy_static::lazy_static;
 use regex::Regex;
 use std::error::Error;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
+
+lazy_static! {
+    static ref NUM_RE: Regex = Regex::new(r"^([+-])?(\d+)$").unwrap();
+}
 
 #[derive(Debug)]
 pub struct Config {
@@ -72,8 +77,7 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn parse_num(val: &str) -> MyResult<i64> {
-    let num_re: Regex = Regex::new(r"^([+-])?(\d+)$").unwrap();
-    let (sign, num) = match num_re.captures(val) {
+    let (sign, num) = match NUM_RE.captures(val) {
         Some(caps) => (
             caps.get(1).map_or("", |c| c.as_str()),
             caps.get(2).unwrap().as_str(),
