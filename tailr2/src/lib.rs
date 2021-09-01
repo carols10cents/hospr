@@ -81,12 +81,28 @@ fn parse_num(val: &str) -> MyResult<i64> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::parse_num;
 
     #[test]
-    fn capture_number_bits() {
-        assert_eq!(parse_num("333").unwrap(), -333);
-        assert_eq!(parse_num("-333").unwrap(), -333);
-        assert_eq!(parse_num("+333").unwrap(), 333)
+    fn test_parse_num() {
+        let res0 = parse_num("3");
+        assert!(res0.is_ok());
+        assert_eq!(res0.unwrap(), -3);
+
+        let res = parse_num("+3");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), 3);
+
+        let res = parse_num("-3");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), -3);
+
+        let res = parse_num("3.14");
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().to_string(), "3.14".to_string());
+
+        let res = parse_num("foo");
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().to_string(), "foo".to_string());
     }
 }
