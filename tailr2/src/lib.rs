@@ -51,13 +51,11 @@ pub fn get_args() -> MyResult<Config> {
 
     let bytes = match matches.value_of("bytes") {
         None => None,
-        Some(b) => Some(b.parse().map_err(|_| format!("illegal offset -- {}", b))?),
+        Some(b) => Some(parse_num(b).map_err(|e| format!("illegal byte count -- {}", e))?),
     };
 
     let lines = matches.value_of("lines").unwrap();
-    let lines = lines
-        .parse()
-        .map_err(|_| format!("illegal offset -- {}", lines))?;
+    let lines = parse_num(lines).map_err(|e| format!("illegal line count -- {}", e))?;
 
     Ok(Config {
         lines,
@@ -70,4 +68,25 @@ pub fn get_args() -> MyResult<Config> {
 pub fn run(config: Config) -> MyResult<()> {
     println!("{:#?}", config);
     Ok(())
+}
+
+fn parse_num(val: &str) -> MyResult<i64> {
+    let num = val.parse().map_err(|_| val)?;
+    Ok(if !val.starts_with("+") && !val.starts_with("-") {
+        num * -1
+    } else {
+        num
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn capture_number_bits() {
+        assert_eq!(parse_num("333").unwrap(), -333);
+        assert_eq!(parse_num("-333").unwrap(), -333);
+        assert_eq!(parse_num("+333").unwrap(), 333)
+    }
 }
