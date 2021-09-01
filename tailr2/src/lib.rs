@@ -1,4 +1,5 @@
 use clap::{App, Arg};
+use regex::Regex;
 use std::error::Error;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
@@ -71,12 +72,19 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn parse_num(val: &str) -> MyResult<i64> {
-    let num = val.parse().map_err(|_| val)?;
-    Ok(if !val.starts_with("+") && !val.starts_with("-") {
-        num * -1
-    } else {
-        num
-    })
+    let num_re: Regex = Regex::new(r"^([+-])?(\d+)$").unwrap();
+    let (sign, num) = match num_re.captures(val) {
+        Some(caps) => (
+            caps.get(1).map_or("", |c| c.as_str()),
+            caps.get(2).unwrap().as_str(),
+        ),
+        _ => return Err(From::from(val)),
+    };
+
+    match num.parse() {
+        Ok(n) => Ok(if sign == "+" { n } else { -n }),
+        _ => Err(From::from(val)),
+    }
 }
 
 #[cfg(test)]
