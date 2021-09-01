@@ -99,10 +99,10 @@ mod tests {
 
         let res = parse_num("3.14");
         assert!(res.is_err());
-        assert_eq!(res.unwrap_err().to_string(), "3.14".to_string());
+        assert_eq!(res.unwrap_err().to_string(), "3.14");
 
         let res = parse_num("foo");
         assert!(res.is_err());
-        assert_eq!(res.unwrap_err().to_string(), "foo".to_string());
+        assert_eq!(res.unwrap_err().to_string(), "foo");
     }
 }
