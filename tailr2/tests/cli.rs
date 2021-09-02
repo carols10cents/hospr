@@ -107,6 +107,8 @@ fn run(args: &[&str], expected_file: &str) -> TestResult {
     file.read_to_end(&mut buffer)?;
     let expected = String::from_utf8_lossy(&buffer);
 
+    println!("Expected: \n{}", expected);
+
     Command::cargo_bin(PRG)?
         .args(args)
         .assert()
