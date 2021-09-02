@@ -4,7 +4,7 @@ use regex::Regex;
 use std::{
     error::Error,
     fs::File,
-    io::{BufRead, BufReader, Read},
+    io::{BufRead, BufReader, Read, Seek, SeekFrom},
 };
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
@@ -99,7 +99,7 @@ pub fn run(config: Config) -> MyResult<()> {
                     if config.lines > 0 {
                         let mut line = String::new();
 
-                        // First skip this many lines
+                        // First skip config.lines
                         for _ in 0..config.lines - 1 {
                             let bytes = file.read_line(&mut line)?;
                             if bytes == 0 {
@@ -118,11 +118,55 @@ pub fn run(config: Config) -> MyResult<()> {
                             line.clear();
                         }
                     } else {
+                        if let Err(_) = file.seek(SeekFrom::End(-1)) {
+                            // if the file is empty, go to the next file
+                            continue;
+                        }
+
+                        // First seek back abs(config.lines) number of lines
+                        let mut lines_found = 1; // lol magic number
+
+                        loop {
+                            // read one byte
+                            let mut byte_buf: Vec<u8> = vec![0];
+                            file.read_exact(&mut byte_buf).unwrap();
+                            dbg!(byte_buf[0] as char);
+
+                            // if we found a newline, count it
+                            if byte_buf[0] == '\n' as u8 {
+                                lines_found -= 1;
+                                dbg!(lines_found, config.lines);
+                                if lines_found == config.lines {
+                                    break;
+                                }
+                            }
+
+                            // go back the byte we just read and the byte before that
+                            if let Err(_) = file.seek(SeekFrom::Current(-2)) {
+                                // if we're at the beginning of the file, stop
+                                file.seek(SeekFrom::Current(-1)).unwrap();
+                                break;
+                            }
+                        }
+
+                        dbg!(file.stream_position());
+
+                        // Then print
+                        let mut line = String::new();
+                        loop {
+                            let bytes = file.read_line(&mut line)?;
+                            if bytes == 0 {
+                                break;
+                            }
+                            print!("{}", line);
+                            line.clear();
+                        }
                     }
                 }
             }
         }
     }
+
     Ok(())
 }
 
