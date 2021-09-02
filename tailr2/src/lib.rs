@@ -2,6 +2,8 @@ use clap::{App, Arg};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::{
+    cmp::Ordering::*,
+    collections::VecDeque,
     error::Error,
     fs::File,
     io::{BufRead, BufReader, Read, Seek, SeekFrom},
