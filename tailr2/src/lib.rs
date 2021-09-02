@@ -99,9 +99,8 @@ pub fn run(config: Config) -> MyResult<()> {
 
                         // As long as we aren't past the end
                         if new_pos < total_len {
-                            let mut line = vec![];
-
                             // Print the rest
+                            let mut line = vec![];
                             loop {
                                 let bytes = file.read_until('\n' as u8, &mut line)?;
                                 if bytes == 0 {
@@ -111,12 +110,25 @@ pub fn run(config: Config) -> MyResult<()> {
                                 line.clear();
                             }
                         }
+                    } else {
+                        // if seeking this many bytes would take us past the beginning, start at
+                        // the beginning instead.
+                        if total_len as i64 + num_bytes < 0 {
+                            file.seek(SeekFrom::Start(0)).unwrap();
+                        } else {
+                            file.seek(SeekFrom::End(num_bytes)).unwrap();
+                        }
+                        // Print the rest
+                        let mut line = vec![];
+                        loop {
+                            let bytes = file.read_until('\n' as u8, &mut line)?;
+                            if bytes == 0 {
+                                break;
+                            }
+                            print!("{}", String::from_utf8_lossy(&line));
+                            line.clear();
+                        }
                     }
-
-                    // let mut handle = file.take(num_bytes as u64);
-                    // let mut buffer = vec![0; num_bytes];
-                    // let n = handle.read(&mut buffer)?;
-                    // print!("{}", String::from_utf8_lossy(&buffer[..n]));
                 } else {
                     if config.lines > 0 {
                         let mut line = String::new();
