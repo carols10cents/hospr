@@ -92,6 +92,32 @@ pub fn run(config: Config) -> MyResult<()> {
     Ok(())
 }
 
+fn print_lines(mut file: impl BufRead, num_lines: i64) -> MyResult<()> {
+    match num_lines.cmp(&0) {
+        Greater => {
+            let mut line = String::new();
+            let mut line_num = 0;
+            loop {
+                let bytes = file.read_line(&mut line)?;
+                if bytes == 0 {
+                    break;
+                }
+                line_num += 1;
+                if line_num >= num_lines {
+                    print!("{}", line);
+                }
+                line.clear();
+            }
+        }
+        _ => {}
+    };
+    Ok(())
+}
+
+fn last_lines(mut file: impl BufRead, num_lines: usize) -> MyResult<Vec<String>> {
+    unimplemented!();
+}
+
 fn parse_num(val: &str) -> MyResult<i64> {
     let (sign, num) = match NUM_RE.captures(val) {
         Some(caps) => (
