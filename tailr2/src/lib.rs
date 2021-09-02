@@ -90,6 +90,28 @@ pub fn run(config: Config) -> MyResult<()> {
                     println!("==> {} <==", filename);
                 }
                 if let Some(num_bytes) = config.bytes {
+                    // Get the file size so we know if we've gone past the end
+                    let total_len = file.seek(SeekFrom::End(0)).unwrap();
+
+                    if num_bytes > 0 {
+                        // First seek past the number of bytes to skip
+                        let new_pos = file.seek(SeekFrom::Start(num_bytes as u64 - 1)).unwrap();
+
+                        // As long as we aren't past the end
+                        if new_pos < total_len {
+                            let mut line = vec![];
+
+                            // Print the rest
+                            loop {
+                                let bytes = file.read_until('\n' as u8, &mut line)?;
+                                if bytes == 0 {
+                                    break;
+                                }
+                                print!("{}", String::from_utf8_lossy(&line));
+                                line.clear();
+                            }
+                        }
+                    }
 
                     // let mut handle = file.take(num_bytes as u64);
                     // let mut buffer = vec![0; num_bytes];
@@ -148,8 +170,6 @@ pub fn run(config: Config) -> MyResult<()> {
                                 break;
                             }
                         }
-
-                        dbg!(file.stream_position());
 
                         // Then print
                         let mut line = String::new();
