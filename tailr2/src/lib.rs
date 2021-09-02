@@ -81,14 +81,19 @@ pub fn get_args() -> MyResult<Config> {
 pub fn run(config: Config) -> MyResult<()> {
     let multiple_files = config.files.len() > 1;
 
-    for filename in config.files {
+    for (file_num, filename) in config.files.into_iter().enumerate() {
         match File::open(&filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(file) => {
                 let mut file = BufReader::new(file);
                 if multiple_files {
-                    println!("==> {} <==", filename);
+                    println!(
+                        "{}==> {} <==",
+                        if file_num == 0 { "" } else { "\n" },
+                        filename
+                    );
                 }
+
                 if let Some(num_bytes) = config.bytes {
                     // Get the file size so we know if we've gone past the end
                     let total_len = file.seek(SeekFrom::End(0)).unwrap();
@@ -164,12 +169,10 @@ pub fn run(config: Config) -> MyResult<()> {
                             // read one byte
                             let mut byte_buf: Vec<u8> = vec![0];
                             file.read_exact(&mut byte_buf).unwrap();
-                            dbg!(byte_buf[0] as char);
 
                             // if we found a newline, count it
                             if byte_buf[0] == '\n' as u8 {
                                 lines_found -= 1;
-                                dbg!(lines_found, config.lines);
                                 if lines_found == config.lines {
                                     break;
                                 }
