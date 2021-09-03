@@ -97,6 +97,26 @@ pub fn run(config: Config) -> MyResult<()> {
     Ok(())
 }
 
+fn print_bytes<T: Read + Seek>(mut file: T, num_bytes: i64) -> MyResult<()> {
+    let direction = match num_bytes.cmp(&0) {
+        Less => Some(SeekFrom::End(num_bytes)),
+        Greater => Some(SeekFrom::Start(num_bytes as u64 - 1)),
+        _ => None,
+    };
+
+    if let Some(seek_from) = direction {
+        if file.seek(seek_from).is_ok() {
+            let mut buffer = Vec::new();
+            file.read_to_end(&mut buffer)?;
+            if !buffer.is_empty() {
+                print!("{}", String::from_utf8_lossy(&buffer));
+            }
+        }
+    }
+
+    Ok(())
+}
+
 fn print_lines(mut file: impl BufRead, num_lines: i64) -> MyResult<()> {
     match num_lines.cmp(&0) {
         Greater => {
