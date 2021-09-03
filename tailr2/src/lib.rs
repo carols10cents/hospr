@@ -114,23 +114,21 @@ fn print_lines(mut file: impl BufRead, num_lines: i64) -> MyResult<()> {
     Ok(())
 }
 
-fn last_lines(mut file: impl BufRead, num_lines: usize) -> MyResult<Vec<String>> {
-    let mut deque = VecDeque::with_capacity(num_lines + 1);
-
+fn last_lines(mut file: impl BufRead, num_lines: usize) -> MyResult<VecDeque<String>> {
+    let mut last: VecDeque<String> = VecDeque::with_capacity(num_lines);
     let mut line = String::new();
     loop {
         let bytes = file.read_line(&mut line)?;
         if bytes == 0 {
             break;
         }
-        deque.push_back(line.clone());
-        if deque.len() > num_lines {
-            deque.pop_front();
+        last.push_back(line.to_string());
+        if last.len() > num_lines {
+            last.pop_front();
         }
         line.clear();
     }
-
-    Ok(deque.into())
+    Ok(last)
 }
 
 fn parse_num(val: &str) -> MyResult<i64> {
