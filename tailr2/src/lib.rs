@@ -115,7 +115,22 @@ fn print_lines(mut file: impl BufRead, num_lines: i64) -> MyResult<()> {
 }
 
 fn last_lines(mut file: impl BufRead, num_lines: usize) -> MyResult<Vec<String>> {
-    unimplemented!();
+    let mut deque = VecDeque::with_capacity(num_lines + 1);
+
+    let mut line = String::new();
+    loop {
+        let bytes = file.read_line(&mut line)?;
+        if bytes == 0 {
+            break;
+        }
+        deque.push_back(line.clone());
+        if deque.len() > num_lines {
+            deque.pop_front();
+        }
+        line.clear();
+    }
+
+    Ok(deque.into())
 }
 
 fn parse_num(val: &str) -> MyResult<i64> {
