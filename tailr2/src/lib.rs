@@ -135,7 +135,8 @@ fn parse_num(val: &str) -> MyResult<i64> {
 
 #[cfg(test)]
 mod tests {
-    use super::parse_num;
+    use super::{last_lines, parse_num};
+    use std::io::Cursor;
 
     #[test]
     fn test_parse_num() {
@@ -158,5 +159,16 @@ mod tests {
         let res = parse_num("foo");
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().to_string(), "foo");
+    }
+
+    #[test]
+    fn test_last_lines() {
+        let lines = b"lorem\nipsum\r\ndolor";
+        let res = last_lines(Cursor::new(lines), 1);
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), vec!["dolor"]);
+        let res = last_lines(Cursor::new(lines), 2);
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), vec!["ipsum\r\n", "dolor"]);
     }
 }
