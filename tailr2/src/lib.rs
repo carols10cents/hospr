@@ -109,6 +109,11 @@ fn print_lines(mut file: impl BufRead, num_lines: i64) -> MyResult<()> {
                 line.clear();
             }
         }
+        Less => {
+            for line in last_lines(file, num_lines.abs() as usize)? {
+                print!("{}", line);
+            }
+        }
         _ => {}
     };
     Ok(())
