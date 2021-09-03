@@ -85,7 +85,12 @@ pub fn run(config: Config) -> MyResult<()> {
         match File::open(&filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(file) => {
-                print_lines(BufReader::new(file), config.lines)?;
+                let file = BufReader::new(file);
+                if let Some(num_bytes) = config.bytes {
+                    print_bytes(file, num_bytes)?;
+                } else {
+                    print_lines(file, config.lines)?;
+                }
             }
         }
     }
