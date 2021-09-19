@@ -1,4 +1,4 @@
 #[test]
 fn works() {
-    assert!(true);
+    assert!(false);
 }
