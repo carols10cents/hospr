@@ -30,3 +30,25 @@ pub fn run(config: Config) -> MyResult<()> {
     println!("{:#?}", config);
     Ok(())
 }
+
+fn parse_u64(val: &str) -> MyResult<u64> {
+    unimplemented!();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_u64;
+
+    #[test]
+    fn test_parse_u64() {
+        let res = parse_u64("a");
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().to_string(), "\"a\" not a valid integer");
+        let res = parse_u64("0");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), 0);
+        let res = parse_u64("4");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), 4);
+    }
+}
