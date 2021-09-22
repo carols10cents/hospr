@@ -107,7 +107,9 @@ struct Fortune {
 
 #[cfg(test)]
 mod tests {
-    use super::{find_files, parse_u64};
+    use super::{find_files, parse_u64, read_fortunes};
+    use regex::Regex;
+    use std::path::PathBuf;
 
     #[test]
     fn test_parse_u64() {
@@ -150,5 +152,37 @@ mod tests {
         assert!(first.contains("ascii-art"));
         let last = files.last().unwrap().display().to_string();
         assert!(last.contains("startrek"));
+    }
+
+    #[test]
+    fn test_read_fortunes() {
+        // Parses all the fortunes without a filter
+        let res = read_fortunes(&[PathBuf::from("./tests/inputs/fortunes")], &None);
+        assert!(res.is_ok());
+
+        if let Ok(fortunes) = res {
+            // Correct number and sorting
+            assert_eq!(fortunes.len(), 5433);
+            assert_eq!(
+                fortunes.iter().nth(0).unwrap().text,
+                "You cannot achieve the impossible without \
+    attempting the absurd."
+            );
+            assert_eq!(
+                fortunes.last().unwrap().text,
+                "There is no material safety data sheet for \
+    astatine. If there were, it would just be the word \
+    \"NO\" scrawled over and over in charred blood.\n\
+    -- Randall Munroe, \"What If?\""
+            );
+        }
+
+        // Filters for matching text
+        let res = read_fortunes(
+            &[PathBuf::from("./tests/inputs/fortunes")],
+            &Some(Regex::new("Yogi Berra").unwrap()),
+        );
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap().len(), 2);
     }
 }
