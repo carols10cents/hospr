@@ -17,27 +17,32 @@ pub fn get_args() -> MyResult<Config> {
         .author("Ken Youens-Clark <kyclark@gmail.com>")
         .about("Rust fortune")
         .arg(
+            Arg::with_name("sources")
+                .value_name("FILE")
+                .multiple(true)
+                .required(true)
+                .help("Input files or directories"),
+        )
+        .arg(
             Arg::with_name("pattern")
+                .value_name("PATTERN")
                 .short("m")
                 .long("pattern")
-                .takes_value(true)
-                .value_name("PATTERN")
-                .help("Search pattern"),
+                .help("Pattern"),
+        )
+        .arg(
+            Arg::with_name("insensitive")
+                .short("i")
+                .long("insensitive")
+                .help("Case-insensitive pattern matching")
+                .takes_value(false),
         )
         .arg(
             Arg::with_name("seed")
+                .value_name("SEED")
                 .short("s")
                 .long("seed")
-                .takes_value(true)
-                .value_name("SEED")
-                .help("PRNG seed"),
-        )
-        .arg(
-            Arg::with_name("sources")
-                .value_name("FILE")
-                .help("Input file(s)")
-                .required(true)
-                .min_values(1),
+                .help("Random seed"),
         )
         .get_matches();
 
