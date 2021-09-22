@@ -1,6 +1,10 @@
 use clap::{App, Arg};
 use regex::{Regex, RegexBuilder};
-use std::{error::Error, path::PathBuf};
+use std::{
+    collections::BTreeSet,
+    error::Error,
+    path::{Path, PathBuf},
+};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -75,7 +79,29 @@ fn parse_u64(val: &str) -> MyResult<u64> {
 }
 
 fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
-    unimplemented!();
+    let mut answer = BTreeSet::new();
+
+    for source in sources {
+        let path = Path::new(source);
+
+        if !path.exists() {
+            return Err("nope".into());
+        }
+
+        if path.is_dir() {
+            for s in path.read_dir()? {
+                let p = s?.path();
+                if !p.exists() {
+                    return Err("nope".into());
+                }
+                answer.insert(p);
+            }
+        } else {
+            answer.insert(path.to_path_buf());
+        }
+    }
+
+    Ok(answer.into_iter().collect())
 }
 
 #[cfg(test)]
