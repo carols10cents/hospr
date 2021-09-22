@@ -71,7 +71,19 @@ pub fn get_args() -> MyResult<Config> {
 
 pub fn run(config: Config) -> MyResult<()> {
     let files = find_files(&config.sources)?;
-    println!("{:#?}", files);
+    let fortunes = read_fortunes(&files, &config.pattern)?;
+    match config.pattern.is_some() {
+        true => {
+            for fortune in fortunes {
+                // Print output
+            }
+        }
+        _ => {
+            if let Some(fortune) = pick_fortune(&fortunes, &config.seed) {
+                println!("{}", fortune);
+            }
+        }
+    };
     Ok(())
 }
 
