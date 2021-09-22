@@ -1,6 +1,6 @@
 use clap::{App, Arg};
 use regex::{Regex, RegexBuilder};
-use std::error::Error;
+use std::{error::Error, path::PathBuf};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -74,9 +74,13 @@ fn parse_u64(val: &str) -> MyResult<u64> {
         .map_err(|_| format!("\"{}\" not a valid integer", val))?)
 }
 
+fn find_files(sources: &[String]) -> Vec<PathBuf> {
+    unimplemented!();
+}
+
 #[cfg(test)]
 mod tests {
-    use super::parse_u64;
+    use super::{find_files, parse_u64};
 
     #[test]
     fn test_parse_u64() {
@@ -89,5 +93,35 @@ mod tests {
         let res = parse_u64("4");
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), 4);
+    }
+
+    #[test]
+    fn test_find_files() {
+        // Verify that the function finds a file known to exist
+        let res = find_files(&["./tests/inputs/fortunes".to_string()]);
+        assert!(res.is_ok());
+
+        let files = res.unwrap();
+        assert_eq!(files.len(), 1);
+        assert_eq!(
+            files.get(0).unwrap().to_string_lossy(),
+            "./tests/inputs/fortunes"
+        );
+
+        // Fails to find a bad file
+        let res = find_files(&["/path/does/not/exist".to_string()]);
+        assert!(res.is_err());
+
+        // Finds all the input files, excludes ".dat"
+        let res = find_files(&["./tests/inputs".to_string()]);
+        assert!(res.is_ok());
+
+        // Check number and order of files
+        let files = res.unwrap();
+        assert_eq!(files.len(), 5);
+        let first = files.get(0).unwrap().display().to_string();
+        assert!(first.contains("ascii-art"));
+        let last = files.last().unwrap().display().to_string();
+        assert!(last.contains("startrek"));
     }
 }
