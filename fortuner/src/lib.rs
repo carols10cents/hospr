@@ -46,23 +46,19 @@ pub fn get_args() -> MyResult<Config> {
         )
         .get_matches();
 
-    let pattern = match matches.value_of("pattern") {
-        Some(pat) => Some(
-            RegexBuilder::new(pat)
+    let pattern = matches
+        .value_of("pattern")
+        .map(|val| {
+            RegexBuilder::new(val)
+                .case_insensitive(matches.is_present("insensitive"))
                 .build()
-                .map_err(|_| format!("Invalid --pattern \"{}\"", pat))?,
-        ),
-        None => None,
-    };
-
-    let seed = match matches.value_of("seed") {
-        Some(s) => Some(parse_u64(s)?),
-        None => None,
-    };
+                .map_err(|_| format!("Invalid --pattern \"{}\"", val))
+        })
+        .transpose()?;
 
     Ok(Config {
         sources: matches.values_of_lossy("sources").unwrap(),
-        seed,
+        seed: matches.value_of("seed").map(parse_u64).transpose()?,
         pattern,
     })
 }
