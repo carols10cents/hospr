@@ -164,9 +164,13 @@ struct Fortune {
     text: String,
 }
 
+fn pick_fortune(fortunes: &[Fortune], seed: &Option<u64>) -> Option<String> {
+    unimplemented!();
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{find_files, parse_u64, read_fortunes};
+    use super::{find_files, parse_u64, pick_fortune, read_fortunes};
     use regex::Regex;
     use std::path::PathBuf;
 
@@ -243,5 +247,32 @@ mod tests {
         );
         assert!(res.is_ok());
         assert_eq!(res.unwrap().len(), 2);
+    }
+
+    #[test]
+    fn test_pick_fortune() {
+        // Create a vector of fortunes
+        let fortunes = &[
+            Fortune {
+                source: "fortunes".to_string(),
+                text: "You cannot achieve the impossible without \
+    attempting the absurd."
+                    .to_string(),
+            },
+            Fortune {
+                source: "fortunes".to_string(),
+                text: "Assumption is the mother of all screw-ups.".to_string(),
+            },
+            Fortune {
+                source: "fortunes".to_string(),
+                text: "Neckties strangle clear thinking.".to_string(),
+            },
+        ];
+
+        // Pick a fortune with a seed
+        assert_eq!(
+            pick_fortune(fortunes, &Some(1)).unwrap(),
+            "Neckties strangle clear thinking.".to_string()
+        );
     }
 }
