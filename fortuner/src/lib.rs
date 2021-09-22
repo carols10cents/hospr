@@ -81,23 +81,15 @@ fn parse_u64(val: &str) -> MyResult<u64> {
 }
 
 fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
-    let mut answer = BTreeSet::new();
+    let mut answer = Vec::new();
 
     for source in sources {
-        let metadata = fs::metadata(source).map_err(|e| format!("{}: {}", source, e))?;
+        fs::metadata(source).map_err(|e| format!("{}: {}", source, e))?;
 
-        if metadata.is_dir() {
-            for s in fs::read_dir(source)? {
-                let s = s?;
-                s.metadata().map_err(|e| format!("{}: {}", source, e))?;
-                answer.insert(s.path());
-            }
-        } else {
-            answer.insert(PathBuf::from(source));
-        }
+        answer.push(PathBuf::from(source));
     }
 
-    Ok(answer.into_iter().collect())
+    Ok(answer)
 }
 
 #[cfg(test)]
