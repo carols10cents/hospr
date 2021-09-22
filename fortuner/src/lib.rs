@@ -74,7 +74,7 @@ fn parse_u64(val: &str) -> MyResult<u64> {
         .map_err(|_| format!("\"{}\" not a valid integer", val))?)
 }
 
-fn find_files(sources: &[String]) -> Vec<PathBuf> {
+fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
     unimplemented!();
 }
 
