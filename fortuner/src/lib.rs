@@ -1,11 +1,6 @@
 use clap::{App, Arg};
 use regex::{Regex, RegexBuilder};
-use std::{
-    collections::BTreeSet,
-    error::Error,
-    fs,
-    path::{PathBuf},
-};
+use std::{collections::BTreeSet, error::Error, fs, path::PathBuf};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -90,6 +85,16 @@ fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
     }
 
     Ok(answer)
+}
+
+fn read_fortunes(paths: &[PathBuf], pattern: &Option<Regex>) -> MyResult<Vec<Fortune>> {
+    unimplemented!();
+}
+
+#[derive(Debug)]
+struct Fortune {
+    source: String,
+    text: String,
 }
 
 #[cfg(test)]
