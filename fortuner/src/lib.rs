@@ -3,7 +3,8 @@ use regex::{Regex, RegexBuilder};
 use std::{
     collections::BTreeSet,
     error::Error,
-    path::{Path, PathBuf},
+    fs,
+    path::{PathBuf},
 };
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
@@ -83,22 +84,16 @@ fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
     let mut answer = BTreeSet::new();
 
     for source in sources {
-        let path = Path::new(source);
+        let metadata = fs::metadata(source).map_err(|e| format!("{}: {}", source, e))?;
 
-        if !path.exists() {
-            return Err("nope".into());
-        }
-
-        if path.is_dir() {
-            for s in path.read_dir()? {
-                let p = s?.path();
-                if !p.exists() {
-                    return Err("nope".into());
-                }
-                answer.insert(p);
+        if metadata.is_dir() {
+            for s in fs::read_dir(source)? {
+                let s = s?;
+                s.metadata().map_err(|e| format!("{}: {}", source, e))?;
+                answer.insert(s.path());
             }
         } else {
-            answer.insert(path.to_path_buf());
+            answer.insert(PathBuf::from(source));
         }
     }
 
