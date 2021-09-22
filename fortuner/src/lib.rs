@@ -1,6 +1,12 @@
 use clap::{App, Arg};
 use regex::{Regex, RegexBuilder};
-use std::{collections::BTreeSet, error::Error, fs, path::PathBuf};
+use std::{
+    collections::BTreeSet,
+    error::Error,
+    fs::{self, File},
+    io::{BufRead, BufReader},
+    path::PathBuf,
+};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -96,10 +102,51 @@ fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
 }
 
 fn read_fortunes(paths: &[PathBuf], pattern: &Option<Regex>) -> MyResult<Vec<Fortune>> {
-    unimplemented!();
+    let mut fortunes = vec![];
+
+    for path in paths {
+        let source = path.file_name().unwrap().to_string_lossy().to_string();
+
+        let mut file = BufReader::new(File::open(path)?);
+        let mut line = String::new();
+        let mut texts = vec![];
+
+        loop {
+            let bytes = file.read_line(&mut line)?;
+            if bytes == 0 {
+                break;
+            }
+
+            let trim = line.trim();
+
+            if trim == "%" {
+                let text = texts.join("\n");
+                if let Some(pat) = pattern {
+                    if pat.is_match(&text) {
+                        fortunes.push(Fortune {
+                            source: source.clone(),
+                            text,
+                        });
+                    }
+                } else {
+                    fortunes.push(Fortune {
+                        source: source.clone(),
+                        text,
+                    });
+                }
+
+                texts.clear();
+            } else {
+                texts.push(trim.to_owned());
+            }
+            line.clear();
+        }
+    }
+
+    Ok(fortunes)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Fortune {
     source: String,
     text: String,
