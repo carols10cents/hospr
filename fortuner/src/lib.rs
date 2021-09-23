@@ -78,6 +78,7 @@ pub fn run(config: Config) -> MyResult<()> {
     match config.pattern.is_some() {
         true => {
             for fortune in fortunes {
+                dbg!(&fortune);
                 // Print output
             }
         }
