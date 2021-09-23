@@ -114,43 +114,32 @@ fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
 
 fn read_fortunes(paths: &[PathBuf], pattern: &Option<Regex>) -> MyResult<Vec<Fortune>> {
     let mut fortunes = vec![];
+    let mut buffer = vec![];
+
+    let is_match = |text: &str| pattern.as_ref().map_or(true, |re| re.is_match(text));
 
     for path in paths {
-        let source = path.file_name().unwrap().to_string_lossy().to_string();
+        let source = path.file_name().unwrap().to_string_lossy().into_owned();
+        for line in BufReader::new(File::open(path)?)
+            .lines()
+            .filter_map(Result::ok)
+            .map(|line| line.trim_end().to_owned())
+        {
+            if line == "%" {
+                if !buffer.is_empty() {
+                    let text = buffer.join("\n");
+                    buffer.clear();
 
-        let mut file = BufReader::new(File::open(path)?);
-        let mut line = String::new();
-        let mut texts = vec![];
-
-        loop {
-            let bytes = file.read_line(&mut line)?;
-            if bytes == 0 {
-                break;
-            }
-
-            let trim = line.trim();
-
-            if trim == "%" {
-                let text = texts.join("\n");
-                if let Some(pat) = pattern {
-                    if pat.is_match(&text) {
+                    if is_match(&text) {
                         fortunes.push(Fortune {
                             source: source.clone(),
                             text,
                         });
                     }
-                } else {
-                    fortunes.push(Fortune {
-                        source: source.clone(),
-                        text,
-                    });
                 }
-
-                texts.clear();
             } else {
-                texts.push(trim.to_owned());
+                buffer.push(line.to_string());
             }
-            line.clear();
         }
     }
 
