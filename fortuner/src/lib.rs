@@ -4,10 +4,12 @@ use regex::{Regex, RegexBuilder};
 use std::{
     collections::BTreeSet,
     error::Error,
+    ffi::OsStr,
     fs::{self, File},
     io::{BufRead, BufReader},
     path::PathBuf,
 };
+use walkdir::WalkDir;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -96,7 +98,7 @@ fn parse_u64(val: &str) -> MyResult<u64> {
 
 fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
     let dat = OsStr::new("dat");
-    let mut results: Vec<PathBuf> = vec![];
+    let mut results = vec![];
     for source in sources {
         fs::metadata(source).map_err(|e| format!("{}: {}", source, e))?;
         results.extend(
