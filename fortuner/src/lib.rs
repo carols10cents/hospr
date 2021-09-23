@@ -4,7 +4,7 @@ use regex::{Regex, RegexBuilder};
 use std::{
     error::Error,
     ffi::OsStr,
-    fs::File,
+    fs::{self, File},
     io::{BufRead, BufReader},
     path::PathBuf,
 };
@@ -156,7 +156,7 @@ fn pick_fortune(fortunes: &[Fortune], seed: &Option<u64>) -> Option<String> {
         true => None,
         _ => {
             let range = 0..fortunes.len();
-            let i: usize = match &seed {
+            let i = match seed {
                 Some(seed) => StdRng::seed_from_u64(*seed).gen_range(range),
                 _ => rand::thread_rng().gen_range(range),
             };
