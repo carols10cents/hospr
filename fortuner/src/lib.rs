@@ -127,8 +127,9 @@ fn read_fortunes(paths: &[PathBuf], pattern: &Option<Regex>) -> MyResult<Vec<For
         for line in BufReader::new(File::open(path)?)
             .lines()
             .filter_map(Result::ok)
+            .map(|line| line.trim_end().to_owned())
         {
-            if line.trim_end() == "%" {
+            if line == "%" {
                 if !buffer.is_empty() {
                     let text = buffer.join("\n");
                     buffer.clear();
