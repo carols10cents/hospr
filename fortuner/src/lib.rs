@@ -187,6 +187,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn test_find_files() {
         // Verify that the function finds a file known to exist
         let res = find_files(&["./tests/inputs/fortunes".to_string()]);
