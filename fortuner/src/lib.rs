@@ -1,4 +1,5 @@
 use clap::{App, Arg};
+use rand::prelude::*;
 use regex::{Regex, RegexBuilder};
 use std::{
     collections::BTreeSet,
@@ -165,12 +166,23 @@ struct Fortune {
 }
 
 fn pick_fortune(fortunes: &[Fortune], seed: &Option<u64>) -> Option<String> {
-    unimplemented!();
+    let fortune = match seed.as_ref() {
+        Some(&s) => {
+            let mut rng = StdRng::seed_from_u64(s);
+            fortunes.choose(&mut rng)
+        }
+        None => {
+            let mut rng = thread_rng();
+            fortunes.choose(&mut rng)
+        }
+    };
+
+    fortune.map(|f| f.text.clone())
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{find_files, parse_u64, pick_fortune, read_fortunes};
+    use super::{find_files, parse_u64, pick_fortune, read_fortunes, Fortune};
     use regex::Regex;
     use std::path::PathBuf;
 
