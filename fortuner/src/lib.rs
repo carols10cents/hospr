@@ -19,6 +19,12 @@ pub struct Config {
     seed: Option<u64>,
 }
 
+#[derive(Debug, Clone)]
+struct Fortune {
+    source: String,
+    text: String,
+}
+
 pub fn get_args() -> MyResult<Config> {
     let matches = App::new("fortuner")
         .version("0.1.0")
@@ -100,22 +106,6 @@ fn parse_u64(val: &str) -> MyResult<u64> {
         .map_err(|_| format!("\"{}\" not a valid integer", val).into())
 }
 
-fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
-    let dat = OsStr::new("dat");
-    let mut results = vec![];
-    for source in sources {
-        fs::metadata(source).map_err(|e| format!("{}: {}", source, e))?;
-        results.extend(
-            WalkDir::new(source)
-                .into_iter()
-                .filter_map(|e| e.ok())
-                .filter(|e| e.file_type().is_file() && e.path().extension() != Some(dat))
-                .map(|e| e.path().into()),
-        );
-    }
-    Ok(results)
-}
-
 fn read_fortunes(paths: &[PathBuf], pattern: &Option<Regex>) -> MyResult<Vec<Fortune>> {
     let mut fortunes = vec![];
     let mut buffer = vec![];
@@ -150,10 +140,20 @@ fn read_fortunes(paths: &[PathBuf], pattern: &Option<Regex>) -> MyResult<Vec<For
     Ok(fortunes)
 }
 
-#[derive(Debug, Clone)]
-struct Fortune {
-    source: String,
-    text: String,
+fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
+    let dat = OsStr::new("dat");
+    let mut results = vec![];
+    for source in sources {
+        fs::metadata(source).map_err(|e| format!("{}: {}", source, e))?;
+        results.extend(
+            WalkDir::new(source)
+                .into_iter()
+                .filter_map(|e| e.ok())
+                .filter(|e| e.file_type().is_file() && e.path().extension() != Some(dat))
+                .map(|e| e.path().into()),
+        );
+    }
+    Ok(results)
 }
 
 fn pick_fortune(fortunes: &[Fortune], seed: &Option<u64>) -> Option<String> {
