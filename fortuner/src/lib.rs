@@ -76,9 +76,13 @@ pub fn run(config: Config) -> MyResult<()> {
     let fortunes = read_fortunes(&files, &config.pattern)?;
     match config.pattern.is_some() {
         true => {
+            let mut last_source: Option<String> = None;
             for fortune in fortunes {
-                dbg!(&fortune);
-                // Print output
+                if last_source.map_or(true, |s| s != fortune.source) {
+                    eprintln!("({})\n%", fortune.source);
+                }
+                println!("{}\n%", fortune.text);
+                last_source = Some(fortune.source.clone());
             }
         }
         _ => {
