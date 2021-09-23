@@ -95,23 +95,19 @@ fn parse_u64(val: &str) -> MyResult<u64> {
 }
 
 fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
-    let mut answer = BTreeSet::new();
-
+    let dat = OsStr::new("dat");
+    let mut results: Vec<PathBuf> = vec![];
     for source in sources {
-        let metadata = fs::metadata(source).map_err(|e| format!("{}: {}", source, e))?;
-
-        if metadata.is_dir() {
-            for s in fs::read_dir(source)? {
-                let s = s?;
-                s.metadata().map_err(|e| format!("{}: {}", source, e))?;
-                answer.insert(s.path());
-            }
-        } else {
-            answer.insert(PathBuf::from(source));
-        }
+        fs::metadata(source).map_err(|e| format!("{}: {}", source, e))?;
+        results.extend(
+            WalkDir::new(source)
+                .into_iter()
+                .filter_map(|e| e.ok())
+                .filter(|e| e.file_type().is_file() && e.path().extension() != Some(dat))
+                .map(|e| e.path().into()),
+        );
     }
-
-    Ok(answer.into_iter().collect())
+    Ok(results)
 }
 
 fn read_fortunes(paths: &[PathBuf], pattern: &Option<Regex>) -> MyResult<Vec<Fortune>> {
