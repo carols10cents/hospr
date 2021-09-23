@@ -1,11 +1,10 @@
 use clap::{App, Arg};
-use rand::prelude::*;
+use rand::{rngs::StdRng, Rng, SeedableRng};
 use regex::{Regex, RegexBuilder};
 use std::{
-    collections::BTreeSet,
     error::Error,
     ffi::OsStr,
-    fs::{self, File},
+    fs::File,
     io::{BufRead, BufReader},
     path::PathBuf,
 };
@@ -153,18 +152,17 @@ struct Fortune {
 }
 
 fn pick_fortune(fortunes: &[Fortune], seed: &Option<u64>) -> Option<String> {
-    let fortune = match seed.as_ref() {
-        Some(&s) => {
-            let mut rng = StdRng::seed_from_u64(s);
-            fortunes.choose(&mut rng)
+    match fortunes.is_empty() {
+        true => None,
+        _ => {
+            let range = 0..fortunes.len();
+            let i: usize = match &seed {
+                Some(seed) => StdRng::seed_from_u64(*seed).gen_range(range),
+                _ => rand::thread_rng().gen_range(range),
+            };
+            fortunes.get(i).map(|fortune| fortune.text.to_string())
         }
-        None => {
-            let mut rng = thread_rng();
-            fortunes.choose(&mut rng)
-        }
-    };
-
-    fortune.map(|f| f.text.clone())
+    }
 }
 
 #[cfg(test)]
