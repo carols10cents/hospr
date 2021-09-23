@@ -89,9 +89,9 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn parse_u64(val: &str) -> MyResult<u64> {
-    Ok(val
+    val.trim()
         .parse()
-        .map_err(|_| format!("\"{}\" not a valid integer", val))?)
+        .map_err(|_| format!("\"{}\" not a valid integer", val).into())
 }
 
 fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
