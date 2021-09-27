@@ -129,7 +129,16 @@ fn format_month(year: i32, month: u32, print_year: bool, today: NaiveDate) -> Ve
 }
 
 fn last_day_in_month(year: i32, month: u32) -> NaiveDate {
-    unimplemented!();
+    // the first day of the next month...
+    let (y, m) = if month == 12 {
+        (year + 1, 1)
+    } else {
+        (year, month + 1)
+    };
+    let d = NaiveDate::from_ymd(y, m, 1);
+
+    // ...is preceded by the last day of the original month
+    d.pred()
 }
 
 #[cfg(test)]
