@@ -8,6 +8,7 @@ clap = "2.33"
 chrono = "0.4"
 itertools = "0.10"
 colorize = "0.1"
+num-traits = "0.2.14"
 
 [dev-dependencies]
 assert_cmd = "1"

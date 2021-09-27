@@ -1,6 +1,7 @@
 use chrono::NaiveDate;
-use chrono::{Datelike, Utc};
+use chrono::{Datelike, Month, Utc};
 use clap::{App, Arg};
+use num_traits::FromPrimitive;
 use std::error::Error;
 use std::str::FromStr;
 
@@ -125,7 +126,20 @@ fn parse_year(year: &str) -> MyResult<i32> {
 }
 
 fn format_month(year: i32, month: u32, print_year: bool, today: NaiveDate) -> Vec<String> {
-    unimplemented!();
+    let mut output = vec![];
+
+    let start_date = NaiveDate::from_ymd(year, month, 1);
+
+    output.push(format!(
+        "{:^20}  ",
+        format!(
+            "{} {}",
+            Month::from_u32(start_date.month()).unwrap().name(),
+            start_date.year()
+        )
+    ));
+
+    output
 }
 
 fn last_day_in_month(year: i32, month: u32) -> NaiveDate {
