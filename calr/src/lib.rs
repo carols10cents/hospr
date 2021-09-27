@@ -128,7 +128,9 @@ fn parse_year(year: &str) -> MyResult<i32> {
 fn format_month(year: i32, month: u32, print_year: bool, today: NaiveDate) -> Vec<String> {
     let mut output = vec![];
 
-    let start_date = NaiveDate::from_ymd(year, month, 1);
+    let mut days = NaiveDate::from_ymd(year, month, 1).iter_days();
+
+    let start_date = days.next().unwrap();
 
     output.push(format!(
         "{:^20}  ",
@@ -138,6 +140,34 @@ fn format_month(year: i32, month: u32, print_year: bool, today: NaiveDate) -> Ve
             start_date.year()
         )
     ));
+
+    output.push("Su Mo Tu We Th Fr Sa  ".into());
+
+    let mut week = String::new();
+
+    // Initial padding
+    week.push_str(&" ".repeat(3 * start_date.weekday().num_days_from_sunday() as usize));
+    week.push_str(&format!("{:>2} ", start_date.day()));
+
+    while let Some(day) = days.next() {
+        if day.month() != month {
+            break;
+        }
+
+        if day.weekday().num_days_from_sunday() == 0 {
+            week.push_str(" ");
+            output.push(week.clone());
+            week.clear();
+        }
+
+        week.push_str(&format!("{:>2} ", day.day()));
+    }
+
+    output.push(format!("{:<22}", week));
+
+    while output.len() < 8 {
+        output.push(" ".repeat(22));
+    }
 
     output
 }
