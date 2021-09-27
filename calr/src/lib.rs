@@ -1,3 +1,4 @@
+use chrono::NaiveDate;
 use chrono::{Datelike, Utc};
 use clap::{App, Arg};
 use std::error::Error;
@@ -123,9 +124,18 @@ fn parse_year(year: &str) -> MyResult<i32> {
     })
 }
 
+fn format_month(year: i32, month: u32, print_year: bool, today: NaiveDate) -> Vec<String> {
+    unimplemented!();
+}
+
+fn last_day_in_month(year: i32, month: u32) -> NaiveDate {
+    unimplemented!();
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{parse_int, parse_month, parse_year};
+    use super::{format_month, last_day_in_month, parse_int, parse_month, parse_year};
+    use chrono::{NaiveDate, Utc};
 
     #[test]
     fn test_parse_int() {
@@ -204,5 +214,53 @@ mod tests {
         let res = parse_month("foo");
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().to_string(), "Invalid month \"foo\"");
+    }
+
+    #[test]
+    fn test_format_month() {
+        let today = Utc::today().naive_local();
+        let april = vec![
+            " April 2020 ",
+            "Su Mo Tu We Th Fr Sa ",
+            " 1 2 3 4 ",
+            " 5 6 7 8 9 10 11 ",
+            "12 13 14 15 16 17 18 ",
+            "19 20 21 22 23 24 25 ",
+            "26 27 28 29 30 ",
+            " ",
+        ];
+        assert_eq!(format_month(2020, 4, true, today), april);
+
+        let may = vec![
+            " May 2020 ",
+            "Su Mo Tu We Th Fr Sa ",
+            " 1 2 ",
+            " 3 4 5 6 7 8 9 ",
+            "10 11 12 13 14 15 16 ",
+            "17 18 19 20 21 22 23 ",
+            "24 25 26 27 28 29 30 ",
+            "31 ",
+        ];
+        assert_eq!(format_month(2020, 5, true, today), may);
+
+        let april_hl = vec![
+            " April 2021 ",
+            "Su Mo Tu We Th Fr Sa ",
+            " 1 2 3 ",
+            " 4 5 6 \u{1b}[7m 7\u{1b}[0;39;49m 8 9 10 ",
+            "11 12 13 14 15 16 17 ",
+            "18 19 20 21 22 23 24 ",
+            "25 26 27 28 29 30 ",
+            " ",
+        ];
+        let today = NaiveDate::from_ymd(2021, 4, 7);
+        assert_eq!(format_month(2021, 4, true, today), april_hl);
+    }
+
+    #[test]
+    fn test_last_day_in_month() {
+        assert_eq!(last_day_in_month(2020, 1), NaiveDate::from_ymd(2020, 1, 31));
+        assert_eq!(last_day_in_month(2020, 2), NaiveDate::from_ymd(2020, 2, 29));
+        assert_eq!(last_day_in_month(2020, 4), NaiveDate::from_ymd(2020, 4, 30));
     }
 }
