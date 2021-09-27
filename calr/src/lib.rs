@@ -1,4 +1,4 @@
-use chrono::{Datelike, Local};
+use chrono::{Datelike, Utc};
 use clap::{App, Arg};
 use std::error::Error;
 use std::str::FromStr;
@@ -32,39 +32,42 @@ pub fn get_args() -> MyResult<Config> {
         .author("Ken Youens-Clark <kyclark@gmail.com>")
         .about("Rust cal")
         .arg(
-            Arg::with_name("year")
+            Arg::with_name("month")
+                .value_name("MONTH")
+                .short("m")
+                .help("Month name or number (1-12)")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("show_current_year")
                 .short("y")
                 .long("year")
-                .takes_value(false)
-                .help("Show whole current year"),
+                .help("Show whole current year")
+                .takes_value(false),
         )
         .arg(
-            Arg::with_name("month")
-                .short("m")
-                .value_name("MONTH")
-                .help("Month name or number (1-12)"),
-        )
-        .arg(
-            Arg::with_name("year_value")
+            Arg::with_name("year")
                 .value_name("YEAR")
                 .help("Year (1-9999)"),
         )
         .get_matches();
 
-    let now = Local::now();
+    let mut month = matches.value_of("month").map(parse_month).transpose()?;
+    let mut year = matches.value_of("year").map(parse_year).transpose()?;
 
-    let yv = matches.value_of("year_value");
+    let today = Utc::today();
+    if matches.is_present("show_current_year") {
+        month = None;
+        year = Some(today.year());
+    } else if month.is_none() && year.is_none() {
+        month = Some(today.month());
+        year = Some(today.year());
+    }
 
-    let month = match (matches.is_present("year"), matches.value_of("month"), yv) {
-        (true, _, _) => None,
-        (_, Some(m), _) => Some(parse_month(m)?),
-        (_, None, Some(_)) => None,
-        (_, None, None) => Some(now.month()),
-    };
-
-    let year = yv.map(|y| parse_year(y)).transpose()?.unwrap_or(now.year());
-
-    Ok(Config { month, year })
+    Ok(Config {
+        month,
+        year: year.unwrap_or_else(|| today.year()),
+    })
 }
 
 pub fn run(config: Config) -> MyResult<()> {
