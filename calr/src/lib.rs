@@ -1,4 +1,4 @@
-use chrono::{Datelike, Local, NaiveDate};
+use chrono::{Datelike, Local};
 use clap::{App, Arg};
 use std::error::Error;
 use std::str::FromStr;
@@ -58,7 +58,40 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn parse_month(month: &str) -> MyResult<u32> {
-    unimplemented!();
+    parse_int(month)
+        .or_else(|_| {
+            let lower = month.to_lowercase();
+            let names = vec![
+                "january",
+                "february",
+                "march",
+                "april",
+                "may",
+                "june",
+                "july",
+                "august",
+                "september",
+                "october",
+                "november",
+                "december",
+            ];
+
+            let matching_names: Vec<_> = names
+                .iter()
+                .enumerate()
+                .filter(|(_i, n)| n.starts_with(&lower))
+                .collect();
+
+            if matching_names.len() == 1 {
+                Ok((matching_names[0].0 + 1) as u32)
+            } else {
+                Err(format!("Invalid month \"{}\"", month).into())
+            }
+        })
+        .and_then(|m| match m {
+            1..=12 => Ok(m),
+            _ => Err(format!("month \"{}\" not in the range 1..12", month).into()),
+        })
 }
 
 fn parse_int<T: FromStr>(val: &str) -> MyResult<T> {
