@@ -41,7 +41,7 @@ pub fn get_args() -> MyResult<Config> {
 
     let month = match (matches.is_present("year"), matches.value_of("month"), yv) {
         (true, _, _) => None,
-        (_, Some(m), _) => Some(m.parse::<u32>()?),
+        (_, Some(m), _) => Some(parse_month(m)?),
         (_, None, Some(_)) => None,
         (_, None, None) => Some(now.month()),
     };
@@ -54,4 +54,13 @@ pub fn get_args() -> MyResult<Config> {
 pub fn run(config: Config) -> MyResult<()> {
     println!("{:?}", config);
     Ok(())
+}
+
+fn parse_month(m: &str) -> MyResult<u32> {
+    m.parse::<u32>()
+        .map_err(|e| e.into())
+        .and_then(|n| match n {
+            1..=12 => Ok(n),
+            _ => Err(format!("month \"{}\" not in the range 1..12", n).into()),
+        })
 }
