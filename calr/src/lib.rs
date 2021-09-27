@@ -3,6 +3,21 @@ use clap::{App, Arg};
 use std::error::Error;
 use std::str::FromStr;
 
+const MONTH_NAMES: [&str; 12] = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+];
+
 #[derive(Debug)]
 pub struct Config {
     month: Option<u32>,
@@ -58,40 +73,35 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn parse_month(month: &str) -> MyResult<u32> {
-    parse_int(month)
-        .or_else(|_| {
-            let lower = month.to_lowercase();
-            let names = vec![
-                "january",
-                "february",
-                "march",
-                "april",
-                "may",
-                "june",
-                "july",
-                "august",
-                "september",
-                "october",
-                "november",
-                "december",
-            ];
-
-            let matching_names: Vec<_> = names
+    match parse_int(month) {
+        Ok(num) => {
+            if (1..=12).contains(&num) {
+                Ok(num)
+            } else {
+                Err(format!("month \"{}\" not in the range 1..12", month).into())
+            }
+        }
+        _ => {
+            let lower = &month.to_lowercase();
+            let matches: Vec<usize> = MONTH_NAMES
                 .iter()
                 .enumerate()
-                .filter(|(_i, n)| n.starts_with(&lower))
+                .filter_map(|(i, name)| {
+                    if name.to_lowercase().starts_with(lower) {
+                        Some(i + 1)
+                    } else {
+                        None
+                    }
+                })
                 .collect();
 
-            if matching_names.len() == 1 {
-                Ok((matching_names[0].0 + 1) as u32)
+            if matches.len() == 1 {
+                Ok(matches[0] as u32)
             } else {
-                Err(format!("Invalid month \"{}\"", month).into())
+                Err(From::from(format!("Invalid month \"{}\"", month)))
             }
-        })
-        .and_then(|m| match m {
-            1..=12 => Ok(m),
-            _ => Err(format!("month \"{}\" not in the range 1..12", month).into()),
-        })
+        }
+    }
 }
 
 fn parse_int<T: FromStr>(val: &str) -> MyResult<T> {
