@@ -229,38 +229,38 @@ mod tests {
     fn test_format_month() {
         let today = Utc::today().naive_local();
         let april = vec![
-            " April 2020 ",
-            "Su Mo Tu We Th Fr Sa ",
-            " 1 2 3 4 ",
-            " 5 6 7 8 9 10 11 ",
-            "12 13 14 15 16 17 18 ",
-            "19 20 21 22 23 24 25 ",
-            "26 27 28 29 30 ",
-            " ",
+            "     April 2020       ",
+            "Su Mo Tu We Th Fr Sa  ",
+            "          1  2  3  4  ",
+            " 5  6  7  8  9 10 11  ",
+            "12 13 14 15 16 17 18  ",
+            "19 20 21 22 23 24 25  ",
+            "26 27 28 29 30        ",
+            "                      ",
         ];
         assert_eq!(format_month(2020, 4, true, today), april);
 
         let may = vec![
-            " May 2020 ",
-            "Su Mo Tu We Th Fr Sa ",
-            " 1 2 ",
-            " 3 4 5 6 7 8 9 ",
-            "10 11 12 13 14 15 16 ",
-            "17 18 19 20 21 22 23 ",
-            "24 25 26 27 28 29 30 ",
-            "31 ",
+            "      May 2020        ",
+            "Su Mo Tu We Th Fr Sa  ",
+            "                1  2  ",
+            " 3  4  5  6  7  8  9  ",
+            "10 11 12 13 14 15 16  ",
+            "17 18 19 20 21 22 23  ",
+            "24 25 26 27 28 29 30  ",
+            "31                    ",
         ];
         assert_eq!(format_month(2020, 5, true, today), may);
 
         let april_hl = vec![
-            " April 2021 ",
-            "Su Mo Tu We Th Fr Sa ",
-            " 1 2 3 ",
-            " 4 5 6 \u{1b}[7m 7\u{1b}[0;39;49m 8 9 10 ",
-            "11 12 13 14 15 16 17 ",
-            "18 19 20 21 22 23 24 ",
-            "25 26 27 28 29 30 ",
-            " ",
+            "     April 2021       ",
+            "Su Mo Tu We Th Fr Sa  ",
+            "             1  2  3  ",
+            " 4  5  6 \u{1b}[7m 7\u{1b}[0;39;49m  8  9 10  ",
+            "11 12 13 14 15 16 17  ",
+            "18 19 20 21 22 23 24  ",
+            "25 26 27 28 29 30     ",
+            "                      ",
         ];
         let today = NaiveDate::from_ymd(2021, 4, 7);
         assert_eq!(format_month(2021, 4, true, today), april_hl);
