@@ -39,16 +39,14 @@ pub fn get_args() -> MyResult<Config> {
 
     let yv = matches.value_of("year_value");
 
-    let month = match (matches.value_of("month"), yv) {
-        (Some(m), _) => Some(m.parse::<u32>()?),
-        (None, Some(_)) => None,
-        (None, None) => Some(now.month()),
+    let month = match (matches.is_present("year"), matches.value_of("month"), yv) {
+        (true, _, _) => None,
+        (_, Some(m), _) => Some(m.parse::<u32>()?),
+        (_, None, Some(_)) => None,
+        (_, None, None) => Some(now.month()),
     };
 
-    let year = yv
-        .map(|y| y.parse())
-        .transpose()?
-        .unwrap_or(now.year());
+    let year = yv.map(|y| y.parse()).transpose()?.unwrap_or(now.year());
 
     Ok(Config { month, year })
 }
