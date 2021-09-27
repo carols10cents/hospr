@@ -47,7 +47,7 @@ pub fn get_args() -> MyResult<Config> {
         (_, None, None) => Some(now.month()),
     };
 
-    let year = yv.map(|y| y.parse()).transpose()?.unwrap_or(now.year());
+    let year = yv.map(|y| parse_year(y)).transpose()?.unwrap_or(now.year());
 
     Ok(Config { month, year })
 }
