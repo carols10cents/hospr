@@ -74,9 +74,13 @@ fn parse_int<T: FromStr>(val: &str) -> MyResult<T> {
         .map_err(|_| format!("Invalid integer \"{}\"", val).into())
 }
 
+fn parse_year(year: &str) -> MyResult<i32> {
+    unimplemented!();
+}
+
 #[cfg(test)]
 mod tests {
-    use super::parse_int;
+    use super::{parse_int, parse_year};
 
     #[test]
     fn test_parse_int() {
@@ -94,5 +98,33 @@ mod tests {
         let res = parse_int::<i64>("foo");
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().to_string(), "Invalid integer \"foo\"");
+    }
+
+    #[test]
+    fn test_parse_year() {
+        let res = parse_year("1");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), 1i32);
+
+        let res = parse_year("9999");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), 9999i32);
+
+        let res = parse_year("0");
+        assert!(res.is_err());
+        assert_eq!(
+            res.unwrap_err().to_string(),
+            "year \"0\" not in the range 1..9999"
+        );
+
+        let res = parse_year("10000");
+        assert!(res.is_err());
+        assert_eq!(
+            res.unwrap_err().to_string(),
+            "year \"10000\" not in the range 1..9999"
+        );
+
+        let res = parse_year("foo");
+        assert!(res.is_err());
     }
 }
