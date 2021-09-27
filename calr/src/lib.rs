@@ -4,18 +4,18 @@ use std::error::Error;
 use std::str::FromStr;
 
 const MONTH_NAMES: [&str; 12] = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
 ];
 
 #[derive(Debug)]
@@ -83,11 +83,11 @@ fn parse_month(month: &str) -> MyResult<u32> {
         }
         _ => {
             let lower = &month.to_lowercase();
-            let matches: Vec<usize> = MONTH_NAMES
+            let matches: Vec<_> = MONTH_NAMES
                 .iter()
                 .enumerate()
                 .filter_map(|(i, name)| {
-                    if name.to_lowercase().starts_with(lower) {
+                    if name.starts_with(lower) {
                         Some(i + 1)
                     } else {
                         None
