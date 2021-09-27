@@ -95,7 +95,8 @@ fn parse_month(month: &str) -> MyResult<u32> {
 }
 
 fn parse_int<T: FromStr>(val: &str) -> MyResult<T> {
-    val.parse()
+    val.trim()
+        .parse()
         .map_err(|_| format!("Invalid integer \"{}\"", val).into())
 }
 
