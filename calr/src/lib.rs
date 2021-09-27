@@ -1,4 +1,4 @@
-use chrono::{Datelike, Local};
+use chrono::{Datelike, Local, NaiveDate};
 use clap::{App, Arg};
 use std::error::Error;
 
@@ -58,7 +58,8 @@ pub fn run(config: Config) -> MyResult<()> {
 
 fn parse_month(m: &str) -> MyResult<u32> {
     m.parse::<u32>()
-        .map_err(|e| e.into())
+        .or_else(|_| dbg!(NaiveDate::parse_from_str(&format!("{} 2021", m), "%B 2021")).map(|r| r.month()))
+        .map_err(|_| format!("Invalid month \"{}\"", m).into())
         .and_then(|n| match n {
             1..=12 => Ok(n),
             _ => Err(format!("month \"{}\" not in the range 1..12", n).into()),
