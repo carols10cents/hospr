@@ -1,6 +1,7 @@
 use chrono::NaiveDate;
 use chrono::{Datelike, Month, Utc};
 use clap::{App, Arg};
+use colorize::AnsiColor;
 use num_traits::FromPrimitive;
 use std::error::Error;
 use std::str::FromStr;
@@ -147,7 +148,7 @@ fn format_month(year: i32, month: u32, print_year: bool, today: NaiveDate) -> Ve
 
     // Initial padding
     week.push_str(&" ".repeat(3 * start_date.weekday().num_days_from_sunday() as usize));
-    week.push_str(&format!("{:>2} ", start_date.day()));
+    week.push_str(&day_display(start_date, today));
 
     while let Some(day) = days.next() {
         if day.month() != month {
@@ -160,7 +161,7 @@ fn format_month(year: i32, month: u32, print_year: bool, today: NaiveDate) -> Ve
             week.clear();
         }
 
-        week.push_str(&format!("{:>2} ", day.day()));
+        week.push_str(&day_display(day, today));
     }
 
     output.push(format!("{:<22}", week));
@@ -170,6 +171,16 @@ fn format_month(year: i32, month: u32, print_year: bool, today: NaiveDate) -> Ve
     }
 
     output
+}
+
+fn day_display(day: NaiveDate, today: NaiveDate) -> String {
+    let mut day_display = format!("{:>2}", day.day());
+
+    if day == today {
+        day_display = day_display.reverse();
+    }
+
+    format!("{} ", day_display)
 }
 
 fn last_day_in_month(year: i32, month: u32) -> NaiveDate {
@@ -306,6 +317,9 @@ mod tests {
             "25 26 27 28 29 30     ",
             "                      ",
         ];
+        for line in &april_hl {
+            println!("{}", line);
+        }
         let today = NaiveDate::from_ymd(2021, 4, 7);
         assert_eq!(format_month(2021, 4, true, today), april_hl);
     }
