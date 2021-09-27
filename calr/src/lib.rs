@@ -58,7 +58,9 @@ pub fn run(config: Config) -> MyResult<()> {
 
 fn parse_month(m: &str) -> MyResult<u32> {
     m.parse::<u32>()
-        .or_else(|_| dbg!(NaiveDate::parse_from_str(&format!("{} 2021", m), "%B 2021")).map(|r| r.month()))
+        .or_else(|_| {
+            dbg!(NaiveDate::parse_from_str(&format!("{} 2021", m), "%B %Y")).map(|r| r.month())
+        })
         .map_err(|_| format!("Invalid month \"{}\"", m).into())
         .and_then(|n| match n {
             1..=12 => Ok(n),
