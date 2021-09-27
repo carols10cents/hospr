@@ -88,7 +88,7 @@ pub fn run(config: Config) -> MyResult<()> {
                     eprintln!("({})\n%", fortune.source);
                 }
                 println!("{}\n%", fortune.text);
-                last_source = Some(fortune.source.clone());
+                last_source = Some(fortune.source);
             }
         }
         _ => {
