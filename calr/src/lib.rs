@@ -37,12 +37,15 @@ pub fn get_args() -> MyResult<Config> {
 
     let now = Local::now();
 
-    let month = match matches.value_of("month") {
-        Some(m) => Some(m.parse::<u32>()?),
-        None => Some(now.month()),
+    let yv = matches.value_of("year_value");
+
+    let month = match (matches.value_of("month"), yv) {
+        (Some(m), _) => Some(m.parse::<u32>()?),
+        (None, Some(_)) => None,
+        (None, None) => Some(now.month()),
     };
-    let year = matches
-        .value_of("year_value")
+
+    let year = yv
         .map(|y| y.parse())
         .transpose()?
         .unwrap_or(now.year());
