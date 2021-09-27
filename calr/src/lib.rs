@@ -57,16 +57,8 @@ pub fn run(config: Config) -> MyResult<()> {
     Ok(())
 }
 
-fn parse_month(m: &str) -> MyResult<u32> {
-    m.parse::<u32>()
-        .or_else(|_| {
-            dbg!(NaiveDate::parse_from_str(&format!("{} 2021", m), "%B %Y")).map(|r| r.month())
-        })
-        .map_err(|_| format!("Invalid month \"{}\"", m).into())
-        .and_then(|n| match n {
-            1..=12 => Ok(n),
-            _ => Err(format!("month \"{}\" not in the range 1..12", n).into()),
-        })
+fn parse_month(month: &str) -> MyResult<u32> {
+    unimplemented!();
 }
 
 fn parse_int<T: FromStr>(val: &str) -> MyResult<T> {
@@ -83,7 +75,7 @@ fn parse_year(year: &str) -> MyResult<i32> {
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_int, parse_year};
+    use super::{parse_int, parse_month, parse_year};
 
     #[test]
     fn test_parse_int() {
@@ -129,5 +121,38 @@ mod tests {
 
         let res = parse_year("foo");
         assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_parse_month() {
+        let res = parse_month("1");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), 1u32);
+
+        let res = parse_month("12");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), 12u32);
+
+        let res = parse_month("jan");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), 1u32);
+
+        let res = parse_month("0");
+        assert!(res.is_err());
+        assert_eq!(
+            res.unwrap_err().to_string(),
+            "month \"0\" not in the range 1..12"
+        );
+
+        let res = parse_month("13");
+        assert!(res.is_err());
+        assert_eq!(
+            res.unwrap_err().to_string(),
+            "month \"13\" not in the range 1..12"
+        );
+
+        let res = parse_month("foo");
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().to_string(), "Invalid month \"foo\"");
     }
 }
