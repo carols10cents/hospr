@@ -101,9 +101,12 @@ fn parse_int<T: FromStr>(val: &str) -> MyResult<T> {
 }
 
 fn parse_year(year: &str) -> MyResult<i32> {
-    parse_int(year).and_then(|y| match y {
-        1..=9999 => Ok(y),
-        _ => Err(format!("year \"{}\" not in the range 1..9999", year).into()),
+    parse_int(year).and_then(|num| {
+        if (1..=9999).contains(&num) {
+            Ok(num)
+        } else {
+            Err(format!("year \"{}\" not in the range 1..9999", year).into())
+        }
     })
 }
 
