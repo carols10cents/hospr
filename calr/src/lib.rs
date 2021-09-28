@@ -184,14 +184,14 @@ fn format_month(year: i32, month: u32, print_year: bool, today: NaiveDate) -> Ve
 
     if let Some(month_name) = MONTH_NAMES.iter().nth(month as usize - 1) {
         lines.push(format!(
-            "{:^20} ",
+            "{:^20}  ",
             if print_year {
                 format!("{} {}", month_name, year)
             } else {
                 month_name.to_string()
             }
         ));
-        lines.push("Su Mo Tu We Th Fr Sa ".to_string());
+        lines.push("Su Mo Tu We Th Fr Sa  ".to_string());
 
         for week in days.chunks(7) {
             let mut disp = format!("{:width$}", week.join(" "), width = width);
