@@ -224,16 +224,13 @@ fn day_display(day: NaiveDate, today: NaiveDate) -> String {
 }
 
 fn last_day_in_month(year: i32, month: u32) -> NaiveDate {
-    // the first day of the next month...
+    // The first day of the next month...
     let (y, m) = if month == 12 {
         (year + 1, 1)
     } else {
         (year, month + 1)
     };
-    let d = NaiveDate::from_ymd(y, m, 1);
-
-    // ...is preceded by the last day of the original month
-    d.pred()
+    NaiveDate::from_ymd(y, m, 1).pred()
 }
 
 #[cfg(test)]
