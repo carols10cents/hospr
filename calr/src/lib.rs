@@ -160,57 +160,53 @@ fn parse_year(year: &str) -> MyResult<i32> {
 }
 
 fn format_month(year: i32, month: u32, print_year: bool, today: NaiveDate) -> Vec<String> {
-    let mut output = vec![];
+    let first = NaiveDate::from_ymd(year, month, 1);
+    let last = last_day_in_month(year, month);
+    let mut days: Vec<String> = (1..first.weekday().number_from_sunday())
+        .into_iter()
+        .map(|_| "  ".to_string())
+        .collect();
 
-    let mut days = NaiveDate::from_ymd(year, month, 1).iter_days();
+    let is_today = |n: &u32| year == today.year() && month == today.month() && *n == today.day();
 
-    let start_date = days.next().unwrap();
+    let placeholder = "XX";
 
-    output.push(format!(
-        "{:^20}  ",
-        if print_year {
-            format!(
-                "{} {}",
-                Month::from_u32(start_date.month()).unwrap().name(),
-                start_date.year()
-            )
+    days.extend((first.day()..=last.day()).into_iter().map(|num| {
+        if is_today(&num) {
+            placeholder.to_string()
         } else {
-            Month::from_u32(start_date.month())
-                .unwrap()
-                .name()
-                .to_string()
+            format!("{:>2}", num)
         }
-    ));
+    }));
 
-    output.push("Su Mo Tu We Th Fr Sa  ".into());
+    let width = 22;
+    let mut lines: Vec<String> = vec![];
 
-    let mut week = String::new();
+    if let Some(month_name) = MONTH_NAMES.iter().nth(month as usize - 1) {
+        lines.push(format!(
+            "{:^20} ",
+            if print_year {
+                format!("{} {}", month_name, year)
+            } else {
+                month_name.to_string()
+            }
+        ));
+        lines.push("Su Mo Tu We Th Fr Sa ".to_string());
 
-    // Initial padding
-    week.push_str(&" ".repeat(3 * start_date.weekday().num_days_from_sunday() as usize));
-    week.push_str(&day_display(start_date, today));
-
-    while let Some(day) = days.next() {
-        if day.month() != month {
-            break;
+        for week in days.chunks(7) {
+            let mut disp = format!("{:width$}", week.join(" "), width = width);
+            if disp.contains(&placeholder) {
+                disp = disp.replace(&placeholder, &format!("{:2}", today.day()).reverse());
+            }
+            lines.push(disp);
         }
-
-        if day.weekday().num_days_from_sunday() == 0 {
-            week.push_str(" ");
-            output.push(week.clone());
-            week.clear();
-        }
-
-        week.push_str(&day_display(day, today));
     }
 
-    output.push(format!("{:<22}", week));
-
-    while output.len() < 8 {
-        output.push(" ".repeat(22));
+    while lines.len() < 8 {
+        lines.push(" ".repeat(width));
     }
 
-    output
+    lines
 }
 
 fn day_display(day: NaiveDate, today: NaiveDate) -> String {
