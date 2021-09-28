@@ -1,9 +1,8 @@
-use chrono::NaiveDate;
-use chrono::{Datelike, Local};
+use chrono::{Datelike, NaiveDate, Utc, Local};
 use clap::{App, Arg};
 use colorize::AnsiColor;
-use std::error::Error;
-use std::str::FromStr;
+use itertools::izip;
+use std::{error::Error, str::FromStr};
 
 const MONTH_NAMES: [&str; 12] = [
     "January",
@@ -73,40 +72,36 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    let today = Local::today().naive_local();
-    match config.month {
-        Some(m) => {
-            for line in format_month(config.year, m, true, today) {
-                println!("{}", line);
-            }
-        }
-        None => {
-            print!("{}", format!("{:^61}", config.year).trim_end());
+    let month_nums: Vec<u32> = match config.month {
+        Some(m) => vec![m],
+        _ => (1..=12).collect(),
+    };
+    let show_year = month_nums.len() < 12;
+    let today = Utc::today().naive_local();
+    let months: Vec<Vec<String>> = month_nums
+        .iter()
+        .map(|month| format_month(config.year, *month, show_year, today))
+        .collect();
 
-            let mut months = (1..=12u32).into_iter();
+    if !show_year {
+        println!("{:32}", config.year);
+    }
 
-            loop {
-                let month_left = if let Some(n) = months.next() {
-                    n
-                } else {
-                    break;
-                };
-                let month_center = months.next().unwrap();
-                let month_right = months.next().unwrap();
-
-                println!();
-
-                let month_left = format_month(config.year, month_left, false, today).into_iter();
-                let month_center =
-                    format_month(config.year, month_center, false, today).into_iter();
-                let month_right = format_month(config.year, month_right, false, today).into_iter();
-
-                for ((left, right), center) in month_left.zip(month_center).zip(month_right) {
-                    println!("{}{}{}", left, right, center);
+    for (i, chunk) in months.chunks(3).enumerate() {
+        match chunk {
+            [m1] => println!("{}", m1.join("\n")),
+            [m1, m2, m3] => {
+                for lines in izip!(m1, m2, m3) {
+                    println!("{}{}{}", lines.0, lines.1, lines.2);
+                }
+                if i < 3 {
+                    println!();
                 }
             }
-        }
+            _ => {}
+        };
     }
+
     Ok(())
 }
 
