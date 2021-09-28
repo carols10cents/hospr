@@ -1,8 +1,7 @@
 use chrono::NaiveDate;
-use chrono::{Datelike, Local, Month};
+use chrono::{Datelike, Local};
 use clap::{App, Arg};
 use colorize::AnsiColor;
-use num_traits::FromPrimitive;
 use std::error::Error;
 use std::str::FromStr;
 
@@ -207,16 +206,6 @@ fn format_month(year: i32, month: u32, print_year: bool, today: NaiveDate) -> Ve
     }
 
     lines
-}
-
-fn day_display(day: NaiveDate, today: NaiveDate) -> String {
-    let mut day_display = format!("{:>2}", day.day());
-
-    if day == today {
-        day_display = day_display.reverse();
-    }
-
-    format!("{} ", day_display)
 }
 
 fn last_day_in_month(year: i32, month: u32) -> NaiveDate {
