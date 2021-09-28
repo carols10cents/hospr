@@ -1,5 +1,5 @@
 use chrono::NaiveDate;
-use chrono::{Datelike, Month, Utc};
+use chrono::{Datelike, Local, Month};
 use clap::{App, Arg};
 use colorize::AnsiColor;
 use num_traits::FromPrimitive;
@@ -58,7 +58,7 @@ pub fn get_args() -> MyResult<Config> {
     let mut month = matches.value_of("month").map(parse_month).transpose()?;
     let mut year = matches.value_of("year").map(parse_year).transpose()?;
 
-    let today = Utc::today();
+    let today = Local::today();
     if matches.is_present("show_current_year") {
         month = None;
         year = Some(today.year());
@@ -74,7 +74,40 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    println!("{:?}", config);
+    let today = Local::today().naive_local();
+    match config.month {
+        Some(m) => {
+            for line in format_month(config.year, m, true, today) {
+                println!("{}", line);
+            }
+        }
+        None => {
+            print!("{}", format!("{:^61}", config.year).trim_end());
+
+            let mut months = (1..=12u32).into_iter();
+
+            loop {
+                let month_left = if let Some(n) = months.next() {
+                    n
+                } else {
+                    break;
+                };
+                let month_center = months.next().unwrap();
+                let month_right = months.next().unwrap();
+
+                println!();
+
+                let month_left = format_month(config.year, month_left, false, today).into_iter();
+                let month_center =
+                    format_month(config.year, month_center, false, today).into_iter();
+                let month_right = format_month(config.year, month_right, false, today).into_iter();
+
+                for ((left, right), center) in month_left.zip(month_center).zip(month_right) {
+                    println!("{}{}{}", left, right, center);
+                }
+            }
+        }
+    }
     Ok(())
 }
 
@@ -135,11 +168,18 @@ fn format_month(year: i32, month: u32, print_year: bool, today: NaiveDate) -> Ve
 
     output.push(format!(
         "{:^20}  ",
-        format!(
-            "{} {}",
-            Month::from_u32(start_date.month()).unwrap().name(),
-            start_date.year()
-        )
+        if print_year {
+            format!(
+                "{} {}",
+                Month::from_u32(start_date.month()).unwrap().name(),
+                start_date.year()
+            )
+        } else {
+            Month::from_u32(start_date.month())
+                .unwrap()
+                .name()
+                .to_string()
+        }
     ));
 
     output.push("Su Mo Tu We Th Fr Sa  ".into());
@@ -199,7 +239,7 @@ fn last_day_in_month(year: i32, month: u32) -> NaiveDate {
 #[cfg(test)]
 mod tests {
     use super::{format_month, last_day_in_month, parse_int, parse_month, parse_year};
-    use chrono::{NaiveDate, Utc};
+    use chrono::{Local, NaiveDate};
 
     #[test]
     fn test_parse_int() {
@@ -282,7 +322,7 @@ mod tests {
 
     #[test]
     fn test_format_month() {
-        let today = Utc::today().naive_local();
+        let today = Local::today().naive_local();
         let april = vec![
             "     April 2020       ",
             "Su Mo Tu We Th Fr Sa  ",
