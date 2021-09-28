@@ -167,12 +167,12 @@ fn format_month(year: i32, month: u32, print_year: bool, today: NaiveDate) -> Ve
         .map(|_| "  ".to_string())
         .collect();
 
-    let is_today = |n: &u32| year == today.year() && month == today.month() && *n == today.day();
+    let is_today = |n: u32| year == today.year() && month == today.month() && n == today.day();
 
     let placeholder = "XX";
 
     days.extend((first.day()..=last.day()).into_iter().map(|num| {
-        if is_today(&num) {
+        if is_today(num) {
             placeholder.to_string()
         } else {
             format!("{:>2}", num)
