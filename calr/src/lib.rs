@@ -1,4 +1,4 @@
-use chrono::{Datelike, NaiveDate, Utc, Local};
+use chrono::{Datelike, Local, NaiveDate, Utc};
 use clap::{App, Arg};
 use colorize::AnsiColor;
 use itertools::izip;
@@ -72,13 +72,13 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    let month_nums: Vec<u32> = match config.month {
-        Some(m) => vec![m],
-        _ => (1..=12).collect(),
+    let (month_nums, show_year) = match config.month {
+        Some(m) => (vec![m], true),
+        None => ((1..=12).collect(), false),
     };
-    let show_year = month_nums.len() < 12;
-    let today = Utc::today().naive_local();
-    let months: Vec<Vec<String>> = month_nums
+
+    let today = Local::today().naive_local();
+    let months: Vec<_> = month_nums
         .iter()
         .map(|month| format_month(config.year, *month, show_year, today))
         .collect();
