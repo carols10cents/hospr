@@ -58,3 +58,55 @@ pub fn run(config: Config) -> MyResult<()> {
     println!("{:#?}", config);
     Ok(())
 }
+
+fn parse_delimiters(given: &str) -> MyResult<Vec<String>> {
+    unimplemented!();
+}
+
+#[cfg(test)]
+mod test {
+    use super::parse_delimiters;
+
+    #[test]
+    fn test_parse_delimiters() {
+        // A single backslash is an error
+        let res = parse_delimiters("\\");
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().to_string(), "Lone backslash");
+
+        // Any backslash not followed by t, n, 0, or \\ is an error
+        let res = parse_delimiters("\\x");
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().to_string(), "Unknown escape \"\\x\"");
+
+        // A single character is OK
+        let res = parse_delimiters(",");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), &[","]);
+
+        // A tab character is OK
+        let res = parse_delimiters("\\t");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), &["\t"]);
+
+        // A newline character is OK
+        let res = parse_delimiters("\\n");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), &["\n"]);
+
+        // A literal backslash is OK
+        let res = parse_delimiters("\\\\");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), &["\\"]);
+
+        // The sequence \0 means the empty string
+        let res = parse_delimiters("\\0");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), &[""]);
+
+        // Test all the things
+        let res = parse_delimiters("\\t,\\n;\\\\\\0");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), &["\t", ",", "\n", ";", "\\", ""]);
+    }
+}
