@@ -72,7 +72,40 @@ pub fn run(config: Config) -> MyResult<()> {
             }
         }
     } else {
-        // let lines_iters = config.files
+        let delimiter = delims.next().unwrap();
+        let lines_iters = config
+            .files
+            .iter()
+            .map(|filename| {
+                open(filename)
+                    .map_err(|err| format!("{}: {}", filename, err).into())
+                    .map(|file| file.lines().fuse())
+            })
+            .collect::<MyResult<Vec<_>>>();
+
+        match lines_iters {
+            Err(e) => eprintln!("{}", e),
+            Ok(mut lines_iters) => {
+                let mut group: Vec<_> = lines_iters.iter_mut().map(|lines| lines.next()).collect();
+
+                while group.iter().any(|item| item.is_some()) {
+                    println!(
+                        "{}",
+                        group
+                            .iter()
+                            .map(|item| {
+                                match item {
+                                    Some(Ok(line)) => line,
+                                    _ => "",
+                                }
+                            })
+                            .collect::<Vec<_>>()
+                            .join(delimiter)
+                    );
+                    group = lines_iters.iter_mut().map(|lines| lines.next()).collect();
+                }
+            }
+        }
     }
 
     Ok(())
