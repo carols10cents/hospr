@@ -60,28 +60,16 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn parse_delimiters(given: &str) -> MyResult<Vec<String>> {
-    let mut chrs = given.chars().collect::<Vec<_>>().into_iter().peekable();
+    let mut chrs = given.chars();
     let mut results = vec![];
     while let Some(chr) = chrs.next() {
         if chr == '\\' {
-            let esc = match &chrs.peek() {
+            let esc = match chrs.next() {
                 None => Err("Lone backslash".to_string()),
-                Some('n') => {
-                    chrs.next();
-                    Ok("\n".to_string())
-                }
-                Some('t') => {
-                    chrs.next();
-                    Ok("\t".to_string())
-                }
-                Some('\\') => {
-                    chrs.next();
-                    Ok("\\".to_string())
-                }
-                Some('0') => {
-                    chrs.next();
-                    Ok("".to_string())
-                }
+                Some('n') => Ok("\n".to_string()),
+                Some('t') => Ok("\t".to_string()),
+                Some('\\') => Ok("\\".to_string()),
+                Some('0') => Ok("".to_string()),
                 Some(c) => Err(format!("Unknown escape \"\\{}\"", c)),
             }?;
             results.push(esc);
