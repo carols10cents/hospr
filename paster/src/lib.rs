@@ -34,15 +34,14 @@ pub fn get_args() -> MyResult<Config> {
                 .value_name("DELIMITER")
                 .short("d")
                 .long("delimiter")
-                .default_value("\\t")
-                .help("Delimiter"),
+                .help("Delimiter [default value: \t]"),
         )
         .get_matches();
 
     let files = matches.values_of_lossy("files").unwrap();
     let delimiters: Vec<_> = matches
         .value_of_lossy("delimiter")
-        .unwrap()
+        .unwrap_or(String::from("\t").into())
         .chars()
         .map(|c| c.to_string())
         .collect();
