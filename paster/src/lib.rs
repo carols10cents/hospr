@@ -58,12 +58,23 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    for filename in config.files {
-        match open(&filename) {
-            Err(err) => eprintln!("{}: {}", filename, err),
-            Ok(_file) => {}
+    let mut delims = config.delimiters.iter().cycle();
+
+    if config.serial {
+        for filename in config.files {
+            match open(&filename) {
+                Err(err) => eprintln!("{}: {}", filename, err),
+                Ok(file) => {
+                    for line in file.lines() {
+                        print!("{}{}", line?, delims.next().unwrap());
+                    }
+                }
+            }
         }
+    } else {
+        // let lines_iters = config.files
     }
+
     Ok(())
 }
 
