@@ -15,8 +15,38 @@ pub fn get_args() -> MyResult<Config> {
         .version("0.1.0")
         .author("Ken Youens-Clark <kyclark@gmail.com>")
         .about("Rust paste")
-        // What goes here?
+        .arg(
+            Arg::with_name("files")
+                .value_name("FILE")
+                .help("Input file(s)")
+                .default_value("-")
+                .min_values(1),
+        )
+        .arg(
+            Arg::with_name("serial")
+                .short("s")
+                .long("serial")
+                .takes_value(false)
+                .help("Concatenate lines of each file serially"),
+        )
+        .arg(
+            Arg::with_name("delimiter")
+                .value_name("DELIMITER")
+                .short("d")
+                .long("delimiter")
+                .default_value("\\t")
+                .help("Delimiter"),
+        )
         .get_matches();
+
+    let files = matches.values_of_lossy("files").unwrap();
+    let delimiters: Vec<_> = matches
+        .value_of_lossy("delimiter")
+        .unwrap()
+        .chars()
+        .map(|c| c.to_string())
+        .collect();
+    let serial = matches.is_present("serial");
 
     Ok(Config {
         files,
