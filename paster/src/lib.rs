@@ -60,27 +60,36 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn parse_delimiters(given: &str) -> MyResult<Vec<String>> {
-    let mut delimiters = vec![];
-
-    let mut chars = given.chars().peekable();
-    while let Some(ch) = chars.next() {
-        if ch == '\\' {
-            let n = chars
-                .next()
-                .ok_or::<Box<dyn Error>>("Lone backslash".into())?;
-            match n {
-                't' => delimiters.push("\t".to_string()),
-                'n' => delimiters.push("\n".to_string()),
-                '0' => delimiters.push("".to_string()),
-                '\\' => delimiters.push("\\".to_string()),
-                _ => return Err(format!("Unknown escape \"{}{}\"", ch, n).into()),
-            }
+    let mut chrs = given.chars().collect::<Vec<_>>().into_iter().peekable();
+    let mut results = vec![];
+    while let Some(chr) = chrs.next() {
+        if chr == '\\' {
+            let esc = match &chrs.peek() {
+                None => Err("Lone backslash".to_string()),
+                Some('n') => {
+                    chrs.next();
+                    Ok("\n".to_string())
+                }
+                Some('t') => {
+                    chrs.next();
+                    Ok("\t".to_string())
+                }
+                Some('\\') => {
+                    chrs.next();
+                    Ok("\\".to_string())
+                }
+                Some('0') => {
+                    chrs.next();
+                    Ok("".to_string())
+                }
+                Some(c) => Err(format!("Unknown escape \"\\{}\"", c)),
+            }?;
+            results.push(esc);
         } else {
-            delimiters.push(ch.to_string());
+            results.push(chr.to_string());
         }
     }
-
-    Ok(delimiters)
+    Ok(results)
 }
 
 #[cfg(test)]
