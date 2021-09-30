@@ -20,37 +20,36 @@ pub fn get_args() -> MyResult<Config> {
                 .value_name("FILE")
                 .help("Input file(s)")
                 .default_value("-")
-                .min_values(1),
+                .multiple(true),
+        )
+        .arg(
+            Arg::with_name("delimiters")
+                .short("d")
+                .long("delimiter")
+                .value_name("DELIMITER")
+                .help("Delimiter")
+                .default_value("\\t")
+                .takes_value(true),
         )
         .arg(
             Arg::with_name("serial")
                 .short("s")
                 .long("serial")
-                .takes_value(false)
-                .help("Concatenate lines of each file serially"),
-        )
-        .arg(
-            Arg::with_name("delimiter")
-                .value_name("DELIMITER")
-                .short("d")
-                .long("delimiter")
-                .help("Delimiter [default value: \t]"),
+                .help("Concatenate lines of each file serially")
+                .takes_value(false),
         )
         .get_matches();
 
-    let files = matches.values_of_lossy("files").unwrap();
-    let delimiters: Vec<_> = matches
-        .value_of_lossy("delimiter")
-        .unwrap_or(String::from("\t").into())
-        .chars()
-        .map(|c| c.to_string())
-        .collect();
-    let serial = matches.is_present("serial");
+    let delimiters = matches
+        .value_of("delimiters")
+        .map(parse_delimiters)
+        .transpose()?
+        .unwrap();
 
     Ok(Config {
-        files,
+        files: matches.values_of_lossy("files").unwrap(),
         delimiters,
-        serial,
+        serial: matches.is_present("serial"),
     })
 }
 
