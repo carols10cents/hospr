@@ -69,11 +69,11 @@ pub fn run(config: Config) -> MyResult<()> {
         }
     }
     if config.serial {
-        let mut delims = config.delimiters.into_iter().cycle();
+        let delims = config.delimiters.into_iter().cycle();
         for mut file in files {
             let mut out = file.next().unwrap_or_default();
-            for line in file {
-                out += &delims.next().unwrap();
+            for (delim, line) in delims.clone().zip(file) {
+                out += &delim;
                 out += &line;
             }
             println!("{}", out);
