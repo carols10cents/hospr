@@ -63,7 +63,7 @@ pub fn run(config: Config) -> MyResult<()> {
         match open(&filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(file) => {
-                let lines = file.lines().filter_map(|line| line.ok());
+                let lines = file.lines().filter_map(|line| line.ok()).fuse();
                 files.push(lines);
             }
         }
