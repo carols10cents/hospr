@@ -69,13 +69,11 @@ pub fn run(config: Config) -> MyResult<()> {
         }
     }
     if config.serial {
-        let delims = &mut config.delimiters.into_iter().cycle();
-        for file in files {
-            let mut out = String::new();
-            for (i, line) in file.enumerate() {
-                if i > 0 {
-                    out += &delims.next().unwrap();
-                }
+        let mut delims = config.delimiters.into_iter().cycle();
+        for mut file in files {
+            let mut out = file.next().unwrap_or_default();
+            for line in file {
+                out += &delims.next().unwrap();
                 out += &line;
             }
             println!("{}", out);
