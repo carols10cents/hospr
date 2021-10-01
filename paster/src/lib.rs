@@ -58,54 +58,28 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    let mut delims = config.delimiters.iter().cycle();
-
-    if config.serial {
-        for filename in config.files {
-            match open(&filename) {
-                Err(err) => eprintln!("{}: {}", filename, err),
-                Ok(file) => {
-                    for line in file.lines() {
-                        print!("{}{}", line?, delims.next().unwrap());
-                    }
-                }
+    let mut files = vec![];
+    for filename in config.files {
+        match open(&filename) {
+            Err(err) => eprintln!("{}: {}", filename, err),
+            Ok(file) => {
+                let lines = file.lines().filter_map(|line| line.ok());
+                files.push(lines);
             }
         }
-    } else {
-        let delimiter = delims.next().unwrap();
-        let lines_iters = config
-            .files
-            .iter()
-            .map(|filename| {
-                open(filename)
-                    .map_err(|err| format!("{}: {}", filename, err).into())
-                    .map(|file| file.lines().fuse())
-            })
-            .collect::<MyResult<Vec<_>>>();
+    }
 
-        match lines_iters {
-            Err(e) => eprintln!("{}", e),
-            Ok(mut lines_iters) => {
-                let mut group: Vec<_> = lines_iters.iter_mut().map(|lines| lines.next()).collect();
+    let delim = config.delimiters.first().unwrap();
+    loop {
+        let mut lines = vec![];
 
-                while group.iter().any(|item| item.is_some()) {
-                    println!(
-                        "{}",
-                        group
-                            .iter()
-                            .map(|item| {
-                                match item {
-                                    Some(Ok(line)) => line,
-                                    _ => "",
-                                }
-                            })
-                            .collect::<Vec<_>>()
-                            .join(delimiter)
-                    );
-                    group = lines_iters.iter_mut().map(|lines| lines.next()).collect();
-                }
-            }
+        for iter in &mut files {
+            lines.push(iter.next().unwrap_or_else(|| "".to_string()));
         }
+        if lines.join("").is_empty() {
+            break;
+        }
+        println!("{}", lines.join(delim));
     }
 
     Ok(())
