@@ -63,25 +63,36 @@ pub fn run(config: Config) -> MyResult<()> {
         match open(&filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(file) => {
-                let lines = file.lines().filter_map(|line| line.ok()).fuse();
+                let lines = file.lines().filter_map(|line| line.ok());
                 files.push(lines);
             }
         }
     }
-
-    let delim = config.delimiters.first().unwrap();
-    loop {
-        let mut lines = vec![];
-
-        for iter in &mut files {
-            lines.push(iter.next().unwrap_or_else(|| "".to_string()));
+    if config.serial {
+        let delims = &mut config.delimiters.into_iter().cycle();
+        for file in files {
+            let mut out = String::new();
+            for (i, line) in file.enumerate() {
+                if i > 0 {
+                    out += &delims.next().unwrap();
+                }
+                out += &line;
+            }
+            println!("{}", out);
         }
-        if lines.join("").is_empty() {
-            break;
+    } else {
+        let delim = config.delimiters.first().unwrap();
+        loop {
+            let mut lines = vec![];
+            for iter in &mut files {
+                lines.push(iter.next().unwrap_or_else(|| "".to_string()));
+            }
+            if lines.join("").is_empty() {
+                break;
+            }
+            println!("{}", lines.join(delim));
         }
-        println!("{}", lines.join(delim));
     }
-
     Ok(())
 }
 
