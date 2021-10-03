@@ -1,5 +1,6 @@
 use clap::{App, Arg};
 use std::error::Error;
+use std::path::PathBuf;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -46,7 +47,10 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    println!("{:?}", config);
+    let paths = find_files(&config.paths, config.show_hidden)?;
+    for path in paths {
+        println!("{}", path.display());
+    }
     Ok(())
 }
 
