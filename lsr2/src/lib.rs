@@ -57,3 +57,52 @@ pub fn run(config: Config) -> MyResult<()> {
 fn find_files(paths: &[String], show_hidden: bool) -> MyResult<Vec<PathBuf>> {
     unimplemented!();
 }
+
+#[cfg(test)]
+mod test {
+    use super::find_files;
+    use std::collections::HashSet;
+
+    #[test]
+    fn test_find_files() {
+        let res = find_files(&["tests/inputs".to_string()], false);
+        assert!(res.is_ok());
+
+        let paths = res.unwrap();
+        assert_eq!(paths.len(), 4);
+
+        let filenames: HashSet<String> = paths.iter().map(|f| f.path.to_string()).collect();
+        let expected: HashSet<String> = [
+            "tests/inputs/bustle.txt",
+            "tests/inputs/dir",
+            "tests/inputs/empty.txt",
+            "tests/inputs/fox.txt",
+        ]
+        .iter()
+        .map(|v| v.to_string())
+        .collect();
+        assert_eq!(filenames, expected);
+    }
+
+    #[test]
+    fn test_find_files_hidden() {
+        let res = find_files(&["tests/inputs".to_string()], true);
+        assert!(res.is_ok());
+
+        let paths = res.unwrap();
+        assert_eq!(paths.len(), 5);
+
+        let filenames: HashSet<String> = paths.iter().map(|f| f.path.to_string()).collect();
+        let expected: HashSet<String> = [
+            "tests/inputs/.hidden",
+            "tests/inputs/bustle.txt",
+            "tests/inputs/dir",
+            "tests/inputs/empty.txt",
+            "tests/inputs/fox.txt",
+        ]
+        .iter()
+        .map(|v| v.to_string())
+        .collect();
+        assert_eq!(filenames, expected);
+    }
+}
