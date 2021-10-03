@@ -49,3 +49,7 @@ pub fn run(config: Config) -> MyResult<()> {
     println!("{:?}", config);
     Ok(())
 }
+
+fn find_files(paths: &[String], show_hidden: bool) -> MyResult<Vec<PathBuf>> {
+    unimplemented!();
+}
