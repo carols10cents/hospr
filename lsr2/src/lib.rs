@@ -71,7 +71,7 @@ mod test {
         let paths = res.unwrap();
         assert_eq!(paths.len(), 4);
 
-        let filenames: HashSet<String> = paths.iter().map(|f| f.path.to_string()).collect();
+        let filenames: HashSet<String> = paths.iter().map(|f| f.display().to_string()).collect();
         let expected: HashSet<String> = [
             "tests/inputs/bustle.txt",
             "tests/inputs/dir",
@@ -92,7 +92,7 @@ mod test {
         let paths = res.unwrap();
         assert_eq!(paths.len(), 5);
 
-        let filenames: HashSet<String> = paths.iter().map(|f| f.path.to_string()).collect();
+        let filenames: HashSet<String> = paths.iter().map(|f| f.display().to_string()).collect();
         let expected: HashSet<String> = [
             "tests/inputs/.hidden",
             "tests/inputs/bustle.txt",
