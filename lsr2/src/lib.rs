@@ -23,29 +23,25 @@ pub fn get_args() -> MyResult<Config> {
                 .multiple(true),
         )
         .arg(
-            Arg::with_name("all")
-                .short("a")
-                .long("all")
-                .help("Show all files")
-                .takes_value(false),
+            Arg::with_name("long")
+                .takes_value(false)
+                .help("Long listing")
+                .short("l")
+                .long("long"),
         )
         .arg(
-            Arg::with_name("long")
-                .short("l")
-                .long("long")
-                .help("Long listing")
-                .takes_value(false),
+            Arg::with_name("all")
+                .takes_value(false)
+                .help("Show all files")
+                .short("a")
+                .long("all"),
         )
         .get_matches();
 
-    let paths = matches.values_of_lossy("paths").unwrap();
-    let long = matches.is_present("long");
-    let show_hidden = matches.is_present("all");
-
     Ok(Config {
-        paths,
-        long,
-        show_hidden,
+        paths: matches.values_of_lossy("paths").unwrap(),
+        long: matches.is_present("long"),
+        show_hidden: matches.is_present("all"),
     })
 }
 
