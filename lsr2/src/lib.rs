@@ -1,6 +1,5 @@
 use clap::{App, Arg};
-use std::error::Error;
-use std::path::PathBuf;
+use std::{error::Error, fs, path::PathBuf};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -55,7 +54,27 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn find_files(paths: &[String], show_hidden: bool) -> MyResult<Vec<PathBuf>> {
-    unimplemented!();
+    let mut files = vec![];
+
+    for path in paths {
+        let metadata = fs::metadata(path)?;
+        if metadata.is_dir() {
+            for entry in fs::read_dir(path)? {
+                let entry = entry?;
+                let hidden = entry
+                    .file_name()
+                    .as_os_str()
+                    .to_string_lossy()
+                    .starts_with(".");
+
+                if show_hidden || !hidden {
+                    files.push(entry.path());
+                }
+            }
+        }
+    }
+
+    Ok(files)
 }
 
 #[cfg(test)]
