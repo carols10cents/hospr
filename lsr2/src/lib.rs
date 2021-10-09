@@ -71,6 +71,17 @@ fn find_files(paths: &[String], show_hidden: bool) -> MyResult<Vec<PathBuf>> {
                     files.push(entry.path());
                 }
             }
+        } else {
+            let pathbuf = PathBuf::from(path);
+            let hidden = pathbuf
+                .file_name()
+                .unwrap()
+                .to_string_lossy()
+                .starts_with(".");
+
+            if show_hidden || !hidden {
+                files.push(pathbuf);
+            }
         }
     }
 
