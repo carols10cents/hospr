@@ -57,7 +57,7 @@ fn find_files(paths: &[String], show_hidden: bool) -> MyResult<Vec<PathBuf>> {
     let mut files = vec![];
 
     for path in paths {
-        let metadata = fs::metadata(path)?;
+        let metadata = fs::metadata(path).map_err(|e| format!("{}: {}", path, e))?;
         if metadata.is_dir() {
             for entry in fs::read_dir(path)? {
                 let entry = entry?;
