@@ -85,6 +85,26 @@ fn find_files(paths: &[String], show_hidden: bool) -> MyResult<Vec<PathBuf>> {
     Ok(files)
 }
 
+fn format_output(paths: &[PathBuf]) -> MyResult<String> {
+    // 1 2 3 4 5 6 7 8
+    let fmt = "{:<}{:<} {:>} {:<} {:<} {:>} {:<} {:<}";
+    let mut table = Table::new(fmt);
+    for path in paths {
+        table.add_row(
+            Row::new()
+                .with_cell("") // 1 "d" or "-"
+                .with_cell("") // 2 permissions
+                .with_cell("") // 3 number of links
+                .with_cell("") // 4 user name
+                .with_cell("") // 5 group name
+                .with_cell("") // 6 size
+                .with_cell("") // 7 modification
+                .with_cell(""), // 8 path
+        );
+    }
+    Ok(format!("{}", table))
+}
+
 #[cfg(test)]
 mod test {
     use super::find_files;
