@@ -1,5 +1,6 @@
 use clap::{App, Arg};
 use std::{error::Error, fs, path::PathBuf};
+use tabular::{Row, Table};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
