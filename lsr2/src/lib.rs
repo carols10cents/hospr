@@ -194,9 +194,9 @@ mod test {
     fn long_match(line: &str, permissions: &str, size: &str, path: &str) {
         let parts: Vec<_> = line.split_whitespace().collect();
 
-        let file_perm = parts.get(0).expect("No file permissions found");
-        assert_eq!(file_perm, &permissions);
-
+        if let Some(&file_perm) = parts.get(0) {
+            assert_eq!(file_perm, permissions);
+        }
         if let Some(&file_size) = parts.get(4) {
             assert_eq!(file_size, size);
         }
@@ -219,5 +219,25 @@ mod test {
 
         let line1 = lines.first().unwrap();
         long_match(&line1, "-rw-r--r--", "193", bustle_path);
+    }
+
+    #[test]
+    fn test_format_output_two() {
+        let res = format_output(&[
+            PathBuf::from("tests/inputs/dir"),
+            PathBuf::from("tests/inputs/empty.txt"),
+        ]);
+        assert!(res.is_ok());
+
+        let out = res.unwrap();
+        let mut lines: Vec<&str> = out.split("\n").filter(|s| !s.is_empty()).collect();
+        lines.sort();
+        assert_eq!(lines.len(), 2);
+
+        let empty_line = lines.remove(0);
+        long_match(&empty_line, "-rw-r--r--", "0", "tests/inputs/empty.txt");
+
+        let dir_line = lines.remove(0);
+        long_match(&dir_line, "drwxr-xr-x", "128", "tests/inputs/dir");
     }
 }
