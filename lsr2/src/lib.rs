@@ -109,7 +109,32 @@ fn format_output(paths: &[PathBuf]) -> MyResult<String> {
 /// Given a file mode in octal format like 0o751,
 /// return a string like "rwxr-x--x"
 pub fn format_mode(mode: u16) -> String {
-    unimplemented!();
+    let mut s = String::with_capacity(9);
+
+    for mask_values in [
+        (0o400, 0o200, 0o100), // user
+        (0o040, 0o020, 0o010), // group
+        (0o004, 0o002, 0o001), // other
+    ] {
+        let (read, write, execute) = mask_values;
+        if mode & read == read {
+            s.push('r')
+        } else {
+            s.push('-')
+        }
+        if mode & write == write {
+            s.push('w')
+        } else {
+            s.push('-')
+        }
+        if mode & execute == execute {
+            s.push('x')
+        } else {
+            s.push('-')
+        }
+    }
+
+    s
 }
 
 #[cfg(test)]
