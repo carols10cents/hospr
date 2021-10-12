@@ -114,7 +114,7 @@ pub fn format_mode(mode: u16) -> String {
 
 #[cfg(test)]
 mod test {
-    use super::find_files;
+    use super::{find_files, format_mode};
     use std::collections::HashSet;
 
     #[test]
@@ -158,5 +158,11 @@ mod test {
         .map(|v| v.to_string())
         .collect();
         assert_eq!(filenames, expected);
+    }
+
+    #[test]
+    fn test_format_mode() {
+        assert_eq!(format_mode(0o755), "rwxr-xr-x");
+        assert_eq!(format_mode(0o421), "r---w---x");
     }
 }
