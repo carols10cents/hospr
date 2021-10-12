@@ -1,5 +1,5 @@
 use clap::{App, Arg};
-use std::{error::Error, fs, path::PathBuf};
+use std::{error::Error, fs, os::unix::fs::MetadataExt, path::PathBuf};
 use tabular::{Row, Table};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
@@ -48,8 +48,12 @@ pub fn get_args() -> MyResult<Config> {
 
 pub fn run(config: Config) -> MyResult<()> {
     let paths = find_files(&config.paths, config.show_hidden)?;
-    for path in paths {
-        println!("{}", path.display());
+    if config.long {
+        println!("{}", format_output(&paths)?);
+    } else {
+        for path in paths {
+            println!("{}", path.display());
+        }
     }
     Ok(())
 }
@@ -91,16 +95,22 @@ fn format_output(paths: &[PathBuf]) -> MyResult<String> {
     let fmt = "{:<}{:<} {:>} {:<} {:<} {:>} {:<} {:<}";
     let mut table = Table::new(fmt);
     for path in paths {
+        let metadata = fs::metadata(path)?;
+
+        let user =
+            users::get_user_by_uid(metadata.uid()).map(|u| u.name().to_string_lossy().to_string());
+        let group =
+            users::get_group_by_gid(metadata.gid()).map(|g| g.name().to_string_lossy().to_string());
         table.add_row(
             Row::new()
-                .with_cell("") // 1 "d" or "-"
-                .with_cell("") // 2 permissions
-                .with_cell("") // 3 number of links
-                .with_cell("") // 4 user name
-                .with_cell("") // 5 group name
-                .with_cell("") // 6 size
+                .with_cell(if metadata.is_dir() { "d" } else { "-" }) // 1 "d" or "-"
+                .with_cell(format_mode(metadata.mode())) // 2 permissions
+                .with_cell(metadata.nlink()) // 3 number of links
+                .with_cell(user.unwrap_or("Unknown".into())) // 4 user name
+                .with_cell(group.unwrap_or("Unknown".into())) // 5 group name
+                .with_cell(metadata.len()) // 6 size
                 .with_cell("") // 7 modification
-                .with_cell(""), // 8 path
+                .with_cell(path.display()), // 8 path
         );
     }
     Ok(format!("{}", table))
@@ -108,7 +118,7 @@ fn format_output(paths: &[PathBuf]) -> MyResult<String> {
 
 /// Given a file mode in octal format like 0o751,
 /// return a string like "rwxr-x--x"
-pub fn format_mode(mode: u16) -> String {
+pub fn format_mode(mode: u32) -> String {
     let mut s = String::with_capacity(9);
 
     for mask_values in [
