@@ -139,7 +139,7 @@ pub fn format_mode(mode: u16) -> String {
 
 #[cfg(test)]
 mod test {
-    use super::{find_files, format_mode};
+    use super::{find_files, format_mode, format_output};
     use std::collections::HashSet;
 
     #[test]
@@ -189,5 +189,18 @@ mod test {
     fn test_format_mode() {
         assert_eq!(format_mode(0o755), "rwxr-xr-x");
         assert_eq!(format_mode(0o421), "r---w---x");
+    }
+
+    fn long_match(line: &str, permissions: &str, size: &str, path: &str) {
+        let parts: Vec<_> = line.split_whitespace().collect();
+        if let Some(file_perm) = &parts.get(0) {
+            assert_eq!(file_perm, &&permissions);
+        }
+        if let Some(file_size) = &parts.get(4) {
+            assert_eq!(file_size, &&size);
+        }
+        if let Some(file_path) = &parts.last() {
+            assert_eq!(file_path, &&path);
+        }
     }
 }
