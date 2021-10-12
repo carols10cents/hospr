@@ -106,6 +106,12 @@ fn format_output(paths: &[PathBuf]) -> MyResult<String> {
     Ok(format!("{}", table))
 }
 
+/// Given a file mode in octal format like 0o751,
+/// return a string like "rwxr-x--x"
+pub fn format_mode(mode: u16) -> String {
+    unimplemented!();
+}
+
 #[cfg(test)]
 mod test {
     use super::find_files;
