@@ -140,7 +140,7 @@ pub fn format_mode(mode: u16) -> String {
 #[cfg(test)]
 mod test {
     use super::{find_files, format_mode, format_output};
-    use std::collections::HashSet;
+    use std::{collections::HashSet, path::PathBuf};
 
     #[test]
     fn test_find_files() {
@@ -194,7 +194,7 @@ mod test {
     fn long_match(line: &str, permissions: &str, size: &str, path: &str) {
         let parts: Vec<_> = line.split_whitespace().collect();
 
-        let file_perm: () = parts.get(0).expect("No file permissions found");
+        let file_perm = parts.get(0).expect("No file permissions found");
         assert_eq!(file_perm, &permissions);
 
         if let Some(&file_size) = parts.get(4) {
@@ -206,7 +206,18 @@ mod test {
     }
 
     #[test]
-    fn test_test() {
-        long_match("hi you", "foo", "bar", "baz");
+    fn test_format_output_one() {
+        let bustle_path = "tests/inputs/bustle.txt";
+        let bustle = PathBuf::from(bustle_path);
+
+        let res = format_output(&[bustle]);
+        assert!(res.is_ok());
+
+        let out = res.unwrap();
+        let lines: Vec<&str> = out.split("\n").filter(|s| !s.is_empty()).collect();
+        assert_eq!(lines.len(), 1);
+
+        let line1 = lines.first().unwrap();
+        long_match(&line1, "-rw-r--r--", "193", bustle_path);
     }
 }
