@@ -2,6 +2,9 @@ use clap::{App, Arg};
 use std::{error::Error, fs, os::unix::fs::MetadataExt, path::PathBuf};
 use tabular::{Row, Table};
 
+mod owner;
+use owner::Owner;
+
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
 #[derive(Debug)]
