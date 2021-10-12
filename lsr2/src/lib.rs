@@ -193,14 +193,20 @@ mod test {
 
     fn long_match(line: &str, permissions: &str, size: &str, path: &str) {
         let parts: Vec<_> = line.split_whitespace().collect();
-        if let Some(file_perm) = &parts.get(0) {
-            assert_eq!(file_perm, &&permissions);
+
+        let file_perm: () = parts.get(0).expect("No file permissions found");
+        assert_eq!(file_perm, &permissions);
+
+        if let Some(&file_size) = parts.get(4) {
+            assert_eq!(file_size, size);
         }
-        if let Some(file_size) = &parts.get(4) {
-            assert_eq!(file_size, &&size);
+        if let Some(&file_path) = parts.last() {
+            assert_eq!(file_path, path);
         }
-        if let Some(file_path) = &parts.last() {
-            assert_eq!(file_path, &&path);
-        }
+    }
+
+    #[test]
+    fn test_test() {
+        long_match("hi you", "foo", "bar", "baz");
     }
 }
