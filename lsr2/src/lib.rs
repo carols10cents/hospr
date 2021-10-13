@@ -1,12 +1,7 @@
 use chrono::{DateTime, Local};
 use clap::{App, Arg};
 use owner::Owner;
-use std::{
-    error::Error,
-    fs,
-    os::unix::fs::{MetadataExt, PermissionsExt},
-    path::PathBuf,
-};
+use std::{error::Error, fs, os::unix::fs::MetadataExt, path::PathBuf};
 use tabular::{Row, Table};
 use users::{get_group_by_gid, get_user_by_uid};
 use walkdir::WalkDir;
@@ -114,7 +109,7 @@ fn format_output(paths: &[PathBuf]) -> MyResult<String> {
             .unwrap_or(format!("{}", gid));
 
         let file_type = if path.is_dir() { "d" } else { "-" };
-        let perms = format_mode(metadata.permissions().mode());
+        let perms = format_mode(metadata.mode());
         let modified: DateTime<Local> = DateTime::from(metadata.modified()?);
         table.add_row(
             Row::new()
