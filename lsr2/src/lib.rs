@@ -164,7 +164,7 @@ pub fn mk_triple(mode: u16, owner: Owner) -> String {
 
 #[cfg(test)]
 mod test {
-    use super::{find_files, format_mode, format_output};
+    use super::{find_files, format_mode, format_output, mk_triple, owner::Owner};
     use std::{collections::HashSet, path::PathBuf};
 
     #[test]
@@ -264,5 +264,13 @@ mod test {
 
         let dir_line = lines.remove(0);
         long_match(&dir_line, "drwxr-xr-x", "128", "tests/inputs/dir");
+    }
+
+    #[test]
+    fn test_mk_triple() {
+        assert_eq!(mk_triple(0o751, Owner::User), "rwx");
+        assert_eq!(mk_triple(0o751, Owner::Group), "r-x");
+        assert_eq!(mk_triple(0o751, Owner::Other), "--x");
+        assert_eq!(mk_triple(0o600, Owner::Other), "---");
     }
 }
