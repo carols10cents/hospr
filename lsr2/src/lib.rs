@@ -122,37 +122,17 @@ fn format_output(paths: &[PathBuf]) -> MyResult<String> {
 /// Given a file mode in octal format like 0o751,
 /// return a string like "rwxr-x--x"
 pub fn format_mode(mode: u32) -> String {
-    let mut s = String::with_capacity(9);
-
-    for mask_values in [
-        (0o400, 0o200, 0o100), // user
-        (0o040, 0o020, 0o010), // group
-        (0o004, 0o002, 0o001), // other
-    ] {
-        let (read, write, execute) = mask_values;
-        if mode & read == read {
-            s.push('r')
-        } else {
-            s.push('-')
-        }
-        if mode & write == write {
-            s.push('w')
-        } else {
-            s.push('-')
-        }
-        if mode & execute == execute {
-            s.push('x')
-        } else {
-            s.push('-')
-        }
-    }
-
-    s
+    format!(
+        "{}{}{}",
+        mk_triple(mode, Owner::User),
+        mk_triple(mode, Owner::Group),
+        mk_triple(mode, Owner::Other),
+    )
 }
 
 /// Given an octal number like 0o500 and an `Owner`,
 /// return a string like "r-x"
-pub fn mk_triple(mode: u16, owner: Owner) -> String {
+pub fn mk_triple(mode: u32, owner: Owner) -> String {
     let [read, write, execute] = owner.masks();
     format!(
         "{}{}{}",
