@@ -150,6 +150,18 @@ pub fn format_mode(mode: u32) -> String {
     s
 }
 
+/// Given an octal number like 0o500 and an `Owner`,
+/// return a string like "r-x"
+pub fn mk_triple(mode: u16, owner: Owner) -> String {
+    let [read, write, execute] = owner.masks();
+    format!(
+        "{}{}{}",
+        if mode & read == 0 { "-" } else { "r" },
+        if mode & write == 0 { "-" } else { "w" },
+        if mode & execute == 0 { "-" } else { "x" },
+    )
+}
+
 #[cfg(test)]
 mod test {
     use super::{find_files, format_mode, format_output};
