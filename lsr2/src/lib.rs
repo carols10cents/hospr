@@ -9,7 +9,7 @@ use std::{
 };
 use tabular::{Row, Table};
 use users::{get_group_by_gid, get_user_by_uid};
-// use walkdir::WalkDir;
+use walkdir::WalkDir;
 
 mod owner;
 
@@ -70,35 +70,29 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn find_files(paths: &[String], show_hidden: bool) -> MyResult<Vec<PathBuf>> {
-    let mut files = vec![];
-
-    for path in paths {
-        let metadata = match fs::metadata(path) {
-            Ok(m) => m,
-            Err(e) => {
-                eprintln!("{}: {}", path, e);
-                continue;
-            }
-        };
-        if metadata.is_dir() {
-            for entry in fs::read_dir(path)? {
-                let entry = entry?;
-                let hidden = entry
-                    .file_name()
-                    .as_os_str()
-                    .to_string_lossy()
-                    .starts_with(".");
-
-                if show_hidden || !hidden {
-                    files.push(entry.path());
+    let mut results = vec![];
+    for filename in paths {
+        match fs::metadata(filename) {
+            Err(e) => eprintln!("{}: {}", filename, e),
+            Ok(meta) => {
+                if meta.is_dir() {
+                    for entry in WalkDir::new(filename).min_depth(1).max_depth(1) {
+                        let entry = entry?;
+                        let path = entry.path();
+                        let is_hidden = path
+                            .file_name()
+                            .map_or(false, |name| name.to_string_lossy().starts_with('.'));
+                        if !is_hidden || show_hidden {
+                            results.push(PathBuf::from(path));
+                        }
+                    }
+                } else {
+                    results.push(PathBuf::from(filename));
                 }
             }
-        } else {
-            files.push(PathBuf::from(path));
         }
     }
-
-    Ok(files)
+    Ok(results)
 }
 
 fn format_output(paths: &[PathBuf]) -> MyResult<String> {
