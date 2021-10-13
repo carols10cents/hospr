@@ -99,23 +99,33 @@ fn format_output(paths: &[PathBuf]) -> MyResult<String> {
     // 1 2 3 4 5 6 7 8
     let fmt = "{:<}{:<} {:>} {:<} {:<} {:>} {:<} {:<}";
     let mut table = Table::new(fmt);
-    for path in paths {
-        let metadata = fs::metadata(path)?;
 
-        let user =
-            users::get_user_by_uid(metadata.uid()).map(|u| u.name().to_string_lossy().to_string());
-        let group =
-            users::get_group_by_gid(metadata.gid()).map(|g| g.name().to_string_lossy().to_string());
+    for path in paths {
+        let metadata = path.metadata()?;
+
+        let uid = metadata.uid();
+        let user = get_user_by_uid(uid)
+            .map(|u| u.name().to_string_lossy().into_owned())
+            .unwrap_or_else(|| uid.to_string());
+
+        let gid = metadata.gid();
+        let group = get_group_by_gid(gid)
+            .map(|g| g.name().to_string_lossy().into_owned())
+            .unwrap_or(format!("{}", gid));
+
+        let file_type = if path.is_dir() { "d" } else { "-" };
+        let perms = format_mode(metadata.permissions().mode());
+        let modified: DateTime<Local> = DateTime::from(metadata.modified()?);
         table.add_row(
             Row::new()
-                .with_cell(if metadata.is_dir() { "d" } else { "-" }) // 1 "d" or "-"
-                .with_cell(format_mode(metadata.mode())) // 2 permissions
-                .with_cell(metadata.nlink()) // 3 number of links
-                .with_cell(user.unwrap_or("Unknown".into())) // 4 user name
-                .with_cell(group.unwrap_or("Unknown".into())) // 5 group name
-                .with_cell(metadata.len()) // 6 size
-                .with_cell("") // 7 modification
-                .with_cell(path.display()), // 8 path
+                .with_cell(file_type) // 1
+                .with_cell(perms) // 2
+                .with_cell(metadata.nlink()) // 3
+                .with_cell(user) // 4
+                .with_cell(group) // 5
+                .with_cell(metadata.len()) // 6
+                .with_cell(modified.format("%b %d %y %H:%M")) // 7
+                .with_cell(path.display()), // 8
         );
     }
     Ok(format!("{}", table))
