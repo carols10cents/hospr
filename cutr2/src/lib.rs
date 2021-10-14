@@ -1,8 +1,8 @@
 use crate::Extract::*;
 use clap::{App, Arg};
-use std::{error::Error, ops::Range};
 use regex::Regex;
 use std::num::NonZeroUsize;
+use std::{error::Error, ops::Range};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 type PositionList = Vec<Range<usize>>;
@@ -26,13 +26,73 @@ pub fn get_args() -> MyResult<Config> {
         .version("0.1.0")
         .author("Ken Youens-Clark <kyclark@gmail.com>")
         .about("Rust cut")
-        // What goes here?
+        .arg(
+            Arg::with_name("files")
+                .value_name("FILE")
+                .help("Input file(s)")
+                .multiple(true)
+                .default_value("-"),
+        )
+        .arg(
+            Arg::with_name("delimiter")
+                .value_name("DELIMITER")
+                .short("d")
+                .long("delim")
+                .help("Field delimiter")
+                .default_value("\t"),
+        )
+        .arg(
+            Arg::with_name("fields")
+                .value_name("FIELDS")
+                .short("f")
+                .long("fields")
+                .help("Selected fields")
+                .conflicts_with_all(&["chars", "bytes"]),
+        )
+        .arg(
+            Arg::with_name("bytes")
+                .value_name("BYTES")
+                .short("b")
+                .long("bytes")
+                .help("Selected bytes")
+                .conflicts_with_all(&["fields", "chars"]),
+        )
+        .arg(
+            Arg::with_name("chars")
+                .value_name("CHARS")
+                .short("c")
+                .long("chars")
+                .help("Selected characters")
+                .conflicts_with_all(&["fields", "bytes"]),
+        )
         .get_matches();
 
+    let delimiter = matches.value_of("delimiter").unwrap();
+    let delim_bytes = delimiter.as_bytes();
+    if delim_bytes.len() != 1 {
+        return Err(From::from(format!(
+            "--delim \"{}\" must be a single byte",
+            delimiter
+        )));
+    }
+
+    let fields = matches.value_of("fields").map(parse_pos).transpose()?;
+    let bytes = matches.value_of("bytes").map(parse_pos).transpose()?;
+    let chars = matches.value_of("chars").map(parse_pos).transpose()?;
+
+    let extract = if let Some(field_pos) = fields {
+        Fields(field_pos)
+    } else if let Some(byte_pos) = bytes {
+        Bytes(byte_pos)
+    } else if let Some(char_pos) = chars {
+        Chars(char_pos)
+    } else {
+        return Err(From::from("Must have --fields, --bytes, or --chars"));
+    };
     Ok(Config {
-        files: unimplemented!(),
-        delimiter: unimplemented!(),
-        extract: unimplemented!(),
+        files: matches.values_of_lossy("files").unwrap(),
+        delimiter: *delim_bytes.first().unwrap(),
+        extract,
     })
 }
 
