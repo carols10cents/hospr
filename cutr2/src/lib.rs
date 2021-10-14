@@ -304,7 +304,7 @@ mod unit_tests {
         let rec = StringRecord::from(vec!["Captain", "Sham", "12345"]);
         assert_eq!(extract_fields(&rec, &[0..1]), &["Captain"]);
         assert_eq!(extract_fields(&rec, &[1..2]), &["Sham"]);
-        assert_eq!(extract_fields(&rec, &[0..2]), &["Captain", "12345"]);
+        assert_eq!(extract_fields(&rec, &[0..1, 2..3]), &["Captain", "12345"]);
         assert_eq!(extract_fields(&rec, &[0..1, 3..4]), &["Captain"]);
         assert_eq!(extract_fields(&rec, &[1..2, 0..1]), &["Sham", "Captain"]);
     }
