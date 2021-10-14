@@ -118,6 +118,10 @@ pub fn run(config: Config) -> MyResult<()> {
     Ok(())
 }
 
+fn extract_chars(line: &str, char_pos: &[Range<usize>]) -> String {
+    unimplemented!();
+}
+
 fn parse_index(input: &str) -> Result<usize, String> {
     let value_error = || format!("illegal list value: \"{}\"", input);
     input
