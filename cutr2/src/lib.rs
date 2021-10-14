@@ -177,7 +177,7 @@ must be lower than second number ({})",
         .map_err(From::from)
 }
 
-fn extract_fields(record: &StringRecord, field_pos: &[Range<usize>]) -> Vec<&str> {
+fn extract_fields<'a>(record: &'a StringRecord, field_pos: &[Range<usize>]) -> Vec<&'a str> {
     field_pos
         .iter()
         .cloned()
