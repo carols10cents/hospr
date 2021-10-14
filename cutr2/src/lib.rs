@@ -128,6 +128,16 @@ fn extract_chars(line: &str, char_pos: &[Range<usize>]) -> String {
         .collect()
 }
 
+fn extract_bytes(line: &str, byte_pos: &[Range<usize>]) -> String {
+    let bytes = line.as_bytes();
+    let selected: Vec<_> = byte_pos
+        .iter()
+        .cloned()
+        .flat_map(|range| range.filter_map(|i| bytes.get(i)).copied())
+        .collect();
+    String::from_utf8_lossy(&selected).into_owned()
+}
+
 fn parse_index(input: &str) -> Result<usize, String> {
     let value_error = || format!("illegal list value: \"{}\"", input);
     input
@@ -167,10 +177,6 @@ must be lower than second number ({})",
         .map_err(From::from)
 }
 
-fn extract_bytes(line: &str, byte_pos: &[Range<usize>]) -> String {
-    unimplemented!();
-}
-
 fn extract_fields(record: &StringRecord, field_pos: &[Range<usize>]) -> Vec<String> {
     unimplemented!();
 }
@@ -182,7 +188,7 @@ mod unit_tests {
 
     #[test]
     fn test_extract_bytes() {
-        assert_eq!(extract_bytes("ábc", &[0..1]), "".to_string());
+        assert_eq!(extract_bytes("ábc", &[0..1]), "�".to_string());
         assert_eq!(extract_bytes("ábc", &[0..2]), "á".to_string());
         assert_eq!(extract_bytes("ábc", &[0..3]), "áb".to_string());
         assert_eq!(extract_bytes("ábc", &[0..4]), "ábc".to_string());
