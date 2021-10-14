@@ -121,11 +121,12 @@ pub fn run(config: Config) -> MyResult<()> {
 
 fn extract_chars(line: &str, char_pos: &[Range<usize>]) -> String {
     let chars: Vec<_> = line.chars().collect();
-    let mut selected: Vec<char> = vec![];
-    for range in char_pos.iter().cloned() {
-        selected.extend(range.filter_map(|i| chars.get(i)));
-    }
-    selected.iter().collect()
+    char_pos
+        .iter()
+        .cloned()
+        .map(|range| range.filter_map(|i| chars.get(i)))
+        .flatten()
+        .collect()
 }
 
 fn parse_index(input: &str) -> Result<usize, String> {
