@@ -1,8 +1,13 @@
 use crate::Extract::*;
 use clap::{App, Arg};
 use regex::Regex;
-use std::num::NonZeroUsize;
-use std::{error::Error, ops::Range};
+use std::{
+    error::Error,
+    fs::File,
+    io::{self, BufRead, BufReader},
+    num::NonZeroUsize,
+    ops::Range,
+};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 type PositionList = Vec<Range<usize>>;
@@ -94,6 +99,13 @@ pub fn get_args() -> MyResult<Config> {
         delimiter: *delim_bytes.first().unwrap(),
         extract,
     })
+}
+
+fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
+    match filename {
+        "-" => Ok(Box::new(BufReader::new(io::stdin()))),
+        _ => Ok(Box::new(BufReader::new(File::open(filename)?))),
+    }
 }
 
 pub fn run(config: Config) -> MyResult<()> {
