@@ -124,8 +124,7 @@ fn extract_chars(line: &str, char_pos: &[Range<usize>]) -> String {
     char_pos
         .iter()
         .cloned()
-        .map(|range| range.filter_map(|i| chars.get(i)))
-        .flatten()
+        .flat_map(|range| range.filter_map(|i| chars.get(i)))
         .collect()
 }
 
