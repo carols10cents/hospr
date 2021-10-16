@@ -9,3 +9,11 @@ enum TakeValue {
     PlusZero,
     TakeNum(i64),
 }
+
+#[derive(Debug)]
+pub struct Config {
+    files: Vec<String>,
+    lines: TakeValue,
+    bytes: Option<TakeValue>,
+    quiet: bool,
+}
