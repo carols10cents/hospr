@@ -5,6 +5,10 @@ use std::error::Error;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
+use once_cell::sync::OnceCell;
+
+static NUM_RE: OnceCell<Regex> = OnceCell::new();
+
 #[derive(Debug, PartialEq)]
 enum TakeValue {
     PlusZero,
@@ -41,7 +45,7 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn parse_num(val: &str) -> MyResult<TakeValue> {
-    let num_re = Regex::new(r"^([+-])?(\d+)$").unwrap();
+    let num_re = NUM_RE.get_or_init(|| Regex::new(r"^([+-])?(\d+)$").unwrap());
 
     match num_re.captures(val) {
         Some(caps) => {
