@@ -2,6 +2,7 @@ use crate::TakeValue::*;
 use clap::{App, Arg};
 use regex::Regex;
 use std::error::Error;
+use std::fs::File;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -77,7 +78,12 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    println!("{:#?}", config);
+    for filename in config.files {
+        match File::open(&filename) {
+            Err(err) => eprintln!("{}: {}", filename, err),
+            Ok(_) => println!("Opened {}", filename),
+        }
+    }
     Ok(())
 }
 
