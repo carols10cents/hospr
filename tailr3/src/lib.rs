@@ -82,12 +82,10 @@ pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
         match File::open(&filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
-            Ok(_) => {
-                let (total_lines, total_bytes) = count_lines_bytes(&filename)?;
-                println!(
-                    "{} has {} lines and {} bytes",
-                    filename, total_lines, total_bytes
-                );
+            Ok(file) => {
+                let (total_lines, _total_bytes) = count_lines_bytes(&filename)?;
+                let file = BufReader::new(file);
+                print_lines(file, config.lines, total_lines)?;
             }
         }
     }
