@@ -169,10 +169,18 @@ fn count_lines_bytes(filename: &str) -> MyResult<(u64, u64)> {
 
 fn print_bytes<T: Read + Seek>(
     mut file: T,
-    num_bytes: &TakeValue,
+    num_bytes: TakeValue,
     total_bytes: u64,
 ) -> MyResult<()> {
-    unimplemented!();
+    if let Some(start) = get_start_index(num_bytes, total_bytes) {
+        file.seek(SeekFrom::Start(start))?;
+        let mut buffer = Vec::new();
+        file.read_to_end(&mut buffer)?;
+        if !buffer.is_empty() {
+            print!("{}", String::from_utf8_lossy(&buffer));
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]
