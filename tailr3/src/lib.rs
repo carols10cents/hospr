@@ -28,14 +28,51 @@ pub fn get_args() -> MyResult<Config> {
         .version("0.1.0")
         .author("Ken Youens-Clark <kyclark@gmail.com>")
         .about("Rust tail")
-        // What goes here?
+        .arg(
+            Arg::with_name("files")
+                .value_name("FILE")
+                .help("Input file(s)")
+                .required(true)
+                .multiple(true),
+        )
+        .arg(
+            Arg::with_name("lines")
+                .short("n")
+                .long("lines")
+                .value_name("LINES")
+                .help("Number of lines")
+                .default_value("10"),
+        )
+        .arg(
+            Arg::with_name("bytes")
+                .short("c")
+                .long("bytes")
+                .value_name("BYTES")
+                .conflicts_with("lines")
+                .help("Number of bytes"),
+        )
+        .arg(
+            Arg::with_name("quiet")
+                .short("q")
+                .long("quiet")
+                .help("Suppress headers"),
+        )
         .get_matches();
-
+    let lines = matches
+        .value_of("lines")
+        .map(parse_num)
+        .transpose()
+        .map_err(|e| format!("illegal line count -- {}", e))?;
+    let bytes = matches
+        .value_of("bytes")
+        .map(parse_num)
+        .transpose()
+        .map_err(|e| format!("illegal byte count -- {}", e))?;
     Ok(Config {
-        files: unimplemented!(),
-        lines: unimplemented!(),
-        bytes: unimplemented!(),
-        quiet: unimplemented!(),
+        files: matches.values_of_lossy("files").unwrap(),
+        lines: lines.unwrap(),
+        bytes,
+        quiet: matches.is_present("quiet"),
     })
 }
 
