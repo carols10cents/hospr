@@ -1,15 +1,14 @@
 use crate::TakeValue::*;
 use clap::{App, Arg};
+use once_cell::sync::OnceCell;
 use regex::Regex;
-use std::error::Error;
-use std::fs::File;
-use std::io::BufRead;
-use std::io::{Read, Seek};
+use std::{
+    error::Error,
+    fs::File,
+    io::{BufRead, BufReader, Read, Seek, SeekFrom},
+};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
-
-use once_cell::sync::OnceCell;
-
 static NUM_RE: OnceCell<Regex> = OnceCell::new();
 
 #[derive(Debug, PartialEq)]
@@ -126,11 +125,11 @@ fn count_lines_bytes(filename: &str) -> MyResult<(i64, i64)> {
 }
 
 fn print_bytes<T: Read + Seek>(
-mut file: T,
-num_bytes: &TakeValue,
-total_bytes: i64,
+    mut file: T,
+    num_bytes: &TakeValue,
+    total_bytes: i64,
 ) -> MyResult<()> {
-unimplemented!();
+    unimplemented!();
 }
 
 #[cfg(test)]
