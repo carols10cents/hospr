@@ -253,5 +253,7 @@ mod tests {
         assert_eq!(get_start_index(&TakeNum(-1), 10), Some(9));
         assert_eq!(get_start_index(&TakeNum(-2), 10), Some(8));
         assert_eq!(get_start_index(&TakeNum(-3), 10), Some(7));
+
+        assert_eq!(get_start_index(&TakeNum(-20), 10), Some(0));
     }
 }
