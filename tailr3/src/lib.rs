@@ -81,7 +81,13 @@ pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
         match File::open(&filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
-            Ok(_) => println!("Opened {}", filename),
+            Ok(_) => {
+                let (total_lines, total_bytes) = count_lines_bytes(&filename)?;
+                println!(
+                    "{} has {} lines and {} bytes",
+                    filename, total_lines, total_bytes
+                );
+            }
         }
     }
     Ok(())
@@ -105,9 +111,23 @@ fn parse_num(val: &str) -> MyResult<TakeValue> {
     }
 }
 
+fn count_lines_bytes(filename: &str) -> MyResult<(i64, i64)> {
+    unimplemented!()
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{parse_num, TakeValue::*};
+    use super::{count_lines_bytes, parse_num, TakeValue::*};
+
+    #[test]
+    fn test_count_lines_bytes() {
+        let res = count_lines_bytes("tests/inputs/one.txt");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), (1, 24));
+        let res = count_lines_bytes("tests/inputs/ten.txt");
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), (10, 49));
+    }
 
     #[test]
     fn test_parse_num() {
