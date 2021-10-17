@@ -79,10 +79,18 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    for filename in config.files {
+    let num_files = config.files.len();
+    for (file_num, filename) in config.files.iter().enumerate() {
         match File::open(&filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(file) => {
+                if !config.quiet && num_files > 1 {
+                    println!(
+                        "{}==> {} <==",
+                        if file_num > 0 { "\n" } else { "" },
+                        filename
+                    );
+                }
                 let (total_lines, total_bytes) = count_lines_bytes(&filename)?;
                 let file = BufReader::new(file);
                 if let Some(num_bytes) = config.bytes {
