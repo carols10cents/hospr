@@ -45,20 +45,17 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn parse_num(val: &str) -> MyResult<TakeValue> {
-    let num_re = NUM_RE.get_or_init(|| Regex::new(r"^([+-])?(\d+)$").unwrap());
-
-    match num_re.captures(val) {
-        Some(caps) => {
-            let sign = caps.get(1).map_or("-", |m| m.as_str());
-            let num = format!("{}{}", sign, caps.get(2).unwrap().as_str());
-            if let Ok(val) = num.parse() {
-                if sign == "+" && val == 0 {
-                    Ok(PlusZero)
-                } else {
-                    Ok(TakeNum(val))
-                }
+    let signs: &[char] = &['+', '-'];
+    let res = val
+        .starts_with(signs)
+        .then(|| val.parse())
+        .unwrap_or_else(|| val.parse().map(i64::wrapping_neg));
+    match res {
+        Ok(num) => {
+            if num == 0 && val.starts_with('+') {
+                Ok(PlusZero)
             } else {
-                Err(From::from(val))
+                Ok(TakeNum(num))
             }
         }
         _ => Err(From::from(val)),
