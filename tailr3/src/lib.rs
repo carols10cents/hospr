@@ -11,7 +11,7 @@ use std::{
 type MyResult<T> = Result<T, Box<dyn Error>>;
 static NUM_RE: OnceCell<Regex> = OnceCell::new();
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 enum TakeValue {
     PlusZero,
     TakeNum(i64),
@@ -94,11 +94,11 @@ pub fn run(config: Config) -> MyResult<()> {
     Ok(())
 }
 
-fn print_lines(mut file: impl BufRead, num_lines: &TakeValue, total_lines: u64) -> MyResult<()> {
+fn print_lines(mut file: impl BufRead, num_lines: TakeValue, total_lines: u64) -> MyResult<()> {
     unimplemented!();
 }
 
-fn get_start_index(take_val: &TakeValue, total: u64) -> Option<u64> {
+fn get_start_index(take_val: TakeValue, total: u64) -> Option<u64> {
     match take_val {
         PlusZero => {
             if total > 0 {
@@ -109,10 +109,10 @@ fn get_start_index(take_val: &TakeValue, total: u64) -> Option<u64> {
         }
         TakeNum(num) => {
             let total = total as i64;
-            if num == &0 || total == 0 || num > &total {
+            if num == 0 || total == 0 || num > total {
                 None
             } else {
-                let start = if num < &0 { total + num } else { num - 1 };
+                let start = if num < 0 { total + num } else { num - 1 };
                 Some(if start < 0 { 0 } else { start as u64 })
             }
         }
@@ -234,27 +234,27 @@ mod tests {
     #[test]
     fn test_get_start_index() {
         // +0 from an empty file (0 lines/bytes) returns None
-        assert_eq!(get_start_index(&PlusZero, 0), None);
+        assert_eq!(get_start_index(PlusZero, 0), None);
         // +0 from a nonempty file returns an index that
         // is one less than the number of lines/bytes
-        assert_eq!(get_start_index(&PlusZero, 1), Some(0));
+        assert_eq!(get_start_index(PlusZero, 1), Some(0));
         // Taking 0 lines/bytes returns None
-        assert_eq!(get_start_index(&TakeNum(0), 1), None);
+        assert_eq!(get_start_index(TakeNum(0), 1), None);
         // Taking any lines/bytes from an empty file returns None
-        assert_eq!(get_start_index(&TakeNum(1), 0), None);
+        assert_eq!(get_start_index(TakeNum(1), 0), None);
         // Taking more lines/bytes than is available returns None
-        assert_eq!(get_start_index(&TakeNum(2), 1), None);
+        assert_eq!(get_start_index(TakeNum(2), 1), None);
         // When starting line/byte is less than total lines/bytes,
         // return one less than starting number
-        assert_eq!(get_start_index(&TakeNum(1), 10), Some(0));
-        assert_eq!(get_start_index(&TakeNum(2), 10), Some(1));
-        assert_eq!(get_start_index(&TakeNum(3), 10), Some(2));
+        assert_eq!(get_start_index(TakeNum(1), 10), Some(0));
+        assert_eq!(get_start_index(TakeNum(2), 10), Some(1));
+        assert_eq!(get_start_index(TakeNum(3), 10), Some(2));
         // When starting line/byte is negative and less than total,
         // return total - start
-        assert_eq!(get_start_index(&TakeNum(-1), 10), Some(9));
-        assert_eq!(get_start_index(&TakeNum(-2), 10), Some(8));
-        assert_eq!(get_start_index(&TakeNum(-3), 10), Some(7));
+        assert_eq!(get_start_index(TakeNum(-1), 10), Some(9));
+        assert_eq!(get_start_index(TakeNum(-2), 10), Some(8));
+        assert_eq!(get_start_index(TakeNum(-3), 10), Some(7));
 
-        assert_eq!(get_start_index(&TakeNum(-20), 10), Some(0));
+        assert_eq!(get_start_index(TakeNum(-20), 10), Some(0));
     }
 }
