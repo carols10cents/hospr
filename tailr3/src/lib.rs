@@ -94,11 +94,11 @@ pub fn run(config: Config) -> MyResult<()> {
     Ok(())
 }
 
-fn print_lines(mut file: impl BufRead, num_lines: &TakeValue, total_lines: i64) -> MyResult<()> {
+fn print_lines(mut file: impl BufRead, num_lines: &TakeValue, total_lines: u64) -> MyResult<()> {
     unimplemented!();
 }
 
-fn get_start_index(take_val: &TakeValue, total: i64) -> Option<u64> {
+fn get_start_index(take_val: &TakeValue, total: u64) -> Option<u64> {
     match take_val {
         PlusZero => {
             if total > 0 {
@@ -108,6 +108,7 @@ fn get_start_index(take_val: &TakeValue, total: i64) -> Option<u64> {
             }
         }
         TakeNum(num) => {
+            let total = total as i64;
             if num == &0 || total == 0 || num > &total {
                 None
             } else {
@@ -136,7 +137,7 @@ fn parse_num(val: &str) -> MyResult<TakeValue> {
     }
 }
 
-fn count_lines_bytes(filename: &str) -> MyResult<(i64, i64)> {
+fn count_lines_bytes(filename: &str) -> MyResult<(u64, u64)> {
     let mut file = BufReader::new(File::open(filename)?);
     let mut num_lines = 0;
     let mut num_bytes = 0;
@@ -147,7 +148,7 @@ fn count_lines_bytes(filename: &str) -> MyResult<(i64, i64)> {
             break;
         }
         num_lines += 1;
-        num_bytes += bytes_read as i64;
+        num_bytes += bytes_read as u64;
         buf.clear();
     }
     Ok((num_lines, num_bytes))
@@ -156,7 +157,7 @@ fn count_lines_bytes(filename: &str) -> MyResult<(i64, i64)> {
 fn print_bytes<T: Read + Seek>(
     mut file: T,
     num_bytes: &TakeValue,
-    total_bytes: i64,
+    total_bytes: u64,
 ) -> MyResult<()> {
     unimplemented!();
 }
