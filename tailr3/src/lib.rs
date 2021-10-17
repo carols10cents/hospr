@@ -121,7 +121,20 @@ fn parse_num(val: &str) -> MyResult<TakeValue> {
 }
 
 fn count_lines_bytes(filename: &str) -> MyResult<(i64, i64)> {
-    unimplemented!()
+    let mut file = BufReader::new(File::open(filename)?);
+    let mut num_lines = 0;
+    let mut num_bytes = 0;
+    let mut buf = Vec::new();
+    loop {
+        let bytes_read = file.read_until(b'\n', &mut buf)?;
+        if bytes_read == 0 {
+            break;
+        }
+        num_lines += 1;
+        num_bytes += bytes_read as i64;
+        buf.clear();
+    }
+    Ok((num_lines, num_bytes))
 }
 
 fn print_bytes<T: Read + Seek>(
