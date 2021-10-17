@@ -95,7 +95,22 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn print_lines(mut file: impl BufRead, num_lines: TakeValue, total_lines: u64) -> MyResult<()> {
-    unimplemented!();
+    if let Some(start) = get_start_index(num_lines, total_lines) {
+        let mut line_num = 0;
+        let mut buf = Vec::new();
+        loop {
+            let bytes_read = file.read_until(b'\n', &mut buf)?;
+            if bytes_read == 0 {
+                break;
+            }
+            if line_num >= start {
+                print!("{}", String::from_utf8_lossy(&buf));
+            }
+            line_num += 1;
+            buf.clear();
+        }
+    }
+    Ok(())
 }
 
 fn get_start_index(take_val: TakeValue, total: u64) -> Option<u64> {
