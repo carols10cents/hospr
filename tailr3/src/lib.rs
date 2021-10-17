@@ -83,9 +83,13 @@ pub fn run(config: Config) -> MyResult<()> {
         match File::open(&filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(file) => {
-                let (total_lines, _total_bytes) = count_lines_bytes(&filename)?;
+                let (total_lines, total_bytes) = count_lines_bytes(&filename)?;
                 let file = BufReader::new(file);
-                print_lines(file, config.lines, total_lines)?;
+                if let Some(num_bytes) = config.bytes {
+                    print_bytes(file, num_bytes, total_bytes)?;
+                } else {
+                    print_lines(file, config.lines, total_lines)?;
+                }
             }
         }
     }
@@ -167,11 +171,10 @@ fn count_lines_bytes(filename: &str) -> MyResult<(u64, u64)> {
     Ok((num_lines, num_bytes))
 }
 
-fn print_bytes<T: Read + Seek>(
-    mut file: T,
-    num_bytes: TakeValue,
-    total_bytes: u64,
-) -> MyResult<()> {
+fn print_bytes<T>(mut file: T, num_bytes: TakeValue, total_bytes: u64) -> MyResult<()>
+where
+    T: Read + Seek,
+{
     if let Some(start) = get_start_index(num_bytes, total_bytes) {
         file.seek(SeekFrom::Start(start))?;
         let mut buffer = Vec::new();
