@@ -4,6 +4,7 @@ use regex::Regex;
 use std::error::Error;
 use std::fs::File;
 use std::io::BufRead;
+use std::io::{Read, Seek};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
@@ -122,6 +123,14 @@ fn parse_num(val: &str) -> MyResult<TakeValue> {
 
 fn count_lines_bytes(filename: &str) -> MyResult<(i64, i64)> {
     unimplemented!()
+}
+
+fn print_bytes<T: Read + Seek>(
+mut file: T,
+num_bytes: &TakeValue,
+total_bytes: i64,
+) -> MyResult<()> {
+unimplemented!();
 }
 
 #[cfg(test)]
