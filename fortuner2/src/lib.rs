@@ -28,7 +28,28 @@ struct Fortune {
 }
 
 fn read_fortunes(paths: &[PathBuf]) -> MyResult<Vec<Fortune>> {
-    unimplemented!();
+    let mut fortunes = vec![];
+    let mut buffer = vec![];
+    for path in paths {
+        let source = path.file_name().unwrap().to_string_lossy().into_owned();
+        let file = File::open(path)
+            .map_err(|e| format!("{}: {}", path.to_string_lossy().into_owned(), e))?;
+        for line in BufReader::new(file).lines().filter_map(Result::ok) {
+            if line == "%" {
+                if !buffer.is_empty() {
+                    let text = buffer.join("\n");
+                    fortunes.push(Fortune {
+                        source: source.clone(),
+                        text,
+                    });
+                    buffer.clear();
+                }
+            } else {
+                buffer.push(line.to_string());
+            }
+        }
+    }
+    Ok(fortunes)
 }
 
 pub fn get_args() -> MyResult<Config> {
