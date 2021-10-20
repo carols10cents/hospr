@@ -103,8 +103,23 @@ fn parse_u64(val: &str) -> MyResult<u64> {
         .map_err(|_| format!("\"{}\" not a valid integer", val).into())
 }
 
-fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
-    unimplemented!();
+fn find_files(paths: &[String]) -> MyResult<Vec<PathBuf>> {
+    let dat = OsStr::new("dat");
+    let mut files = vec![];
+    for path in paths {
+        match fs::metadata(path) {
+            Err(e) => return Err(format!("{}: {}", path, e).into()),
+            Ok(_) => files.extend(
+                WalkDir::new(path)
+                    .into_iter()
+                    .filter_map(|e| e.ok())
+                    .filter(|e| e.file_type().is_file() && e.path().extension() != Some(dat))
+                    .map(|e| e.path().into()),
+            ),
+        }
+    }
+    files.sort();
+    Ok(files.into_iter().unique().collect())
 }
 
 #[cfg(test)]
