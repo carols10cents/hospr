@@ -13,6 +13,16 @@ pub struct Config {
     seed: Option<u64>,
 }
 
+#[derive(Debug)]
+struct Fortune {
+    source: String,
+    text: String,
+}
+
+fn read_fortunes(paths: &[PathBuf]) -> MyResult<Vec<Fortune>> {
+    unimplemented!();
+}
+
 pub fn get_args() -> MyResult<Config> {
     let matches = App::new("fortuner")
         .version("0.1.0")
@@ -79,7 +89,8 @@ fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
 
 #[cfg(test)]
 mod tests {
-    use super::{find_files, parse_u64};
+    use super::{find_files, parse_u64, read_fortunes, Fortune};
+    use std::path::PathBuf;
 
     #[test]
     fn test_parse_u64() {
@@ -133,5 +144,33 @@ mod tests {
         if let Some(filename) = files.last().unwrap().file_name() {
             assert_eq!(filename.to_string_lossy(), "jokes".to_string())
         }
+    }
+
+    #[test]
+    fn test_read_fortunes() {
+        // Parses all the fortunes without a filter
+        let res = read_fortunes(&[PathBuf::from("./tests/inputs/jokes")]);
+        assert!(res.is_ok());
+        if let Ok(fortunes) = res {
+            // Correct number and sorting
+            assert_eq!(fortunes.len(), 6);
+            assert_eq!(
+                fortunes.first().unwrap().text,
+                "Q. What do you call a head of lettuce in a shirt and tie?\n\
+    A. Collared greens."
+            );
+            assert_eq!(
+                fortunes.last().unwrap().text,
+                "Q: What do you call a deer wearing an eye patch?\n\
+    A: A bad idea (bad-eye deer)."
+            );
+        }
+        // Filters for matching text
+        let res = read_fortunes(&[
+            PathBuf::from("./tests/inputs/jokes"),
+            PathBuf::from("./tests/inputs/quotes"),
+        ]);
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap().len(), 11);
     }
 }
