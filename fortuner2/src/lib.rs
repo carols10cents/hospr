@@ -111,11 +111,11 @@ pub fn run(config: Config) -> MyResult<()> {
             .iter()
             .filter(|fortune| pattern.is_match(&fortune.text))
         {
-            if prev_source.map_or(true, |s| s != fortune.source) {
+            if prev_source.iter().find(|&s| s == &fortune.source).is_none() {
                 eprintln!("({})\n%", fortune.source);
+                prev_source = Some(fortune.source.clone());
             }
             println!("{}\n%", fortune.text);
-            prev_source = Some(fortune.source.clone());
         }
     } else {
         println!(
