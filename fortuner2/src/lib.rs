@@ -99,7 +99,8 @@ fn pick_fortune(fortunes: &[Fortune], seed: &Option<u64>) -> Option<String> {
 }
 
 fn parse_u64(val: &str) -> MyResult<u64> {
-    unimplemented!();
+    val.parse()
+        .map_err(|_| format!("\"{}\" not a valid integer", val).into())
 }
 
 fn find_files(sources: &[String]) -> MyResult<Vec<PathBuf>> {
