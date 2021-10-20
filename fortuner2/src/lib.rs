@@ -116,11 +116,10 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn pick_fortune(fortunes: &[Fortune], seed: &Option<u64>) -> Option<String> {
-    // This will not compile
-    let rng = if let Some(val) = seed {
-        StdRng::seed_from_u64(*val)
+    let mut rng: Box<dyn RngCore> = if let Some(val) = seed {
+        Box::new(StdRng::seed_from_u64(*val))
     } else {
-        rand::thread_rng()
+        Box::new(rand::thread_rng())
     };
     fortunes.choose(&mut rng).map(|f| f.text.to_string())
 }
