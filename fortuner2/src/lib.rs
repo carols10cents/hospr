@@ -121,7 +121,7 @@ pub fn run(config: Config) -> MyResult<()> {
         println!(
             "{}",
             pick_fortune(&fortunes, &config.seed)
-                .or(Some("No fortunes found".to_string()))
+                .or_else(|| Some("No fortunes found".to_string()))
                 .unwrap()
         );
     }
