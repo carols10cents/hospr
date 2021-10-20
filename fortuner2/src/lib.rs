@@ -75,8 +75,13 @@ pub fn get_args() -> MyResult<Config> {
 
 pub fn run(config: Config) -> MyResult<()> {
     let files = find_files(&config.sources)?;
-    println!("{:#?}", files);
+    let fortunes = read_fortunes(&files)?;
+    println!("{:#?}", fortunes.last());
     Ok(())
+}
+
+fn pick_fortune(fortunes: &[Fortune], seed: &Option<u64>) -> Option<String> {
+    unimplemented!();
 }
 
 fn parse_u64(val: &str) -> MyResult<u64> {
