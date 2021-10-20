@@ -1,8 +1,16 @@
 use clap::{App, Arg};
 use itertools::Itertools;
+use rand::prelude::SliceRandom;
+use rand::{rngs::StdRng, RngCore, SeedableRng};
 use regex::{Regex, RegexBuilder};
-use std::error::Error;
-use std::path::PathBuf;
+use std::{
+    error::Error,
+    ffi::OsStr,
+    fs::{self, File},
+    io::{BufRead, BufReader},
+    path::PathBuf,
+};
+use walkdir::WalkDir;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
