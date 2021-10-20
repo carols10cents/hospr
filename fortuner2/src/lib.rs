@@ -116,13 +116,13 @@ pub fn run(config: Config) -> MyResult<()> {
 }
 
 fn pick_fortune(fortunes: &[Fortune], seed: &Option<u64>) -> Option<String> {
-    if let Some(val) = seed {
-        let mut rng = StdRng::seed_from_u64(*val);
-        fortunes.choose(&mut rng).map(|f| f.text.to_string())
+    // This will not compile
+    let rng = if let Some(val) = seed {
+        StdRng::seed_from_u64(*val)
     } else {
-        let mut rng = rand::thread_rng();
-        fortunes.choose(&mut rng).map(|f| f.text.to_string())
-    }
+        rand::thread_rng()
+    };
+    fortunes.choose(&mut rng).map(|f| f.text.to_string())
 }
 
 fn parse_u64(val: &str) -> MyResult<u64> {
