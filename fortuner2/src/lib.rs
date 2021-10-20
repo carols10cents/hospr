@@ -106,11 +106,24 @@ pub fn run(config: Config) -> MyResult<()> {
     let files = find_files(&config.sources)?;
     let fortunes = read_fortunes(&files)?;
     if let Some(pattern) = config.pattern {
-        for fortune in fortunes {
-            // Print all the fortunes matching the pattern
+        let mut prev_source: Option<String> = None;
+        for fortune in fortunes
+            .iter()
+            .filter(|fortune| pattern.is_match(&fortune.text))
+        {
+            if prev_source.map_or(true, |s| s != fortune.source) {
+                eprintln!("({})\n%", fortune.source);
+            }
+            println!("{}\n%", fortune.text);
+            prev_source = Some(fortune.source.clone());
         }
     } else {
-        // Select and print one fortune
+        println!(
+            "{}",
+            pick_fortune(&fortunes, &config.seed)
+                .or(Some("No fortunes found".to_string()))
+                .unwrap()
+        );
     }
     Ok(())
 }
